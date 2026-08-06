@@ -27,16 +27,14 @@ export async function logout() {
 export async function signup(email: string, password: string, fullName?: string) {
   try {
     const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      // password,
-      options: {
-        data: { full_name: fullName },
-
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/verify-otp`,
-
-      },
-    });
+   const { data, error } = await supabase.auth.signInWithOtp({
+  email,
+  options: {
+    shouldCreateUser: true, // creates the user if it doesn't exist
+    data: { full_name: fullName }, // custom user metadata
+    emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/verify-otp`, // where to send after OTP request
+  },
+});
     if (error) throw error;
     return { success: true };
   } catch (error) {
