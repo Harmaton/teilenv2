@@ -16,13 +16,13 @@ const ORANGE_PALE = "#FFD8C2";
 const TINT = "#FFF3EC";
 const INK = "#241a14";
 
-const KICKER = "HOW DO YOU KNOW WHERE YOU BELONG?";
+const KICKER = "¿CÓMO SABES A DÓNDE PERTENECES?";
 
 const STOPS = [
-  { number: "01", label: "Disorientation", quote: "I don't know what to study, I like many things." },
-  { number: "02", label: "Frustration", quote: "I'm afraid of making a mistake and wasting years." },
-  { number: "03", label: "Low self-esteem", quote: "What if I don't have any special talents?" },
-  { number: "04", label: "The reality", quote: "Teilen Teens exists to prevent that from happening to you." },
+  { number: "01", label: "Desorientación", quote: "No sé qué estudiar, me gustan muchas cosas." },
+  { number: "02", label: "Frustración", quote: "Tengo miedo de cometer un error y perder años." },
+  { number: "03", label: "Baja autoestima", quote: "¿Y si no tengo ningún talento especial?" },
+  { number: "04", label: "La realidad", quote: "Teilen Teens existe para prevenir que eso te suceda a ti." },
 ] as const;
 
 /* ---------------------------------- Illustrations ---------------------------------- */
@@ -298,7 +298,7 @@ export default function ScrollStory() {
         >
           <div>
             <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: ORANGE }}>
-              A question worth asking
+            Una pregunta que vale la pena hacer
             </span>
             <h2 className="mt-4 text-3xl font-semibold leading-[1.08] md:text-5xl" style={{ color: INK }}>
               {KICKER}
@@ -395,9 +395,9 @@ export default function ScrollStory() {
                         <p className="mt-3 text-base text-black/50 md:text-lg">"{stop.quote}"</p>
                       ) : (
                         <p className="mt-2 text-sm text-black/55 md:text-base">
-                          Don't feel trapped on a path that doesn't represent you.{" "}
+                          No te sientas atrapado en un camino que no te representa.{" "}
                           <span className="font-medium" style={{ color: ORANGE }}>
-                            Teilen Teens exists to prevent that from happening to you.
+                            Teilen Teens existe para prevenir que eso te suceda a ti.
                           </span>
                         </p>
                       )}

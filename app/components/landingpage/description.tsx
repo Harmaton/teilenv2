@@ -19,43 +19,43 @@ const MIDNIGHT = "#0a0e1a";
 const ITEMS = [
   {
     icon: Brain,
-    title: "Your personality type, skills, and strengths",
-    snippet: "Profile: analytical-intuitive hybrid, high verbal reasoning...",
+    title: "Tu tipo de personalidad, habilidades y fortalezas",
+    snippet: "Perfil: híbrido analítico-intuitivo, alto razonamiento verbal...",
   },
   {
     icon: Zap,
-    title: "Your type of natural genius, thinking style, and true passions",
-    snippet: "Genius type: systems thinker — pattern recognition score 91%...",
+    title: "Tu tipo de genio natural, estilo de pensamiento y verdaderas pasiones",
+    snippet: "Tipo de genio: pensador sistémico — puntuación de reconocimiento de patrones: 91%...",
   },
   {
     icon: Target,
-    title: "Your hidden superpower and how to use it in real life",
-    snippet: "Core strength: rapid synthesis under ambiguity...",
+    title: "Tu superpoder oculto y cómo usarlo en la vida real",
+    snippet: "Fortaleza principal: síntesis rápida en situaciones de incertidumbre...",
   },
   {
     icon: Heart,
-    title: "What drains you and what energizes you, so you can turn challenges into strengths",
-    snippet: "Energy drain: repetitive tasks, low autonomy...",
+    title: "Qué te desgasta y qué te da energía, para convertir los desafíos en fortalezas",
+    snippet: "Desgaste energético: tareas repetitivas, poca autonomía...",
   },
   {
     icon: Compass,
-    title: "How to learn, work, and make decisions based on your style",
-    snippet: "Decision style: convergent, evidence-first...",
+    title: "Cómo aprender, trabajar y tomar decisiones según tu estilo",
+    snippet: "Estilo de decisión: convergente, basado primero en la evidencia...",
   },
   {
     icon: TrendingUp,
-    title: "Your professional compass: ideal environments, areas of study, and potential ventures",
-    snippet: "Recommended fields: applied research, product strategy...",
+    title: "Tu brújula profesional: entornos ideales, áreas de estudio y posibles proyectos",
+    snippet: "Campos recomendados: investigación aplicada, estrategia de producto...",
   },
   {
     icon: Shield,
-    title: "Hidden risks that can sabotage your talent",
-    snippet: "Risk flag: perfectionism under external pressure...",
+    title: "Riesgos ocultos que pueden sabotear tu talento",
+    snippet: "Alerta de riesgo: perfeccionismo bajo presión externa...",
   },
   {
     icon: CheckCircle2,
-    title: "Personalized recommendations for growth",
-    snippet: "Next steps: 3 targeted exercises, 1 mentor archetype...",
+    title: "Recomendaciones personalizadas para tu crecimiento",
+    snippet: "Próximos pasos: 3 ejercicios específicos, 1 arquetipo de mentor...",
   },
 ] as const;
 
@@ -126,27 +126,25 @@ export default function WhatIsSection() {
       <div className="relative z-10 mx-auto max-w-6xl">
         {/* heading */}
         <div className="mx-auto max-w-3xl text-center">
-          <span className="text-xs font-medium uppercase tracking-[0.2em] text-[#FF9A5C]">
-            The method
-          </span>
+          {/* <span className="text-xs font-medium uppercase tracking-[0.2em] text-[#FF9A5C]">
+            ¿QUÉ ES?
+          </span> */}
 
           <h2 className="mt-4 text-3xl font-semibold leading-[1.15] tracking-tight text-white md:text-5xl">
-            What is{" "}
+            ¿Qué es{" "}
             <span style={{ color: ORANGE_SOFT }}>Teilen Teens</span>?
           </h2>
 
           <p className="mt-4 text-base text-white/50 md:text-lg">
-            It's not just another vocational test.
+            No es una prueba vocacional más.
           </p>
 
           <p className="mt-3 text-lg font-medium leading-snug text-transparent bg-clip-text bg-gradient-to-r from-[#8B7CF6] to-[#FF7A33] md:text-xl">
-            An in-depth diagnosis of human talent, built on neuroscience and
-            six validated psychological models.
+           Un diagnóstico exhaustivo del talento humano, basado en la neurociencia y seis modelos psicológicos validados.
           </p>
 
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/45 md:text-base">
-            In just 10 minutes, we detect how your mind works, what your
-            natural power is, what blocks you, and what to do about it.
+            En tan solo 10 minutos, detectamos cómo funciona tu mente, cuál es tu poder natural, qué te bloquea y qué puedes hacer al respecto.
           </p>
         </div>
 

@@ -18,29 +18,29 @@ const PURPLE = "#7C5CFF";
 
 const ROWS = [
   {
-    aspect: "Depth",
-    free: "They offer generic results",
-    teilen: "A personalized, functional and complete diagnosis",
+    aspect: "Profundidad",
+    free: "Ofrecen resultados genéricos",
+    teilen: "Un diagnóstico personalizado, funcional y completo",
   },
   {
-    aspect: "Career guidance",
-    free: "Usually games or magazine quizzes",
-    teilen: "Real, creative career paths mapped to you",
+    aspect: "Orientación profesional",
+    free: "Normalmente son juegos o cuestionarios de revista",
+    teilen: "Trayectorias profesionales reales y creativas adaptadas a ti",
   },
   {
-    aspect: "Emotional connection",
-    free: "Cold and lacking narrative impact",
-    teilen: "Personalized storytelling that resonates",
+    aspect: "Conexión emocional",
+    free: "Fríos y sin impacto narrativo",
+    teilen: "Una narrativa personalizada que conecta contigo",
   },
   {
-    aspect: "Emotional integration",
-    free: "They focus on traits alone",
-    teilen: "Integrates values, strengths, and emotions",
+    aspect: "Integración emocional",
+    free: "Se centran únicamente en los rasgos",
+    teilen: "Integra valores, fortalezas y emociones",
   },
   {
-    aspect: "Plan of action",
-    free: "You don't know what to do with the result",
-    teilen: "Tells you exactly how to apply your talent today",
+    aspect: "Plan de acción",
+    free: "No sabes qué hacer con el resultado",
+    teilen: "Te muestra exactamente cómo aplicar tu talento desde hoy",
   },
 ] as const;
 
@@ -130,18 +130,18 @@ export default function InnerMirrorSection() {
       {/* heading */}
       <div className="mx-auto max-w-2xl text-center">
         <span className="text-xs font-medium uppercase tracking-[0.2em]" style={{ color: ORANGE }}>
-          The comparison
+          La comparación
         </span>
         <h2
           className="mt-4 text-3xl font-semibold leading-[1.15] tracking-tight md:text-5xl"
           style={{ color: INK }}
         >
-          We are your{" "}
-          <span style={{ color: ORANGE }}>inner mirror</span>
+          Somos tu{" "}
+          <span style={{ color: ORANGE }}>espejo interior</span>
         </h2>
         <p className="mx-auto mt-4 max-w-md text-sm text-black/45 md:text-base">
-          Not another quiz. See what actually changes when the diagnosis goes
-          deeper.
+          No es otra encuesta. Mira lo que realmente cambia cuando el diagnóstico va
+          más allá.
         </p>
       </div>
 
@@ -213,7 +213,7 @@ export default function InnerMirrorSection() {
                     </div>
                     <div>
                       <span className="text-[11px] font-semibold uppercase tracking-wider text-black/35">
-                        Free tests
+                        Pruebas gratuitas
                       </span>
                       <p className="mt-1 text-sm leading-snug text-black/55 md:text-[15px]">
                         {row.free}

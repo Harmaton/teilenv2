@@ -8,10 +8,10 @@ import Link from "next/link";
 const ORANGE = "#FF5A1F";
 
 const LINKS = [
-  { label: "How it works", href: "#how-it-works" },
-  { label: "What is it", href: "#what-is" },
-  { label: "Comparison", href: "#comparison" },
-  { label: "Stories", href: "#testimonials" },
+  { label: "Cómo funciona", href: "#how-it-works" },
+  { label: "¿Qué es?", href: "#what-is" },
+  { label: "Comparativa", href: "#comparison" },
+  { label: "Historias", href: "#testimonials" },
 ] as const;
 
 export default function Navbar() {

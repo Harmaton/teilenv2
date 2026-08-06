@@ -9,12 +9,6 @@ const ORANGE = "#FF5A1F";
 const INK = "#1c1c22";
 
 const testimonials = [
-  // {
-  //   name: "Micaela",
-  //   age: "17 años",
-  //   text: "Por primera vez sentí que alguien me explicó cómo soy, sin juzgarme.",
-  //   image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?auto=format&fit=crop&w=150&q=80",
-  // },
   {
     name: "Sofía",
     age: "20 años",
@@ -134,12 +128,11 @@ export default function TestimonialsMarquee() {
           className="text-3xl font-semibold leading-[1.15] tracking-tight md:text-5xl"
           style={{ color: INK }}
         >
-          Let's break{" "}
-          <span style={{ color: ORANGE }}>negative statistics</span>
+          Vamos a romper{" "}
+          <span style={{ color: ORANGE }}>las estadísticas negativas</span>
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-sm text-black/50 md:text-base">
-          Schools, universities, entrepreneurs, and many other individuals
-          have received their genius diagnosis. Choose a life with meaning.
+          Escuelas, universidades, emprendedores y muchas otras personas han recibido su diagnóstico de genialidad. Elige una vida con sentido.
         </p>
       </div>
 

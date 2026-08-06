@@ -102,22 +102,22 @@ export default function Hero() {
         {/* eyebrow */}
         <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-[#FF5A1F]/40 bg-[#FF5A1F]/10 px-4 py-1.5">
           <span className="text-xs font-medium uppercase tracking-wider text-[#FF9A5C]">
-            #1 DNA of the inner genius
+           #1 ADN del genio interior
           </span>
         </div>
 
         <h1 className="max-w-3xl text-4xl font-semibold leading-[1.1] tracking-tight text-white md:text-6xl">
-          The diagnosis that reveals your natural talent, your hidden{" "}
-          <span className="text-[#FF7A33]">Potential</span> and the path
-          where you can truly shine.
+          El diagnóstico que revela tu talento natural, tu oculto{" "}
+          <span className="text-[#FF7A33]">Potencial</span> 
+          y el camino donde realmente puedes brillar.
         </h1>
 
         <p className="mt-2 max-w-2xl text-lg leading-relaxed text-white/60">
-          Teilenteens is the first diagnostic study that uncovers your
-          natural power and shows you how to apply it in real life. 70% of
-          people don't know what to study or where to go. What if your
-          greatest talent remains hidden because no one ever taught you how
-          to find it?
+         Teilenteens es el primer estudio de diagnóstico que descubre tu
+          poder natural y te muestra cómo aplicarlo en la vida real. El 70% de las personas
+          no saben qué estudiar ni adónde ir. ¿Y si tu
+          mayor talento permanece oculto porque nadie te enseñó cómo
+          encontrarlo?
         </p>
 
         <div className="mt-9 flex  items-center justify-start gap-4 sm:flex-row">
@@ -134,7 +134,7 @@ export default function Hero() {
                      <rect x="14" y="14" width="7" height="7" rx="1.5" fill="#111" />
                    </svg>
                  </span>
-                 Try Diagnosis
+                 Probar Diagnóstico
                </a>
        
                  
@@ -142,7 +142,7 @@ export default function Hero() {
                    className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-7 py-3.5 text-[15px] font-medium text-white/80 backdrop-blur-sm transition-colors duration-200 hover:border-white/25 hover:text-white"
                  >
                    <PlayCircle className="h-4 w-4" />
-                   See how it works
+                   Ver cómo funciona
                  </a>
                </div>
       </div>
