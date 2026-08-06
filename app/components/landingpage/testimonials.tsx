@@ -160,7 +160,9 @@ export default function TestimonialsMarquee() {
           {LOOP.map((t, i) => (
             <div
               key={i}
-              ref={(el) => (cardRefs.current[i] = el)}
+              ref={(el: HTMLDivElement | null) => {
+                cardRefs.current[i] = el;
+              }}
               className="flex shrink-0 flex-col gap-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.2)]"
               style={{ width: CARD_WIDTH, willChange: "transform, filter, opacity" }}
             >
