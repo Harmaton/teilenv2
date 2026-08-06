@@ -92,7 +92,7 @@ function NightSkyIllustration() {
 
 export default function Hero() {
   return (
-    <section className="relative min-h-[820px] w-full overflow-hidden border-x border-b border-white/10 bg-[#0a0e1a]">
+    <section className="relative min-h-[820px] pt-12 mt-16 w-full overflow-hidden border-x border-b border-white/10 bg-[#0a0e1a]">
       <NightSkyIllustration />
 
       {/* subtle top-to-bottom scrim for text legibility */}
@@ -123,7 +123,7 @@ export default function Hero() {
         <div className="mt-9 flex  items-center justify-start gap-4 sm:flex-row">
                  
                  <a
-                 href="#"
+                 href="/login"
                  className="flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[15px] font-medium text-black transition-opacity hover:opacity-90"
                >
                  <span className="flex h-5 w-5 items-center justify-center rounded bg-amber-400">
@@ -134,7 +134,7 @@ export default function Hero() {
                      <rect x="14" y="14" width="7" height="7" rx="1.5" fill="#111" />
                    </svg>
                  </span>
-                 Start Diagnosis
+                 Try Diagnosis
                </a>
        
                  

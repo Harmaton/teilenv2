@@ -16,8 +16,8 @@ export default function Page() {
         <InnerMirrorSection />
         <TestimonialsMarquee />
         <CtaSection />
-        <Footer />
       </div>
+        <Footer />
     </main>
   );
 }

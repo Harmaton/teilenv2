@@ -27,12 +27,14 @@ export async function logout() {
 export async function signup(email: string, password: string, fullName?: string) {
   try {
     const supabase = await createClient();
-    const { error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      password,
+      // password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/verify-otp`,
+
       },
     });
     if (error) throw error;
@@ -101,7 +103,7 @@ export async function getUserInfo() {
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("full_name, role")
+      .select("*")
       .eq("id", user.id)
       .single();
 
@@ -114,13 +116,17 @@ export async function getUserInfo() {
 }
 
 
-export async function get_user_role(email: string): Promise<{role?: string; error?: string }> {
+export async function get_user_role(): Promise<{role?: string; error?: string }> {
   try{
     const supabase = await createClient();
+     const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError) throw authError;
+    if (!user) throw new Error("No authenticated user");
+
     const { data: profile, error } = await supabase
       .from("profiles")
       .select("role")
-      .eq("email", email)
+      .eq("email", user.email)
       .single();
 
       if(error) throw error;
