@@ -175,7 +175,7 @@ export default function InnerMirrorSection() {
           {ROWS.map((row, i) => (
             <div
               key={row.aspect}
-              ref={(el) => (rowRefs.current[i] = el)}
+              ref={(el) => { rowRefs.current[i] = el }}
               className="relative md:pl-20"
             >
               {/* rail dot marker */}

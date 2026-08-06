@@ -370,7 +370,7 @@ export default function ScrollStory() {
               return (
                 <div
                   key={stop.number}
-                  ref={(el) => (stopRefs.current[i] = el)}
+                  ref={(el) => { stopRefs.current[i] = el }}
                   className="rounded-2xl border border-dashed px-5 py-6 md:px-7 md:py-7"
                   style={{ borderColor: ORANGE_PALE }}
                 >
