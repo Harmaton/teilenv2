@@ -8,7 +8,6 @@ import Link from "next/link";
 const ORANGE = "#FF5A1F";
 
 const LINKS = [
-  { label: "Cómo funciona", href: "#how-it-works" },
   { label: "¿Qué es?", href: "#what-is" },
   { label: "Comparativa", href: "#comparison" },
   { label: "Historias", href: "#testimonials" },
@@ -65,7 +64,7 @@ export default function Navbar() {
               <rect x="14" y="14" width="7" height="7" rx="1.5" fill="#111" />
             </svg>
           </span>
-          Try Diagnosis
+          Probar diagnóstico
         </Link>
 
         {/* mobile toggle */}
@@ -111,7 +110,7 @@ export default function Navbar() {
                   <rect x="14" y="14" width="7" height="7" rx="1.5" fill="#111" />
                 </svg>
               </span>
-              Try Diagnosis
+              Probar diagnóstico
             </Link>
           </div>
         </div>

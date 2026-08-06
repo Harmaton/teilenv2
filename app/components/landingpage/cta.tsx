@@ -46,7 +46,7 @@ export default function CtaSection() {
               <rect x="14" y="14" width="7" height="7" rx="1.5" fill="#111" />
             </svg>
           </span>
-          Prueba el diagnóstico
+          Probar diagnóstico
         </a>
 
           
