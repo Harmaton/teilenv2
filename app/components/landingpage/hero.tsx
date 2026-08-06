@@ -1,3 +1,4 @@
+import { PlayCircle } from "lucide-react";
 import React from "react";
 
 function NightSkyIllustration() {
@@ -119,21 +120,31 @@ export default function Hero() {
           to find it?
         </p>
 
-        <div className="mt-2 flex items-center gap-6">
-          <a
-            href="#"
-            className="rounded-lg bg-[#FF5A1F] px-6 py-3 text-[15px] font-medium text-white transition-opacity hover:opacity-90"
-          >
-            Start diagnosis
-          </a>
-
-          <a
-            href="#"
-            className="text-[15px] text-white/70 transition-colors hover:text-white"
-          >
-            See how it works →
-          </a>
-        </div>
+        <div className="mt-9 flex  items-center justify-start gap-4 sm:flex-row">
+                 
+                 <a
+                 href="#"
+                 className="flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[15px] font-medium text-black transition-opacity hover:opacity-90"
+               >
+                 <span className="flex h-5 w-5 items-center justify-center rounded bg-amber-400">
+                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                     <rect x="3" y="3" width="7" height="7" rx="1.5" fill="#111" />
+                     <rect x="14" y="3" width="7" height="7" rx="1.5" fill="#111" />
+                     <rect x="3" y="14" width="7" height="7" rx="1.5" fill="#111" />
+                     <rect x="14" y="14" width="7" height="7" rx="1.5" fill="#111" />
+                   </svg>
+                 </span>
+                 Start Diagnosis
+               </a>
+       
+                 
+                  <a href="#"
+                   className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-7 py-3.5 text-[15px] font-medium text-white/80 backdrop-blur-sm transition-colors duration-200 hover:border-white/25 hover:text-white"
+                 >
+                   <PlayCircle className="h-4 w-4" />
+                   See how it works
+                 </a>
+               </div>
       </div>
     </section>
   );
