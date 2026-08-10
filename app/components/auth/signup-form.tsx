@@ -39,7 +39,7 @@ export default function SignupForm() {
     }
 
     // Pass email to OTP page via search param
-    router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+    router.push(`/auth/check-email?email=${encodeURIComponent(email)}`);
   }
 
   return (
