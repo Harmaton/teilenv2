@@ -10,9 +10,9 @@ export default async function TestsPage() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
       <div className="mb-8">
-        <h1 className="text-[22px] font-semibold text-black">Tests</h1>
+        <h1 className="text-[22px] font-semibold text-black">Pruebas</h1>
         <p className="mt-1 text-[13px] text-black/45">
-          Choose a test to start a new attempt.
+          Elige una prueba para iniciar un nuevo intento.
         </p>
       </div>
 

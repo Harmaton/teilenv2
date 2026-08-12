@@ -11,7 +11,7 @@ export default function SignupPage() {
             <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <GalleryVerticalEnd className="size-4" />
             </div>
-          Back to Teilen Teens
+            Teilen Teens
           </a>
         </div>
         <div className="flex flex-1 items-center justify-center">
@@ -20,12 +20,14 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
-      <div className="relative hidden bg-muted lg:block">
-        <img
-          src="/auth/sp2.png"
-          alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-        />
+      <div className="relative hidden bg-muted lg:block p-6">
+        <div className="h-full w-full overflow-hidden rounded-[2rem] bg-orange-50 shadow-[inset_0_0_0_1px_rgba(251,146,60,0.16),0_20px_50px_-30px_rgba(251,146,60,0.45)]">
+          <img
+            src="/auth/sp2.png"
+            alt="Imagen de registro"
+            className="h-full w-full object-cover"
+          />
+        </div>
       </div>
     </div>
   )

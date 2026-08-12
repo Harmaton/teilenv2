@@ -16,10 +16,10 @@ import { getDashboardStats, getUserTestAttempts } from "@/_actions/dashbaord";
 const ACCENT = "#FF5A1F";
 
 const STATUS_STYLES: Record<string, { label: string; dot: string; text: string }> = {
-  completed: { label: "Completed", dot: "bg-emerald-500", text: "text-emerald-700" },
-  in_progress: { label: "In progress", dot: "", text: "" }, // orange, set inline below
-  not_started: { label: "Not started", dot: "bg-black/20", text: "text-black/40" },
-  abandoned: { label: "Abandoned", dot: "bg-black/20", text: "text-black/40" },
+  completed: { label: "Completado", dot: "bg-emerald-500", text: "text-emerald-700" },
+  in_progress: { label: "En progreso", dot: "", text: "" }, // orange, set inline below
+  not_started: { label: "No iniciado", dot: "bg-black/20", text: "text-black/40" },
+  abandoned: { label: "Abandonado", dot: "bg-black/20", text: "text-black/40" },
 };
 
 export default async function DashboardPage() {
@@ -37,9 +37,9 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
       <div className="mb-8">
-        <h1 className="text-[22px] font-semibold text-black">Dashboard</h1>
+        <h1 className="text-[22px] font-semibold text-black">Panel</h1>
         <p className="mt-1 text-[13px] text-black/45">
-          A snapshot of your tests, reports, and AI credit usage.
+          Una vista general de tus pruebas, informes y uso de créditos de IA.
         </p>
       </div>
 
@@ -47,50 +47,50 @@ export default async function DashboardPage() {
       <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard
           icon={CheckCircle2}
-          label="Tests completed"
+          label="Pruebas completadas"
           value={stats.testsCompleted}
         />
         <StatCard
           icon={Clock}
-          label="In progress"
+          label="En progreso"
           value={stats.inProgress}
           highlight={stats.inProgress > 0}
         />
         <StatCard
           icon={FileBarChart2}
-          label="Reports ready"
+          label="Informes listos"
           value={stats.reportsReady}
         />
         <StatCard
           icon={Zap}
-          label="AI credits used"
+          label="Créditos de IA usados"
           value={stats.creditsUsed.toFixed(1)}
         />
       </div>
 
       {/* ── Quick actions ─────────────────────────────────── */}
       <div className="mb-10 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <QuickAction href="/tests" icon={ClipboardList} label="Take a test" />
-        <QuickAction href="/reports" icon={FileBarChart2} label="View reports" />
-        <QuickAction href="/profile" icon={UserCircle} label="Update profile" />
-        <QuickAction href="/settings" icon={Settings} label="Settings" />
+        <QuickAction href="/tests" icon={ClipboardList} label="Realizar prueba" />
+        <QuickAction href="/reports" icon={FileBarChart2} label="Ver informes" />
+        <QuickAction href="/profile" icon={UserCircle} label="Actualizar perfil" />
+        <QuickAction href="/settings" icon={Settings} label="Configuración" />
       </div>
 
       {/* ── Attempts table ────────────────────────────────── */}
       <div>
-        <h2 className="mb-3 text-[15px] font-semibold text-black">Your test attempts</h2>
+        <h2 className="mb-3 text-[15px] font-semibold text-black">Tus intentos de prueba</h2>
 
         {attempts.length === 0 ? (
           <div className="rounded-2xl border border-black/[0.06] bg-black/[0.02] px-6 py-10 text-center">
             <p className="text-[13px] text-black/45">
-              You haven&rsquo;t started a test yet.
+              Aún no has empezado una prueba.
             </p>
             <Link
               href="/tests"
               className="mt-3 inline-flex items-center gap-1 text-[13px] font-medium"
               style={{ color: ACCENT }}
             >
-              Browse tests <ArrowUpRight className="h-3.5 w-3.5" />
+              Explorar pruebas <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
           </div>
         ) : (
@@ -98,12 +98,12 @@ export default async function DashboardPage() {
             <table className="w-full border-collapse text-[13px]">
               <thead>
                 <tr className="border-b border-black/[0.06] bg-black/[0.02] text-left">
-                  <Th>Test</Th>
-                  <Th>Status</Th>
-                  <Th>Score</Th>
-                  <Th>Started</Th>
-                  <Th>Completed</Th>
-                  <Th align="right">Report</Th>
+                  <Th>Prueba</Th>
+                  <Th>Estado</Th>
+                  <Th>Puntuación</Th>
+                  <Th>Iniciado</Th>
+                  <Th>Finalizado</Th>
+                  <Th align="right">Informe</Th>
                 </tr>
               </thead>
               <tbody>
@@ -140,14 +140,14 @@ export default async function DashboardPage() {
                             className="inline-flex items-center gap-1 font-medium"
                             style={{ color: ACCENT }}
                           >
-                            View <ArrowUpRight className="h-3 w-3" />
+                            Ver <ArrowUpRight className="h-3 w-3" />
                           </Link>
                         ) : isInProgress ? (
                           <Link
                             href={`/tests/${a.id}`}
                             className="font-medium text-black/70 hover:text-black"
                           >
-                            Continue
+                            Continuar
                           </Link>
                         ) : (
                           <span className="text-black/25">—</span>
@@ -245,5 +245,5 @@ function Td({
 
 function formatDate(value: string | null) {
   if (!value) return "—";
-  return new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return new Date(value).toLocaleDateString("es", { month: "short", day: "numeric" });
 }

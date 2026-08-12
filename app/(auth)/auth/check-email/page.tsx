@@ -145,7 +145,7 @@ function Corner({ style }: { style: React.CSSProperties }) {
       style={{ position: "absolute", ...style }}
       aria-hidden="true"
     >
-      <path d="M1 17V1H17" stroke="#2F6FED" strokeWidth="1.5" fill="none" />
+      <path d="M1 17V1H17" stroke="#f59e0b" strokeWidth="1.5" fill="none" />
     </svg>
   );
 }
@@ -159,13 +159,13 @@ function EnvelopeIcon() {
         width="36"
         height="26"
         rx="4"
-        stroke="#2F6FED"
+        stroke="#f59e0b"
         strokeWidth="1.5"
-        fill="rgba(47,111,237,0.08)"
+        fill="rgba(251,146,60,0.12)"
       />
       <path
         d="M6 13l16 12 16-12"
-        stroke="#2F6FED"
+        stroke="#f59e0b"
         strokeWidth="1.5"
         fill="none"
         strokeLinecap="round"
@@ -181,76 +181,82 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "#05070D",
+    background: "radial-gradient(circle at top, rgba(251,146,60,0.16), transparent 35%), #08090f",
     position: "relative",
     overflow: "hidden",
     fontFamily:
       "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif",
-    padding: 24,
+    padding: 32,
   },
   grid: {
     position: "absolute",
     inset: 0,
     backgroundImage:
-      "linear-gradient(rgba(47,111,237,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(47,111,237,0.06) 1px, transparent 1px)",
+      "linear-gradient(rgba(251,146,60,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(251,146,60,0.05) 1px, transparent 1px)",
     backgroundSize: "42px 42px",
     maskImage: "radial-gradient(circle at 50% 40%, black, transparent 70%)",
   },
   panel: {
     position: "relative",
     width: "100%",
-    maxWidth: 400,
-    padding: "48px 36px",
-    borderRadius: 4,
-    background: "rgba(15,20,32,0.72)",
-    border: "1px solid rgba(47,111,237,0.16)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
+    maxWidth: 440,
+    padding: "44px 36px",
+    borderRadius: 24,
+    background: "rgba(15,20,32,0.92)",
+    border: "1px solid rgba(251,146,60,0.18)",
+    boxShadow: "0 32px 90px rgba(251,146,60,0.14)",
+    backdropFilter: "blur(26px)",
+    WebkitBackdropFilter: "blur(26px)",
     textAlign: "center",
   },
   iconWrap: {
     display: "flex",
     justifyContent: "center",
     marginBottom: 24,
+    padding: 18,
+    borderRadius: 18,
+    background: "rgba(251,146,60,0.12)",
+    boxShadow: "inset 0 0 0 1px rgba(251,146,60,0.18)",
   },
   title: {
     margin: 0,
-    color: "#F5F7FA",
-    fontSize: 19,
-    fontWeight: 600,
+    color: "#FDF8F1",
+    fontSize: 20,
+    fontWeight: 700,
     letterSpacing: "-0.2px",
   },
   subtitle: {
     margin: "10px 0 0",
-    color: "#8B93A7",
-    fontSize: 14,
-    lineHeight: 1.6,
+    color: "#DAD7CE",
+    fontSize: 15,
+    lineHeight: 1.7,
   },
   emailHighlight: {
-    color: "#F5F7FA",
-    fontWeight: 600,
+    color: "#FBBF24",
+    fontWeight: 700,
   },
   divider: {
     height: 1,
-    background: "rgba(139,147,167,0.14)",
+    background: "rgba(251,146,60,0.2)",
     margin: "28px 0 20px",
   },
   helperText: {
     margin: 0,
-    color: "#6B7280",
-    fontSize: 12.5,
-    lineHeight: 1.6,
+    color: "#D1D5DB",
+    fontSize: 13,
+    lineHeight: 1.75,
   },
   resendBtn: {
     marginTop: 16,
     width: "100%",
-    padding: "12px 20px",
-    fontSize: 13,
-    fontWeight: 600,
-    color: "#F5F7FA",
-    background: "rgba(47,111,237,0.14)",
-    border: "1px solid rgba(47,111,237,0.35)",
-    borderRadius: 4,
+    padding: "14px 22px",
+    fontSize: 14,
+    fontWeight: 700,
+    color: "#FFF7ED",
+    background: "#F97316",
+    border: "1px solid rgba(249,115,22,0.24)",
+    borderRadius: 16,
+    boxShadow: "0 14px 30px rgba(249,115,22,0.18)",
   },
   errorText: {
     margin: "12px 0 0",
@@ -261,14 +267,14 @@ const styles: Record<string, React.CSSProperties> = {
   backBtn: {
     marginTop: 14,
     width: "100%",
-    padding: "10px 20px",
+    padding: "12px 20px",
     fontSize: 13,
-    fontWeight: 500,
-    color: "#8B93A7",
-    background: "transparent",
-    border: "none",
+    fontWeight: 600,
+    color: "#FBBF24",
+    background: "rgba(251,146,60,0.08)",
+    border: "1px solid rgba(251,146,60,0.18)",
+    borderRadius: 16,
     cursor: "pointer",
-    textDecoration: "underline",
-    textUnderlineOffset: 3,
+    textDecoration: "none",
   },
 };

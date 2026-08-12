@@ -21,12 +21,12 @@ export function TestsTabs({ free, paid }: { free: TestCard[]; paid: TestCard[] }
     <div>
       {/* ── Tabs ──────────────────────────────────────────── */}
       <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-black/[0.06] bg-black/[0.02] p-1">
-        <TabButton active={tab === "free"} onClick={() => setTab("free")}>
-          Free
+        <TabButton active={tab === "free"} onClick={() => setTab("free") }>
+          Gratis
           <Count>{free.length}</Count>
         </TabButton>
-        <TabButton active={tab === "paid"} onClick={() => setTab("paid")}>
-          Paid
+        <TabButton active={tab === "paid"} onClick={() => setTab("paid") }>
+          Pago
           <Count>{paid.length}</Count>
         </TabButton>
       </div>

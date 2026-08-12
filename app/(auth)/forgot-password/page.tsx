@@ -32,62 +32,64 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <div className="flex flex-col gap-6 text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-900">
-          <svg className="h-7 w-7 text-zinc-600 dark:text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-          </svg>
+      <div className="mx-auto w-full max-w-md rounded-[2rem] border border-orange-200/20 bg-zinc-950/95 p-8 shadow-[0_35px_80px_-40px_rgba(249,115,22,0.45)]">
+        <div className="flex flex-col items-center gap-6 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-500/15 text-orange-400 shadow-inner">
+            <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+            </svg>
+          </div>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl font-semibold tracking-tight text-white">
+              Revisa tu inbox
+            </h1>
+            <p className="text-sm text-zinc-400 leading-relaxed">
+              Enviamos un enlace para restablecer tu contraseña a{' '}
+              <span className="font-medium text-orange-300">{email}</span>.
+              Expira en 1 hora.
+            </p>
+          </div>
+          <Link
+            href="/login"
+            className="inline-flex justify-center rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-3 text-sm font-semibold text-orange-200 transition hover:bg-orange-500/15"
+          >
+            Volver a iniciar sesión
+          </Link>
         </div>
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-white">
-            Check your inbox
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-            We sent a password reset link to{" "}
-            <span className="font-medium text-zinc-700 dark:text-zinc-300">{email}</span>.
-            It expires in 1 hour.
-          </p>
-        </div>
-        <Link
-          href="/login"
-          className="text-sm font-medium text-zinc-900 dark:text-white hover:underline"
-        >
-          Back to sign in
-        </Link>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="mx-auto w-full max-w-md rounded-[2rem] border border-orange-200/20 bg-zinc-950/95 p-8 shadow-[0_35px_80px_-40px_rgba(249,115,22,0.45)]">
       <div className="flex flex-col gap-1">
         <Link
           href="/login"
-          className="text-[10px] font-mono tracking-[0.3em] uppercase text-zinc-400 dark:text-zinc-600 mb-4 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors"
+          className="text-[10px] font-mono tracking-[0.3em] uppercase text-orange-200/80 mb-4 inline-flex items-center gap-2 hover:text-orange-100 transition-colors"
         >
-          ← Back to sign in
+          ← Volver a iniciar sesión
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-white">
-          Forgot password?
+        <h1 className="text-2xl font-semibold tracking-tight text-white">
+          ¿Olvidaste tu contraseña?
         </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-          Enter your email and we&apos;ll send you a reset link.
+        <p className="text-sm text-zinc-400 leading-relaxed">
+          Ingresa tu correo y te enviaremos un enlace para restablecerla.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400 tracking-wide">
-            Email
+          <label className="text-xs font-medium text-zinc-400 tracking-wide">
+            Correo electrónico
           </label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
+            placeholder="correo@ejemplo.com"
             required
             autoComplete="email"
-            className="h-10 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition"
+            className="h-12 rounded-2xl border border-zinc-800 bg-zinc-950/90 px-4 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition"
           />
         </div>
 
@@ -100,7 +102,7 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-1 h-11 flex items-center justify-center rounded-lg bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 text-sm font-medium tracking-tight transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-1 h-12 rounded-2xl bg-orange-500 text-white text-sm font-semibold transition hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (
             <span className="flex items-center gap-2">
