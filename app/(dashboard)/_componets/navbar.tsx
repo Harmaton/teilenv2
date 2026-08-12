@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useSidebar } from "@/components/ui/sidebar";
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Bell, Search, AlertTriangle,  Info, CheckCircle2, ExternalLink, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -18,13 +18,11 @@ import type { AppNotification, NotificationType } from "@/_actions/notifications
 type RouteEntry = { label: string; path: string; group: string };
 
 const ROUTES: RouteEntry[] = [
-  { label: "Dashboard",            path: "/dashboard",  group: "Main"                  },
-  { label: "Team Management",      path: "/team",       group: "Manage"                },
-  { label: "Editorial",            path: "/editorial",  group: "Manage"                },
-  { label: "Projects",             path: "/projects",   group: "Manage"                },
-  { label: "Cohorts & Programmes", path: "/programmes", group: "Programmes & Learning" },
-  { label: "Hackathons",           path: "/hackathons", group: "Programmes & Learning" },
-  { label: "Events",               path: "/events",     group: "Programmes & Learning" },
+  { label: "Panel",       path: "/dashboard", group: "Principal" },
+  { label: "Pruebas",     path: "/tests",     group: "Evaluaciones" },
+  { label: "Informes",    path: "/reports",   group: "Evaluaciones" },
+  { label: "Perfil",      path: "/profile",   group: "Cuenta" },
+  { label: "Configuración", path: "/settings", group: "Cuenta" },
 ];
 
 // ─── Type → icon + colours ────────────────────────────────────────────────────
@@ -375,13 +373,7 @@ export function Navbar() {
       <header className="h-[52px] w-full border-b border-black/10 bg-white flex items-center gap-3 px-4 shrink-0">
 
         {/* ── Burger ── */}
-        <button
-          onClick={() => { toggleSidebar(); setOpen((o) => !o); }}
-          className="w-9 h-9 flex items-center justify-center rounded-md hover:bg-black/5 transition-colors"
-          aria-label="Toggle sidebar"
-        >
-          <BurgerIcon open={open} />
-        </button>
+        <SidebarTrigger />
 
         {/* ── Search ── */}
         <div ref={searchRef} className="relative flex-1 max-w-sm">

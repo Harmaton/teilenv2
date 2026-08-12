@@ -24,7 +24,6 @@ export async function getAuthUser(): Promise<AuthResult> {
   }
 }
 
-/** Use in server components/pages — redirects to / if no session */
 export async function requireAuth(): Promise<User> {
   const result = await getAuthUser()
   if (!result.success) redirect("/")

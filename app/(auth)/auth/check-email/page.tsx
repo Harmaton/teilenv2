@@ -14,25 +14,37 @@ export default function CheckEmailPage() {
   const [error, setError] = useState<string | null>(null);
 
   const handleResend = async () => {
-    // if (!email || resending) return;
-    // setResending(true);
-    // setError(null);
+    if (!email || resending) return;
 
-    // const supabase = createClient();
-    // const { error } = await supabase.auth.signInWithOtp({
-    //   email,
-    //   options: { shouldCreateUser: true },
-    // });
+    setResending(true);
+    setError(null);
 
-    // setResending(false);
+    try {
+      const supabase = createClient();
+      const { error: resendError } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: {
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        },
+      });
 
-    // if (error) {
-    //   setError(error.message || "No se pudo reenviar el correo.");
-    //   return;
-    // }
+      if (resendError) {
+        setError(
+          resendError.message === "For security purposes, you can only request this after 60 seconds."
+            ? "Espera unos segundos antes de reenviar."
+            : "No pudimos reenviar el enlace. Intenta de nuevo."
+        );
+        return;
+      }
 
-    setResent(true);
-    setTimeout(() => setResent(false), 4000);
+      setResent(true);
+      setTimeout(() => setResent(false), 4000);
+    } catch {
+      setError("Ocurrió un error inesperado. Intenta de nuevo.");
+    } finally {
+      setResending(false);
+    }
   };
 
   return (
