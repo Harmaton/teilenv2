@@ -1,12 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { PageShell } from "../auth/check-email/page";
 
 type Status = "verifying" | "success" | "error";
 
-export default function VerifyPage() {
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<PageShell />}>
+      <VerifyPage />
+    </Suspense>
+  );
+}
+
+export function VerifyPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<Status>("verifying");

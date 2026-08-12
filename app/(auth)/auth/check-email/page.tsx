@@ -1,10 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function CheckEmailPage() {
+  return (
+    <Suspense fallback={<PageShell />}>
+      <CheckEmailContent />
+    </Suspense>
+  );
+}
+
+function CheckEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") ?? "";
@@ -109,6 +117,21 @@ export default function CheckEmailPage() {
           }
         }
       `}</style>
+    </div>
+  );
+}
+
+export function PageShell() {
+  return (
+    <div style={styles.page}>
+      <div style={styles.grid} aria-hidden="true" />
+      <div style={styles.panel}>
+        <div style={styles.iconWrap}>
+          <EnvelopeIcon />
+        </div>
+        <h1 style={styles.title}>Revisa tu correo</h1>
+        <p style={styles.subtitle}>Cargando...</p>
+      </div>
     </div>
   );
 }
