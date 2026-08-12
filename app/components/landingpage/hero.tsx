@@ -1,5 +1,5 @@
-import { PlayCircle } from "lucide-react";
-import React from "react";
+import { PlayCircle, User as UserIcon } from "lucide-react";
+import Link from "next/link";
 
 function NightSkyIllustration() {
   return (
@@ -90,7 +90,7 @@ function NightSkyIllustration() {
   );
 }
 
-export default function Hero() {
+export default function Hero({ hasSession }: { hasSession: boolean }) {
   return (
     <section className="relative min-h-[820px] pt-12 mt-16 w-full overflow-hidden border-x border-b border-white/10 bg-[#0a0e1a]">
       <NightSkyIllustration />
@@ -120,31 +120,40 @@ export default function Hero() {
           encontrarlo?
         </p>
 
-        <div className="mt-9 flex  items-center justify-start gap-4 sm:flex-row">
-                 
-                 <a
-                 href="/login"
-                 className="flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[15px] font-medium text-black transition-opacity hover:opacity-90"
-               >
-                 <span className="flex h-5 w-5 items-center justify-center rounded bg-amber-400">
-                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-                     <rect x="3" y="3" width="7" height="7" rx="1.5" fill="#111" />
-                     <rect x="14" y="3" width="7" height="7" rx="1.5" fill="#111" />
-                     <rect x="3" y="14" width="7" height="7" rx="1.5" fill="#111" />
-                     <rect x="14" y="14" width="7" height="7" rx="1.5" fill="#111" />
-                   </svg>
-                 </span>
-                 Probar Diagnóstico
-               </a>
-       
-                 
-                  <a href="#"
-                   className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-7 py-3.5 text-[15px] font-medium text-white/80 backdrop-blur-sm transition-colors duration-200 hover:border-white/25 hover:text-white"
-                 >
-                   <PlayCircle className="h-4 w-4" />
-                   Ver cómo funciona
-                 </a>
-               </div>
+        <div className="mt-9 flex items-center justify-start gap-4 sm:flex-row">
+          {hasSession ? (
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[15px] font-medium text-black transition-opacity hover:opacity-90"
+            >
+              <UserIcon className="h-4 w-4" />
+              Ir al panel
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[15px] font-medium text-black transition-opacity hover:opacity-90"
+            >
+              <span className="flex h-5 w-5 items-center justify-center rounded bg-amber-400">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="3" width="7" height="7" rx="1.5" fill="#111" />
+                  <rect x="14" y="3" width="7" height="7" rx="1.5" fill="#111" />
+                  <rect x="3" y="14" width="7" height="7" rx="1.5" fill="#111" />
+                  <rect x="14" y="14" width="7" height="7" rx="1.5" fill="#111" />
+                </svg>
+              </span>
+              Probar diagnóstico
+            </Link>
+          )}
+
+          <a
+            href="#"
+            className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-7 py-3.5 text-[15px] font-medium text-white/80 backdrop-blur-sm transition-colors duration-200 hover:border-white/25 hover:text-white"
+          >
+            <PlayCircle className="h-4 w-4" />
+            Ver cómo funciona
+          </a>
+        </div>
       </div>
     </section>
   );
