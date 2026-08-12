@@ -26,7 +26,7 @@ function SubmitButton() {
   )
 }
 
-export function LoginForm({
+export default function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
