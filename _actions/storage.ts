@@ -1,11 +1,13 @@
-import { createClient } from "@/lib/supabase/client"
+'use server';
+
+import { createClient } from "@/lib/supabase/server"
 
 export type UploadResult =
   | { success: true;  url: string }
   | { success: false; error: string }
 
 export async function uploadTeamMemberImage(file: File): Promise<UploadResult> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   // sanitise filename — remove spaces, add timestamp to avoid collisions
   const ext      = file.name.split(".").pop()?.toLowerCase() ?? "jpg"
@@ -31,8 +33,33 @@ export async function uploadTeamMemberImage(file: File): Promise<UploadResult> {
   return { success: true, url: data.publicUrl }
 }
 
+export async function uploadProfileAvatar(file: File, profileId: string): Promise<UploadResult> {
+  const supabase = await createClient()
+
+  const ext      = file.name.split(".").pop()?.toLowerCase() ?? "jpg"
+  const filename = `${profileId}-${Date.now()}.${ext}`
+  const path     = `${profileId}/${filename}`
+
+  const { error: uploadError } = await supabase.storage
+    .from("user_images")
+    .upload(path, file, {
+      cacheControl: "3600",
+      upsert:       true,
+    })
+
+  if (uploadError) {
+    return { success: false, error: uploadError.message }
+  }
+
+  const { data } = supabase.storage
+    .from("user_images")
+    .getPublicUrl(path)
+
+  return { success: true, url: data.publicUrl }
+}
+
 export async function deleteStorageFile(url: string): Promise<void> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const marker = "/object/public/media/"
   const idx    = url.indexOf(marker)

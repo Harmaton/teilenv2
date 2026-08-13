@@ -10,7 +10,11 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 
-const initialState = { success: false, error: null };
+type SettingsState =
+  | { success: true; message: string }
+  | { success: false; error: string };
+
+const initialState: SettingsState = { success: false, error: "" };
 
 type SettingsFormProps = {
   theme: "auto" | "light" | "dark";
@@ -38,7 +42,7 @@ export default function SettingsForm({
   const toast = toastId && toastId !== dismissedToast
     ? {
         type: state.success ? "success" : "error",
-        message: state.success ? "Preferencias guardadas correctamente." : state.error ?? "Error inesperado.",
+        message: state.success ? state.message : state.error,
       }
     : null;
 
@@ -134,11 +138,9 @@ export default function SettingsForm({
             </FieldDescription>
           </Field>
 
-          
-
           {state.success && (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-              Preferencias guardadas correctamente.
+              {state.message}
             </div>
           )}
 

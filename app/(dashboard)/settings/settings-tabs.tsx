@@ -9,6 +9,7 @@ const ACCENT = "#FF5A1F";
 
 type SettingsTabsProps = {
   profile: {
+    id: string;
     email: string;
     full_name: string | null;
     avatar_url: string | null;
@@ -47,6 +48,7 @@ export default function SettingsTabs({ profile, settings }: SettingsTabsProps) {
               avatar_url={profile.avatar_url}
               role={profile.role}
               is_active={profile.is_active}
+              userId={profile.id}
             />
           ) : (
             <SettingsForm

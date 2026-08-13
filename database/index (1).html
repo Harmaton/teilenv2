@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teilen Teens — Descubrí quién sos de verdad</title>
+<meta name="description" content="En 10 minutos, Teilen Teens construye tu Identidad Evolutiva. Basado en 6 estudios de neurociencia.">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Montserrat',sans-serif;background-color:#ffffff;color:#4A4A4A;line-height:1.65;overflow-x:hidden}
+img{max-width:100%;display:block}
+a{text-decoration:none;color:inherit}
+
+.wrap{max-width:1140px;margin:0 auto;padding:0 32px}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:999;background-color:#ffffff;border-bottom:1px solid #eeeeee;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 32px}
+.nav-logo img{height:38px}
+.nav-btn{background-color:#E07820;color:#ffffff;padding:10px 22px;border-radius:50px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;display:inline-block}
+
+/* HERO */
+.hero{min-height:100vh;padding-top:68px;background-color:#1A2535;display:grid;grid-template-columns:1fr 1fr;align-items:center;overflow:hidden;position:relative}
+.hero-content{padding:80px 32px 80px 60px;position:relative;z-index:1}
+.hero-label{display:inline-block;border:1px solid rgba(224,120,32,.5);color:#E07820;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;padding:7px 16px;border-radius:50px;margin-bottom:28px;background-color:rgba(224,120,32,.1)}
+.hero h1{font-size:52px;font-weight:900;color:#ffffff;line-height:1.1;margin-bottom:22px}
+.hero h1 span{color:#E07820;display:block}
+.hero-sub{font-size:17px;color:rgba(255,255,255,.72);max-width:480px;margin-bottom:38px;line-height:1.72}
+.hero-btn{background-color:#E07820;color:#ffffff;padding:20px 44px;border-radius:50px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;display:inline-block;margin-bottom:12px}
+.hero-micro{font-size:12px;color:rgba(255,255,255,.4);display:block;margin-top:8px}
+.hero-proof{margin-top:44px;padding-top:28px;border-top:1px solid rgba(255,255,255,.1);display:flex;flex-wrap:wrap;gap:20px}
+.hero-proof-item{font-size:13px;color:rgba(255,255,255,.55);font-weight:500}
+.hero-proof-item strong{color:#E07820}
+.hero-img{height:100vh;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;position:relative}
+.hero-img img{height:92%;width:auto;object-fit:contain;position:relative;z-index:1}
+.hero-img::after{content:'';position:absolute;bottom:0;left:0;right:0;height:200px;background:linear-gradient(to top,#1A2535,transparent);z-index:2}
+
+/* STATS BAR */
+.stats-bar{background-color:#E07820;padding:28px 0}
+.stats-inner{max-width:1140px;margin:0 auto;padding:0 32px;display:flex;justify-content:center;gap:64px;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-num{font-size:36px;font-weight:900;color:#ffffff;line-height:1;display:block}
+.stat-lbl{font-size:11px;font-weight:600;letter-spacing:.1em;color:rgba(255,255,255,.85);margin-top:4px;text-transform:uppercase;display:block}
+
+/* SECTIONS */
+.sec-white{background-color:#ffffff;padding:96px 0}
+.sec-gray{background-color:#F7F7F7;padding:96px 0}
+.sec-navy{background-color:#1A2535;padding:96px 0}
+.sec-cream{background-color:#FFF8F2;padding:96px 0}
+
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#E07820;display:block;margin-bottom:14px}
+.eyebrow-w{color:rgba(255,255,255,.6)}
+
+h2.ttl{font-size:38px;font-weight:900;color:#1A2535;line-height:1.15;margin-bottom:18px}
+h2.ttl-w{color:#ffffff}
+.sub{font-size:16px;color:#8A8A8A;line-height:1.75;max-width:620px;margin-bottom:44px}
+.sub-w{color:rgba(255,255,255,.65)}
+
+/* PAIN */
+.pain-title{font-size:36px;font-weight:900;color:#1A2535;text-align:center;max-width:680px;margin:0 auto 56px;line-height:1.2}
+.pain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-bottom:56px}
+.pain-card{background-color:#ffffff;border-radius:14px;padding:36px 28px;border:1px solid #eeeeee;border-left:4px solid #E07820;transition:transform .25s,box-shadow .25s}
+.pain-card:hover{transform:translateY(-5px);box-shadow:0 16px 48px rgba(0,0,0,.09)}
+.pain-emoji{font-size:40px;margin-bottom:18px;display:block}
+.pain-q{font-size:15px;color:#4A4A4A;font-style:italic;line-height:1.68;font-weight:500}
+.pain-bridge{text-align:center;max-width:560px;margin:0 auto 48px;font-size:17px;color:#4A4A4A;line-height:1.78}
+.pain-stat{background-color:#1A2535;border-radius:14px;padding:52px 40px;max-width:580px;margin:0 auto;text-align:center}
+.stat-big{font-size:80px;font-weight:900;color:#E07820;line-height:1;display:block;margin-bottom:14px}
+.stat-desc{font-size:16px;color:rgba(255,255,255,.72);max-width:320px;margin:0 auto}
+
+/* PROMISE */
+.promise-layout{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+.promise-img-wrap{position:relative;display:flex;justify-content:center}
+.promise-img-wrap img{height:520px;width:auto;object-fit:contain;filter:drop-shadow(0 24px 60px rgba(0,0,0,.12))}
+.promise-badge{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);background-color:#E07820;color:#ffffff;padding:12px 24px;border-radius:50px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;box-shadow:0 8px 30px rgba(224,120,32,.4)}
+.promise-list{display:flex;flex-direction:column;gap:18px;margin-top:28px}
+.promise-item{display:flex;align-items:flex-start;gap:16px;background-color:#ffffff;border-radius:10px;padding:18px 22px;border:1px solid #f0f0f0;border-left:3px solid #E07820;transition:transform .22s,box-shadow .22s}
+.promise-item:hover{transform:translateX(5px);box-shadow:0 4px 22px rgba(0,0,0,.07)}
+.pi-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.pi-title{font-weight:700;color:#1A2535;font-size:14px;margin-bottom:3px}
+.pi-desc{font-size:12px;color:#8A8A8A;line-height:1.55}
+
+/* HOW */
+.how-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:56px;position:relative}
+.how-steps::before{content:'';position:absolute;top:35px;left:12%;right:12%;height:2px;background:linear-gradient(90deg,#E07820,rgba(224,120,32,.15));z-index:0}
+.how-step{position:relative;z-index:1;text-align:center}
+.how-num{width:70px;height:70px;border-radius:50%;background-color:#1A2535;color:#E07820;font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;border:3px solid #E07820;box-shadow:0 0 0 7px rgba(224,120,32,.08)}
+.how-ttl{font-weight:700;color:#1A2535;font-size:14px;margin-bottom:8px}
+.how-desc{font-size:12px;color:#8A8A8A;line-height:1.6}
+.how-badge{display:inline-block;margin-top:10px;font-size:10px;color:#E07820;font-weight:700;background-color:rgba(224,120,32,.08);padding:4px 12px;border-radius:50px}
+
+/* VIDEO */
+.video-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.video-ttl{font-size:34px;font-weight:800;color:#ffffff;line-height:1.25;margin-bottom:18px}
+.video-desc{font-size:15px;color:rgba(255,255,255,.65);line-height:1.78;margin-bottom:32px}
+.video-btn{background-color:#ffffff;color:#1A2535;padding:17px 34px;border-radius:50px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;text-transform:uppercase;text-decoration:none;display:inline-block}
+.video-frame-wrap{display:flex;justify-content:center}
+.video-frame{position:relative;border-radius:22px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.5);aspect-ratio:9/16;max-height:560px;width:100%;max-width:315px;border:2px solid rgba(224,120,32,.35)}
+.video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+
+/* COMPARE */
+.compare-wrap{overflow-x:auto;margin-top:48px;border-radius:14px;box-shadow:0 4px 48px rgba(0,0,0,.09)}
+.ctable{width:100%;border-collapse:collapse;min-width:580px}
+.ctable th{padding:18px 22px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;text-align:center}
+.ctable th:first-child{text-align:left;background-color:#1A2535;color:#ffffff}
+.ctable th:nth-child(2),.ctable th:nth-child(3){background-color:#F7F7F7;color:#8A8A8A}
+.ctable th:nth-child(4){background-color:#E07820;color:#ffffff}
+.ctable td{padding:15px 22px;font-size:13px;border-bottom:1px solid #f0f0f0;vertical-align:middle;color:#4A4A4A}
+.ctable td:first-child{font-weight:600;color:#1A2535;background-color:#fafafa}
+.ctable td:nth-child(2),.ctable td:nth-child(3){text-align:center;color:#8A8A8A}
+.ctable td:nth-child(4){text-align:center;background-color:rgba(224,120,32,.04);font-weight:600;color:#1A2535}
+.ctable tr:last-child td{border-bottom:none}
+.ck{color:#E07820;font-size:16px}
+.cx{color:#cccccc}
+
+/* TESTIMONIALS */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.tcard{background-color:#ffffff;border-radius:14px;padding:30px 26px;box-shadow:0 2px 24px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:14px;border-top:3px solid #E07820;transition:transform .22s,box-shadow .22s}
+.tcard:hover{transform:translateY(-5px);box-shadow:0 12px 48px rgba(0,0,0,.11)}
+.tcard-stars{color:#E07820;font-size:13px}
+.tcard-q{font-size:13px;color:#4A4A4A;line-height:1.72;font-style:italic;flex:1}
+.tcard-name{font-weight:700;color:#1A2535;font-size:14px}
+.tcard-age{font-size:11px;color:#8A8A8A}
+
+/* PARENTS */
+.parents-inner{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+.parents-img-wrap img{height:480px;width:auto;object-fit:contain;filter:drop-shadow(0 20px 60px rgba(0,0,0,.35))}
+.parents-big-q{font-size:22px;font-style:italic;color:#E07820;font-weight:700;margin-bottom:18px;line-height:1.3}
+.parents-desc{font-size:15px;color:rgba(255,255,255,.68);line-height:1.78;margin-bottom:32px}
+.pbenefits{display:flex;flex-direction:column;gap:20px}
+.pbenefit{display:flex;gap:16px;align-items:flex-start;background-color:rgba(255,255,255,.07);border-radius:10px;padding:20px;border-left:3px solid #E07820}
+.pb-icon{font-size:22px;flex-shrink:0}
+.pb-title{font-weight:700;color:#ffffff;font-size:14px;margin-bottom:5px}
+.pb-desc{font-size:12px;color:rgba(255,255,255,.58);line-height:1.6}
+
+/* STORY */
+.story-inner{display:grid;grid-template-columns:1.15fr 1fr;gap:80px;align-items:center}
+.story-badge{display:inline-block;background-color:#E07820;color:#ffffff;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:6px 16px;border-radius:50px;margin-bottom:22px}
+.story-title{font-size:32px;font-weight:900;color:#1A2535;line-height:1.22;margin-bottom:18px}
+.story-text{font-size:14px;color:#4A4A4A;line-height:1.82}
+.story-text p+p{margin-top:14px}
+.story-link{display:inline-flex;align-items:center;gap:8px;margin-top:28px;color:#E07820;font-weight:700;font-size:14px;border-bottom:2px solid #E07820;padding-bottom:3px;text-decoration:none}
+.story-imgs{display:flex;flex-direction:column;gap:22px;align-items:center}
+.story-circle{width:280px;height:280px;border-radius:50%;overflow:hidden;border:4px solid #E07820;box-shadow:0 16px 56px rgba(224,120,32,.25);background-color:#F7F7F7;display:flex;align-items:flex-end;justify-content:center}
+.story-circle img{height:100%;width:auto;object-fit:cover;object-position:top center}
+.story-rect{width:100%;border-radius:16px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.1)}
+.story-rect img{width:100%;height:200px;object-fit:cover;object-position:top center}
+
+/* TEAM */
+.team-sub{font-size:16px;color:#8A8A8A;margin-bottom:60px;max-width:580px}
+.team-group{margin-bottom:72px}
+.team-group-lbl{font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#E07820;border-bottom:2px solid #E07820;padding-bottom:10px;margin-bottom:32px;display:block}
+.team-lead{display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:start;background-color:#F7F7F7;border-radius:14px;padding:32px;border-left:4px solid #E07820;margin-bottom:24px}
+.team-avatar{width:100px;height:100px;border-radius:50%;background-color:#1A2535;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;color:#E07820;border:3px solid #E07820;flex-shrink:0}
+.team-name{font-size:20px;font-weight:800;color:#1A2535;margin-bottom:3px}
+.team-role{font-size:11px;color:#E07820;font-weight:700;text-transform:uppercase;letter-spacing:.09em;margin-bottom:10px}
+.team-bio{font-size:13px;color:#4A4A4A;line-height:1.72;margin-bottom:14px}
+.team-links{display:flex;gap:10px;flex-wrap:wrap}
+.team-link{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#E07820;font-weight:600;background-color:rgba(224,120,32,.08);padding:5px 12px;border-radius:50px;text-decoration:none}
+.skills-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.skill-card{background-color:#F7F7F7;border-radius:10px;padding:20px;border-left:3px solid #E07820}
+.sk-icon{font-size:22px;margin-bottom:8px}
+.sk-title{font-weight:700;color:#1A2535;font-size:13px;margin-bottom:3px}
+.sk-desc{font-size:11px;color:#8A8A8A;line-height:1.55}
+
+/* FAQ */
+.faq-list{max-width:740px;margin:48px auto 0;display:flex;flex-direction:column;gap:14px}
+.faq-item{background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.05)}
+.faq-q{width:100%;text-align:left;padding:20px 26px;display:flex;justify-content:space-between;align-items:center;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#1A2535;background:none;border:none;cursor:pointer}
+.faq-icon{font-size:20px;color:#E07820;transition:transform .3s;flex-shrink:0}
+.faq-a{padding:0 26px;max-height:0;overflow:hidden;font-size:13px;color:#4A4A4A;line-height:1.78;transition:max-height .35s ease,padding .35s ease}
+.faq-item.open .faq-a{max-height:300px;padding:0 26px 20px}
+.faq-item.open .faq-icon{transform:rotate(45deg)}
+.faq-item.open .faq-q{color:#E07820}
+
+/* FINAL CTA */
+.cta-sec{background-color:#1A2535;padding:120px 0;text-align:center;position:relative;overflow:hidden}
+.cta-fl{position:absolute;bottom:0;left:0;height:80%;opacity:.6;pointer-events:none}
+.cta-fr{position:absolute;bottom:0;right:0;height:80%;opacity:.6;pointer-events:none}
+.cta-content{position:relative;z-index:1}
+.cta-big{font-size:52px;font-weight:900;color:#ffffff;line-height:1.12;margin-bottom:18px}
+.cta-big span{color:#E07820}
+.cta-sub{font-size:17px;color:rgba(255,255,255,.62);max-width:500px;margin:0 auto 46px;line-height:1.72}
+.cta-btn{background-color:#E07820;color:#ffffff;padding:22px 48px;border-radius:50px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:16px;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;display:inline-block}
+.cta-micro{font-size:12px;color:rgba(255,255,255,.38);margin-top:14px}
+
+/* FOOTER */
+.footer{background-color:#0d131d;padding:40px 32px;text-align:center}
+.footer-logo{height:34px;margin:0 auto 14px;opacity:.65}
+.footer-text{font-size:12px;color:rgba(255,255,255,.45)}
+.footer-links{margin-top:12px;display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
+.footer-links a{font-size:11px;color:rgba(255,255,255,.38);text-decoration:none}
+.footer-quote{font-size:11px;margin-top:16px;color:rgba(255,255,255,.22);font-style:italic}
+
+/* WHATSAPP */
+.wa{position:fixed;bottom:28px;right:28px;z-index:999;width:62px;height:62px;border-radius:50%;background-color:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 30px rgba(37,211,102,.48);text-decoration:none}
+.wa svg{width:30px;height:30px;fill:#ffffff}
+.wa-tip{position:absolute;right:74px;top:50%;transform:translateY(-50%);background-color:#1A2535;color:#ffffff;font-size:11px;font-weight:600;white-space:nowrap;padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .2s;font-family:'Montserrat',sans-serif}
+.wa:hover .wa-tip{opacity:1}
+
+/* FADE */
+.fi{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease}
+.fi.vis{opacity:1;transform:translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .hero-content{padding:100px 28px 60px}
+  .hero-img{height:300px}
+  .hero h1{font-size:34px}
+  .pain-grid{grid-template-columns:1fr}
+  .promise-layout{grid-template-columns:1fr}
+  .promise-img-wrap{display:none}
+  .how-steps{grid-template-columns:repeat(2,1fr)}
+  .how-steps::before{display:none}
+  .video-inner{grid-template-columns:1fr}
+  .testi-grid{grid-template-columns:1fr}
+  .parents-inner{grid-template-columns:1fr}
+  .parents-img-wrap{display:none}
+  .story-inner{grid-template-columns:1fr}
+  .story-imgs{display:none}
+  .skills-grid{grid-template-columns:1fr}
+  .team-lead{grid-template-columns:1fr}
+  .cta-fl,.cta-fr{display:none}
+  .stats-inner{gap:32px}
+  .cta-big{font-size:32px}
+  h2.ttl{font-size:28px}
+}
+@media(max-width:600px){
+  .sec-white,.sec-gray,.sec-navy,.sec-cream{padding:72px 0}
+  .how-steps{grid-template-columns:1fr}
+  .skills-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo"><img src="img/logo.png" alt="Teilen Teens"></div>
+  <a href="https://teilenteens.com/test" class="nav-btn" target="_blank">Hacer el test →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <span class="hero-label">Basado en 6 estudios de neurociencia y psicología del comportamiento</span>
+    <h1>Descubrí quién sos de verdad.<span>Antes de que alguien más decida por vos.</span></h1>
+    <p class="hero-sub">En 10 minutos, Teilen Teens construye tu Identidad Evolutiva: un mapa completo de cómo pensás, qué te mueve, en qué sos naturalmente bueno y hacia dónde tiene sentido ir.</p>
+    <a href="https://teilenteens.com/test" class="hero-btn" target="_blank">→ Descubrí tu Identidad Evolutiva</a>
+    <span class="hero-micro">Sin registros previos · Sin tarjeta de crédito · El resumen es gratis</span>
+    <div class="hero-proof">
+      <span class="hero-proof-item">⭐ <strong>4.9 / 5.0</strong> satisfacción</span>
+      <span class="hero-proof-item">👤 <strong>+1.200</strong> jóvenes</span>
+      <span class="hero-proof-item">🌎 América Latina</span>
+    </div>
+  </div>
+  <div class="hero-img">
+    <img src="img/1.png" alt="Joven señalando hacia vos">
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item"><span class="stat-num">+1.200</span><span class="stat-lbl">Jóvenes activos</span></div>
+    <div class="stat-item"><span class="stat-num">6</span><span class="stat-lbl">Estudios científicos</span></div>
+    <div class="stat-item"><span class="stat-num">10 min</span><span class="stat-lbl">Para tu mapa completo</span></div>
+    <div class="stat-item"><span class="stat-num">4.9★</span><span class="stat-lbl">Satisfacción</span></div>
+  </div>
+</div>
+
+<!-- PAIN -->
+<section class="sec-white fi">
+  <div class="wrap">
+    <h2 class="pain-title">La mayoría termina el colegio sin saber esto sobre sí mismo.</h2>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <span class="pain-emoji">😰</span>
+        <p class="pain-q">«No sé qué estudiar. Me gustan mil cosas y ninguna me convence del todo.»</p>
+      </div>
+      <div class="pain-card">
+        <span class="pain-emoji">😔</span>
+        <p class="pain-q">«Tengo miedo de elegir mal y perder años en algo que no era para mí.»</p>
+      </div>
+      <div class="pain-card">
+        <span class="pain-emoji">🌀</span>
+        <p class="pain-q">«¿Y si no tengo ningún talento especial y simplemente no sirvo para nada?»</p>
+      </div>
+    </div>
+    <p class="pain-bridge">Esas preguntas no son debilidad. Son la señal de que sos alguien que necesita más que una lista de carreras. <strong>Necesitás un mapa real de quién sos.</strong></p>
+    <div class="pain-stat">
+      <span class="stat-big">7 de cada 10</span>
+      <p class="stat-desc">adolescentes elige su camino sin haber identificado sus fortalezas reales.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PROMISE -->
+<section class="sec-gray fi">
+  <div class="wrap">
+    <div class="promise-layout">
+      <div class="promise-img-wrap">
+        <img src="img/4.png" alt="Joven con su Identidad Evolutiva">
+        <span class="promise-badge">✓ Tu reporte listo en 10 min</span>
+      </div>
+      <div>
+        <span class="eyebrow">En 10 minutos, tu Identidad Evolutiva incluye:</span>
+        <h2 class="ttl">Un mapa completo de quién sos, cómo funcionás y hacia dónde ir.</h2>
+        <div class="promise-list">
+          <div class="promise-item"><span class="pi-icon">🧠</span><div><div class="pi-title">Tu perfil de identidad personal</div><div class="pi-desc">Quién sos hoy, cómo pensás y qué te mueve genuinamente.</div></div></div>
+          <div class="promise-item"><span class="pi-icon">💡</span><div><div class="pi-title">Tus fortalezas predominantes</div><div class="pi-desc">Las 3 capacidades en las que sos naturalmente superior.</div></div></div>
+          <div class="promise-item"><span class="pi-icon">📚</span><div><div class="pi-title">Tu estilo de aprendizaje</div><div class="pi-desc">Cómo procesás la información y tomás decisiones en la vida real.</div></div></div>
+          <div class="promise-item"><span class="pi-icon">🚀</span><div><div class="pi-title">Cuatro caminos de desarrollo</div><div class="pi-desc">Formación, profesión del futuro, emprendimiento o entorno laboral ideal.</div></div></div>
+          <div class="promise-item"><span class="pi-icon">⚡</span><div><div class="pi-title">Lo que te frena</div><div class="pi-desc">El patrón que más limita tu potencial y cómo empezar a trabajarlo.</div></div></div>
+          <div class="promise-item"><span class="pi-icon">💬</span><div><div class="pi-title">Acceso a Salomón IA</div><div class="pi-desc">Tu mentor virtual por WhatsApp para profundizar tu reporte en tiempo real.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="sec-white fi">
+  <div class="wrap">
+    <span class="eyebrow">El proceso</span>
+    <h2 class="ttl">Cuatro pasos. Diez minutos. Un mapa para toda la vida.</h2>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-num">01</div>
+        <div class="how-ttl">Completás el estudio</div>
+        <div class="how-desc">Respondés preguntas sobre vos: tus valores, cómo pensás, qué te importa. No hay respuestas correctas o incorrectas.</div>
+        <span class="how-badge">⏱ 10 minutos</span>
+      </div>
+      <div class="how-step">
+        <div class="how-num">02</div>
+        <div class="how-ttl">El algoritmo analiza</div>
+        <div class="how-desc">Seis estudios científicos cruzan tus respuestas y construyen tu perfil único. No hay resultados genéricos.</div>
+        <span class="how-badge">🔬 Análisis personalizado</span>
+      </div>
+      <div class="how-step">
+        <div class="how-num">03</div>
+        <div class="how-ttl">Recibís tu resumen</div>
+        <div class="how-desc">Una primera mirada a tu identidad. Si querés profundizar, desbloqueás el reporte completo.</div>
+        <span class="how-badge">📄 Inmediato</span>
+      </div>
+      <div class="how-step">
+        <div class="how-num">04</div>
+        <div class="how-ttl">Hablás con Salomón IA</div>
+        <div class="how-desc">Tu mentor virtual por WhatsApp toma tu reporte y lo convierte en decisiones concretas.</div>
+        <span class="how-badge">💬 WhatsApp</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEO -->
+<section class="sec-navy fi">
+  <div class="wrap">
+    <div class="video-inner">
+      <div>
+        <span class="eyebrow eyebrow-w">Lo que dicen quienes ya lo hicieron</span>
+        <h2 class="video-ttl">Escuchá a alguien que pasó exactamente por lo que vos estás viviendo.</h2>
+        <p class="video-desc">No es un adulto explicándote qué hacer. Es alguien de tu edad contándote qué cambió cuando finalmente pudo ver quién era. Mirá el video y después hacé tu propio diagnóstico.</p>
+        <a href="https://teilenteens.com/test" class="video-btn" target="_blank">→ Hacer mi diagnóstico ahora</a>
+      </div>
+      <div class="video-frame-wrap">
+        <div class="video-frame">
+          <iframe src="https://www.youtube.com/embed/9-6X6oHT4-s" title="Teilen Teens" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARE -->
+<section class="sec-white fi">
+  <div class="wrap">
+    <span class="eyebrow">Por qué Teilen y no otro test</span>
+    <h2 class="ttl">No es un test de personalidad.<br>No es orientación vocacional.</h2>
+    <p class="sub">Es la primera plataforma en español que integra identidad, habilidades, emociones y orientación en un solo mapa personalizado.</p>
+    <div class="compare-wrap">
+      <table class="ctable">
+        <thead>
+          <tr>
+            <th>¿Qué analizan?</th>
+            <th>Tests gratuitos</th>
+            <th>Orientación vocacional clásica</th>
+            <th>✦ Teilen Teens</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Profundidad del análisis</td><td>Resultados genéricos</td><td>Listas de carreras</td><td><span class="ck">✓</span> Identidad completa y personalizada</td></tr>
+          <tr><td>Tiempo de resultado</td><td>Inmediato pero superficial</td><td>Sesiones múltiples (costosas)</td><td><span class="ck">✓</span> Reporte completo en 10 min</td></tr>
+          <tr><td>Orientación vocacional</td><td><span class="cx">✕</span> No incluida</td><td>Básica</td><td><span class="ck">✓</span> 4 caminos concretos</td></tr>
+          <tr><td>Análisis emocional</td><td><span class="cx">✕</span> No</td><td><span class="cx">✕</span> Rara vez</td><td><span class="ck">✓</span> Incluido</td></tr>
+          <tr><td>Mentor de seguimiento</td><td><span class="cx">✕</span> No</td><td>Depende del profesional</td><td><span class="ck">✓</span> Salomón IA por WhatsApp</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="sec-gray fi">
+  <div class="wrap">
+    <span class="eyebrow">Resultados reales</span>
+    <h2 class="ttl">Esto es lo que pasa cuando un joven se conoce de verdad.</h2>
+    <div class="testi-grid">
+      <div class="tcard">
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-q">«Fui al test sin saber qué esperar. El reporte me dijo que mi fortaleza era construir conexiones y que aprendía mejor con experiencias sociales. Empecé Trabajo Social y nunca estuve tan segura de algo.»</p>
+        <div><div class="tcard-name">Micaela</div><div class="tcard-age">17 años · Córdoba</div></div>
+      </div>
+      <div class="tcard">
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-q">«Sabía que quería emprender pero no en qué. Teilen me mostró que mi genio está en los sistemas y la organización. Hoy tengo una startup de logística y por primera vez siento que estoy en el lugar correcto.»</p>
+        <div><div class="tcard-name">Javier</div><div class="tcard-age">20 años · Buenos Aires</div></div>
+      </div>
+      <div class="tcard">
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-q">«Dejé Medicina después de leer mi reporte. No porque Teilen me lo dijera, sino porque me aclaró lo que yo ya sabía y no me animaba a decir. Ahora estudio Diseño y me levanto con ganas.»</p>
+        <div><div class="tcard-name">Sofía</div><div class="tcard-age">19 años · Rosario</div></div>
+      </div>
+      <div class="tcard">
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-q">«Tardé 10 años en encontrar esto. Si lo hubiera hecho a los 17, habría ahorrado tiempo, plata y mucha angustia.»</p>
+        <div><div class="tcard-name">Andrea</div><div class="tcard-age">28 años · Mendoza</div></div>
+      </div>
+      <div class="tcard">
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-q">«Mi mamá me lo regaló porque yo no paraba de decir que no sabía para qué servía. El reporte me mostró tres cosas en las que soy buena que yo misma no veía. Cambió cómo me veo.»</p>
+        <div><div class="tcard-name">Valeria</div><div class="tcard-age">15 años · Tucumán</div></div>
+      </div>
+      <div class="tcard">
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-q">«Lo hice en crisis laboral. El reporte me mostró que estaba en el entorno equivocado, no en la carrera equivocada. Cambié de empresa y es como si hubiera encendido una luz.»</p>
+        <div><div class="tcard-name">Miguel</div><div class="tcard-age">25 años · Salta</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARENTS -->
+<section class="sec-navy fi">
+  <div class="wrap">
+    <div class="parents-inner">
+      <div>
+        <span class="eyebrow eyebrow-w">Para madres y padres</span>
+        <h2 class="ttl ttl-w">La pregunta que más les preocupa ya tiene respuesta.</h2>
+        <p class="parents-big-q">«¿Mi hijo sabe para qué es bueno?»</p>
+        <p class="parents-desc">Teilen Teens no le dice a su hijo qué estudiar. Le muestra quién es — para que pueda decidir desde ahí, no por presión, moda o miedo.</p>
+        <div class="pbenefits">
+          <div class="pbenefit">
+            <span class="pb-icon">📖</span>
+            <div><div class="pb-title">Un reporte que pueden leer juntos</div><div class="pb-desc">Lenguaje claro, no técnico. Diseñado para que padres e hijos lo analicen en familia y conversen desde un lugar concreto.</div></div>
+          </div>
+          <div class="pbenefit">
+            <span class="pb-icon">💬</span>
+            <div><div class="pb-title">Salomón IA también acompaña a los padres</div><div class="pb-desc">El mentor virtual no solo acompaña al joven. Los padres pueden hacer preguntas sobre cómo guiar a sus hijos en esta etapa.</div></div>
+          </div>
+          <div class="pbenefit">
+            <span class="pb-icon">🎯</span>
+            <div><div class="pb-title">La inversión más concreta en el futuro de su hijo</div><div class="pb-desc">Menos que una clase particular. Un diagnóstico que su hijo puede usar durante años.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="parents-img-wrap" style="display:flex;justify-content:center">
+        <img src="img/2.png" alt="Jóvenes revisando el diagnóstico">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY -->
+<section class="sec-cream fi">
+  <div class="wrap">
+    <div class="story-inner">
+      <div>
+        <span class="story-badge">Nuestra historia</span>
+        <h2 class="story-title">Nació para ejecutivos.<br>Evolucionó para cambiar el punto de partida.</h2>
+        <div class="story-text">
+          <p>Hace cinco años, Teilen nació como una herramienta de diagnóstico para profesionales y equipos ejecutivos en América Latina. Ayudaba a líderes a identificar sus competencias blandas, estilos de liderazgo y capacidades de trabajo en equipo. Los resultados eran notables.</p>
+          <p>Pero algo seguía apareciendo en cada conversación: <em>«Ojalá hubiera sabido esto a los 18»</em>. Una y otra vez, ejecutivos con décadas de carrera descubrían a los 35 o 40 lo que podrían haber sabido a los 17.</p>
+          <p>Ahí nació la pregunta que lo cambió todo: <strong>¿por qué esperar?</strong> ¿Por qué trabajar el talento humano cuando ya está en una empresa, cuando podemos hacerlo antes de que tome las decisiones que moldean toda una vida?</p>
+          <p>Así nació Teilen Teens. No como una versión simplificada del sistema original, sino como su evolución más importante: llevar el autoconocimiento al momento en que más importa. Cuando todo todavía está por escribirse.</p>
+        </div>
+        <a href="https://paralaje.site" class="story-link" target="_blank">Conocé PARALAJE, el siguiente paso →</a>
+      </div>
+      <div class="story-imgs">
+        <div class="story-circle">
+          <img src="img/5.png" alt="Joven con propósito">
+        </div>
+        <div class="story-rect">
+          <img src="img/3.png" alt="Jóvenes estudiando">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="sec-white fi">
+  <div class="wrap">
+    <span class="eyebrow">Quiénes hacen posible esto</span>
+    <h2 class="ttl">Las personas detrás de cada reporte.</h2>
+    <p class="team-sub">Teilen Teens es el resultado de tres equipos que trabajan en paralelo: fundación, tecnología y ciencia.</p>
+
+    <div class="team-group">
+      <span class="team-group-lbl">Fundador y Creador</span>
+      <div class="team-lead">
+        <div class="team-avatar">S</div>
+        <div>
+          <div class="team-name">Salomón Velásquez</div>
+          <div class="team-role">Fundador · Director General · Creador del Sistema Teilen</div>
+          <p class="team-bio">Psicólogo, filósofo y coach con credencial PCC (Professional Certified Coach). Durante más de 15 años trabajó con jóvenes, profesionales y equipos ejecutivos en Argentina y América Latina, ayudándolos a identificar su talento y construir proyectos de vida coherentes con quiénes son. Es el fundador de Simple Life Foundation y el arquitecto metodológico del sistema Teilen. Su convicción de fondo: el talento humano no se forma en las organizaciones — se descubre antes de llegar a ellas.</p>
+          <div class="team-links">
+            <a href="mailto:hola@simplelifemindset.com" class="team-link">✉ hola@simplelifemindset.com</a>
+            <a href="https://www.linkedin.com/in/salomonvelasquez" class="team-link" target="_blank">in LinkedIn</a>
+            <a href="https://www.simplelifemindset.com" class="team-link" target="_blank">🌐 simplelifemindset.com</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="team-group">
+      <span class="team-group-lbl">Equipo Técnico — Director: Harmaton Njagi</span>
+      <div class="team-lead">
+        <div class="team-avatar" style="background-color:#0f3460">H</div>
+        <div>
+          <div class="team-name">Harmaton Njagi</div>
+          <div class="team-role">Director de Ingeniería &amp; Arquitectura de Plataforma</div>
+          <p class="team-bio">Lidera el equipo técnico responsable de construir y escalar la plataforma Teilen Teens. Con experiencia en arquitectura de sistemas y desarrollo de productos digitales a escala, garantiza que cada reporte sea generado con la precisión y velocidad que el usuario espera.</p>
+          <div class="team-links">
+            <a href="mailto:harmaton@teilenteens.com" class="team-link">✉ harmaton@teilenteens.com</a>
+            <a href="https://www.linkedin.com/in/harmatonnjagi" class="team-link" target="_blank">in LinkedIn</a>
+          </div>
+        </div>
+      </div>
+      <div class="skills-grid">
+        <div class="skill-card"><div class="sk-icon">⚙️</div><div class="sk-title">Ingeniería de Software</div><div class="sk-desc">Arquitectura de backend, APIs y procesamiento del reporte en tiempo real.</div></div>
+        <div class="skill-card"><div class="sk-icon">🤖</div><div class="sk-title">Inteligencia Artificial</div><div class="sk-desc">Desarrollo e integración de Salomón IA: el mentor conversacional vía WhatsApp.</div></div>
+        <div class="skill-card"><div class="sk-icon">🎨</div><div class="sk-title">Diseño UX/UI</div><div class="sk-desc">Interfaz optimizada para adolescentes en dispositivos móviles.</div></div>
+        <div class="skill-card"><div class="sk-icon">🔐</div><div class="sk-title">Seguridad y Datos</div><div class="sk-desc">Protección de la información y cumplimiento de privacidad.</div></div>
+        <div class="skill-card"><div class="sk-icon">📊</div><div class="sk-title">Algoritmo de Análisis</div><div class="sk-desc">El motor que cruza los 6 estudios y genera reportes únicos.</div></div>
+        <div class="skill-card"><div class="sk-icon">☁️</div><div class="sk-title">Infraestructura Cloud</div><div class="sk-desc">Escalabilidad para toda América Latina sin interrupciones.</div></div>
+      </div>
+    </div>
+
+    <div class="team-group">
+      <span class="team-group-lbl">Equipo de Investigación — Director: Pietro Moura</span>
+      <div class="team-lead">
+        <div class="team-avatar" style="background-color:#1a4a2e">P</div>
+        <div>
+          <div class="team-name">Pietro Moura</div>
+          <div class="team-role">Director de Investigación Científica y Metodología</div>
+          <p class="team-bio">Lidera el equipo interdisciplinario que valida, actualiza y profundiza el sustento científico del sistema Teilen Teens. Garantiza que cada estudio integrado sea metodológicamente riguroso, culturalmente pertinente para el contexto latinoamericano y éticamente aplicado.</p>
+          <div class="team-links">
+            <a href="mailto:pietro@teilenteens.com" class="team-link">✉ pietro@teilenteens.com</a>
+            <a href="https://www.linkedin.com/in/pietromoura" class="team-link" target="_blank">in LinkedIn</a>
+          </div>
+        </div>
+      </div>
+      <div class="skills-grid">
+        <div class="skill-card"><div class="sk-icon">🧠</div><div class="sk-title">Psicología del Comportamiento</div><div class="sk-desc">Validación de estudios que miden fortalezas, estilos cognitivos y patrones emocionales.</div></div>
+        <div class="skill-card"><div class="sk-icon">🔬</div><div class="sk-title">Neurociencias Aplicadas</div><div class="sk-desc">Integración de hallazgos sobre procesamiento cerebral y estilos de aprendizaje.</div></div>
+        <div class="skill-card"><div class="sk-icon">🌍</div><div class="sk-title">Antropología Social</div><div class="sk-desc">Contextualización cultural de los perfiles para jóvenes latinoamericanos.</div></div>
+        <div class="skill-card"><div class="sk-icon">📐</div><div class="sk-title">Filosofía y Ética</div><div class="sk-desc">Marcos conceptuales que sostienen la metodología de identidad.</div></div>
+        <div class="skill-card"><div class="sk-icon">📈</div><div class="sk-title">Sociología del Desarrollo</div><div class="sk-desc">Análisis de tendencias vocacionales y laborales para la orientación.</div></div>
+        <div class="skill-card"><div class="sk-icon">✅</div><div class="sk-title">Validación Continua</div><div class="sk-desc">Revisión permanente de los estudios para garantizar vigencia.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec-gray fi">
+  <div class="wrap">
+    <span class="eyebrow" style="text-align:center;display:block">Preguntas frecuentes</span>
+    <h2 class="ttl" style="text-align:center;margin-bottom:0">¿Algo que todavía no quedó claro?</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="tFaq(this)">¿Cuánto tiempo tarda el diagnóstico?<span class="faq-icon">+</span></button>
+        <div class="faq-a">El estudio toma aproximadamente 10 minutos. Es ágil, sin preguntas trampa y sin respuestas correctas o incorrectas. Solo vos respondiendo sobre vos.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="tFaq(this)">¿Es realmente gratis?<span class="faq-icon">+</span></button>
+        <div class="faq-a">El resumen inicial del diagnóstico es completamente gratuito. Podés ver los primeros resultados de tu identidad sin ningún costo. Si querés el reporte completo, hay un costo que conocerás al finalizar el test.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="tFaq(this)">¿Para qué edad está diseñado?<span class="faq-icon">+</span></button>
+        <div class="faq-a">Teilen Teens está especialmente diseñado para jóvenes de 15 a 25 años. El sistema adapta el lenguaje y las recomendaciones según la edad: más exploratorio para los de 15-17, más estratégico para los de 18 en adelante.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="tFaq(this)">¿Es lo mismo que un test de personalidad o vocacional?<span class="faq-icon">+</span></button>
+        <div class="faq-a">No. Teilen Teens integra seis estudios distintos que analizan simultáneamente personalidad, fortalezas, valores, estilo de aprendizaje, patrones emocionales y orientación vocacional. El resultado no es una categoría — es un mapa de identidad personalizado.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="tFaq(this)">¿Qué es Salomón IA y cómo funciona?<span class="faq-icon">+</span></button>
+        <div class="faq-a">Salomón IA es un mentor virtual disponible por WhatsApp. Una vez que recibís tu reporte, podés chatear con él para profundizar los resultados, hacer preguntas y construir un plan de acción concreto. También está disponible para padres.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="tFaq(this)">¿Mis datos están seguros?<span class="faq-icon">+</span></button>
+        <div class="faq-a">Sí. Toda la información que completás es confidencial y se utiliza exclusivamente para construir tu reporte personal. Nunca se comparte con terceros sin tu consentimiento expreso.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="tFaq(this)">¿Puedo hacer el test si ya terminé el colegio?<span class="faq-icon">+</span></button>
+        <div class="faq-a">Completamente. Aunque el sistema está optimizado para jóvenes de 15 a 25 años, muchos adultos de hasta 30 o más lo usan para clarificar su identidad profesional, especialmente en momentos de cambio o crisis vocacional.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-sec fi">
+  <img class="cta-fl" src="img/6.png" alt="">
+  <img class="cta-fr" src="img/4.png" alt="">
+  <div class="wrap cta-content">
+    <h2 class="cta-big">Ya sabés que algo no cierra.<br><span>Teilen te muestra exactamente qué es.</span></h2>
+    <p class="cta-sub">Miles de jóvenes tardaron años en descubrir lo que Teilen puede mostrarte en 10 minutos. Ese tiempo no vuelve. Pero el mapa sí está disponible ahora.</p>
+    <a href="https://teilenteens.com/test" class="cta-btn" target="_blank">→ Hacer mi diagnóstico ahora</a>
+    <p class="cta-micro">Sin registros. Sin tarjeta. El primer paso es gratis.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <img class="footer-logo" src="img/logo.png" alt="Teilen Teens">
+  <p class="footer-text">© 2025 Simple Life Foundation · Córdoba, Argentina · Todos los derechos reservados</p>
+  <div class="footer-links">
+    <a href="mailto:hola@simplelifemindset.com">hola@simplelifemindset.com</a>
+    <a href="https://paralaje.site" target="_blank">PARALAJE →</a>
+    <a href="https://teilenteens.com/test" target="_blank">Hacer el test</a>
+    <a href="https://wa.me/543517623874" target="_blank">WhatsApp</a>
+  </div>
+  <p class="footer-quote">«El talento no cambia un país. Lo cambia la oportunidad de descubrirlo a tiempo.»</p>
+</footer>
+
+<!-- WHATSAPP FLOAT -->
+<a class="wa" href="https://wa.me/543517623874?text=Hola%2C%20quiero%20saber%20m%C3%A1s%20sobre%20Teilen%20Teens" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 32 32"><path d="M16 0C7.164 0 0 7.163 0 16c0 2.822.737 5.47 2.027 7.773L0 32l8.456-2.01A15.933 15.933 0 0016 32c8.836 0 16-7.163 16-16S24.836 0 16 0zm0 29.333a13.3 13.3 0 01-6.794-1.858l-.487-.29-5.02 1.194 1.224-4.895-.317-.503A13.265 13.265 0 012.667 16C2.667 8.636 8.636 2.667 16 2.667S29.333 8.636 29.333 16 23.364 29.333 16 29.333zM23.2 19.6c-.387-.194-2.29-1.13-2.645-1.26-.355-.13-.613-.194-.871.194-.258.387-1 1.26-1.226 1.517-.225.258-.45.29-.839.097-.387-.194-1.636-.603-3.117-1.922-1.152-1.026-1.93-2.293-2.155-2.68-.226-.387-.024-.596.17-.789.173-.173.387-.45.58-.678.193-.226.258-.387.387-.645.13-.258.065-.484-.032-.678-.097-.193-.871-2.1-1.194-2.874-.314-.754-.634-.652-.871-.663-.225-.01-.484-.013-.742-.013-.258 0-.678.097-1.033.484-.355.387-1.355 1.323-1.355 3.226 0 1.903 1.387 3.742 1.58 4s2.71 4.136 6.567 5.8c.917.395 1.633.632 2.19.808.92.293 1.757.252 2.42.153.738-.11 2.29-.936 2.613-1.84.322-.903.322-1.677.226-1.84-.097-.161-.355-.258-.742-.452z"/></svg>
+  <span class="wa-tip">¿Tenés dudas? Escribinos</span>
+</a>
+
+<script>
+function tFaq(btn){
+  var item=btn.closest('.faq-item');
+  var isOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(function(i){i.classList.remove('open')});
+  if(!isOpen)item.classList.add('open');
+}
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('vis')});
+},{threshold:0.07});
+document.querySelectorAll('.fi').forEach(function(el){obs.observe(el)});
+</script>
+</body>
+</html>

@@ -27,7 +27,7 @@ export async function getUserSettings(): Promise<
     .from("user_settings")
     .select("category, value")
     .eq("profile_id", authResult.user.id)
-    .eq("category", "site_preferences")
+    .eq("key", "site_preferences")
     .single();
 
   if (error && error.code !== "PGRST116") {
@@ -70,6 +70,7 @@ export async function updateUserSettings(
   const supabase = await createClient();
   const payload = {
     profile_id: authResult.user.id,
+    key: "site_preferences",
     category: "site_preferences",
     value: {
       theme,
@@ -79,9 +80,16 @@ export async function updateUserSettings(
     updated_at: new Date().toISOString(),
   };
 
+  // Delete existing record if it exists, then insert new one
+  await supabase
+    .from("user_settings")
+    .delete()
+    .eq("profile_id", authResult.user.id)
+    .eq("key", "site_preferences");
+
   const { error } = await supabase
     .from("user_settings")
-    .upsert(payload, { onConflict: "profile_id,category" });
+    .insert(payload);
 
   if (error) {
     return { success: false, error: error.message };

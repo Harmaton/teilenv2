@@ -58,7 +58,7 @@ const NAV: NavGroup[] = [
   {
     label: "Account",
     items: [
-      { label: "Profile", href: "/profile", icon: UserCircle },
+      // { label: "Profile", href: "/profile", icon: UserCircle },
       { label: "Settings", href: "/settings", icon: Settings },
     ],
   },

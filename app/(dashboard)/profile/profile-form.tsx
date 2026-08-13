@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useActionState } from "react";
 import { updateProfile } from "@/_actions/profile";
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +12,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-
-const initialState = { success: false, error: null };
+import { uploadProfileAvatar } from "@/_actions/storage";
 
 type ProfileFormProps = {
   email: string;
@@ -20,7 +20,14 @@ type ProfileFormProps = {
   avatar_url: string | null;
   role: string | null;
   is_active: boolean;
+  userId: string;
 };
+
+type ProfileState =
+  | { success: true; message: string }
+  | { success: false; error: string };
+
+const initialState: ProfileState = { success: false, error: "" };
 
 export default function ProfileForm({
   email,
@@ -28,11 +35,15 @@ export default function ProfileForm({
   avatar_url,
   role,
   is_active,
+  userId,
 }: ProfileFormProps) {
   const [state, formAction] = useActionState(updateProfile, initialState);
   const [name, setName] = useState(full_name ?? "");
   const [avatarUrl, setAvatarUrl] = useState(avatar_url ?? "");
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(avatar_url);
+  const [uploading, setUploading] = useState(false);
   const [dismissedToast, setDismissedToast] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const toastId = state.success
     ? "profile-success"
@@ -43,9 +54,30 @@ export default function ProfileForm({
   const toast = toastId && toastId !== dismissedToast
     ? {
         type: state.success ? "success" : "error",
-        message: state.success ? "Perfil actualizado correctamente." : state.error ?? "Error inesperado.",
+        message: state.success ? state.message : state.error,
       }
     : null;
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Show preview immediately
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setAvatarPreview(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to storage
+    setUploading(true);
+    const result = await uploadProfileAvatar(file, userId);
+    setUploading(false);
+
+    if (result.success) {
+      setAvatarUrl(result.url);
+    }
+  };
 
   return (
     <form action={formAction} className="space-y-6">
@@ -100,17 +132,27 @@ export default function ProfileForm({
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="avatar_url">URL del avatar</FieldLabel>
-            <Input
-              id="avatar_url"
-              name="avatar_url"
-              value={avatarUrl}
-              onChange={(event) => setAvatarUrl(event.target.value)}
-              placeholder="https://..."
-            />
-            <FieldDescription>
-              Añade una URL de avatar para mostrar en tu perfil.
-            </FieldDescription>
+            <FieldLabel htmlFor="avatar_file">Avatar</FieldLabel>
+            <input type="hidden" name="avatar_url" value={avatarUrl} />
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="inline-flex items-center gap-2 rounded-lg border border-black/[0.08] bg-black/[0.02] px-4 py-2 text-sm font-medium text-black hover:bg-black/[0.04] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {uploading ? "Subiendo..." : "Cambiar avatar"}
+              </button>
+              <input
+                ref={fileInputRef}
+                id="avatar_file"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+              />
+            </div>
+            <FieldDescription>Selecciona una imagen para tu avatar (JPG, PNG, etc.)</FieldDescription>
           </Field>
 
           <Field>
@@ -127,14 +169,6 @@ export default function ProfileForm({
             </div>
           </Field>
 
-          
-
-          {state.success && (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-              Perfil actualizado correctamente.
-            </div>
-          )}
-
           <Field className="pt-4">
             <Button
               type="submit"
@@ -146,27 +180,27 @@ export default function ProfileForm({
         </div>
 
         <div className="rounded-3xl border border-black/[0.08] bg-white p-6">
-          <div className="flex items-center gap-4">
-            <div className="relative h-16 w-16 overflow-hidden rounded-3xl bg-black/5">
-              {avatarUrl ? (
+          <div className="mb-6 flex justify-center">
+            <div className="relative h-40 w-40 overflow-hidden rounded-full bg-black/5">
+              {avatarPreview ? (
                 <Image
-                  src={avatarUrl}
+                  src={avatarPreview}
                   alt="Avatar preview"
                   fill
-                  sizes="64px"
+                  sizes="160px"
                   unoptimized
                   className="object-cover"
                 />
               ) : (
-                <div className="flex h-full items-center justify-center text-xl font-semibold text-black/35">
+                <div className="flex h-full items-center justify-center text-6xl font-semibold text-black/35">
                   {name ? name[0].toUpperCase() : "U"}
                 </div>
               )}
             </div>
-            <div>
-              <p className="text-sm font-semibold text-black">Vista previa del avatar</p>
-              <p className="text-sm text-black/60">Tu imagen se actualizará cuando guardes cambios.</p>
-            </div>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-black">Vista previa del avatar</p>
+            <p className="text-sm text-black/60">Se actualiza cuando subes una imagen.</p>
           </div>
 
           <div className="mt-6 space-y-4 rounded-3xl border border-black/[0.06] bg-black/[0.03] p-4">
@@ -175,7 +209,7 @@ export default function ProfileForm({
             </div>
             <div className="space-y-3 text-sm text-black/70">
               <p>Usa tu nombre real para que el panel sea más fácil de reconocer.</p>
-              <p>Si no tienes avatar, mostramos tus iniciales.</p>
+              <p>El avatar se sube a Supabase Storage automáticamente.</p>
               <p>El rol se mantiene en el backend; contacta al administrador para cambios de permisos.</p>
             </div>
           </div>
