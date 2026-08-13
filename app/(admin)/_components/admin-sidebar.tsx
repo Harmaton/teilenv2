@@ -45,21 +45,21 @@ const NAV: NavGroup[] = [
   {
     label: "Main",
     items: [
-      { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+       { label: "Manage Users", href: "/admin/manage-users", icon: UserCircle },
     ],
   },
   {
     label: "Assessments",
     items: [
-      { label: "Tests", href: "/tests", icon: ClipboardList },
-      { label: "Reports", href: "/reports", icon: FileBarChart2 },
+      { label: "Manage Tests", href: "/admin/manage-tests", icon: ClipboardList },
+      { label: "View Reports", href: "/admin/manage-reports", icon: FileBarChart2 },
     ],
   },
   {
     label: "Account",
     items: [
-      // { label: "Profile", href: "/profile", icon: UserCircle },
-      { label: "Settings", href: "/settings", icon: Settings },
+      { label: "Settings", href: "/admin/settings", icon: Settings },
     ],
   },
 ]
@@ -95,6 +95,12 @@ export function AppSidebar({ user }: AppSidebarProps) {
             quality={100}
             style={{ objectFit: "contain" }}
           />
+          <span
+            className="rounded-full px-1 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white"
+            style={{ backgroundColor: ACCENT }}
+          >
+           Administrador
+          </span>
         </div>
       </SidebarHeader>
 
@@ -153,7 +159,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
           </div>
           <div className="flex min-w-0 flex-col">
             <span className="truncate text-[12px] font-medium text-black">{email}</span>
-
+            <span className="text-[11px] text-black/40">Administrador</span>
           </div>
         </div>
 

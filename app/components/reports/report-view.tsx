@@ -1,34 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Loader2, RefreshCcw, Pencil, Check, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, RefreshCcw, Sparkles, Download, X } from "lucide-react";
 import {
   getReportDetail,
-  updateReportContent,
   retryReportGeneration,
   type ReportDetail,
-  type ReportContent,
 } from "@/_actions/reports";
+import { buildReportHtml } from "@/lib/report-html";
 
 const ACCENT = "#FF5A1F";
 
+const QUICK_EDITS = [
+  { id: "concise", label: "Más conciso" },
+  { id: "formal", label: "Más formal" },
+  { id: "motivational", label: "Más motivador" },
+  { id: "detailed", label: "Más detallado" },
+];
+
 export function ReportView({ initial }: { initial: ReportDetail }) {
   const [report, setReport] = useState(initial);
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState<ReportContent | null>(initial.content);
-  const [saving, setSaving] = useState(false);
   const [retrying, setRetrying] = useState(false);
+  const [editPanelOpen, setEditPanelOpen] = useState(false);
+  const [instruction, setInstruction] = useState("");
+  const [applying, setApplying] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Poll while pending/generating
   useEffect(() => {
     if (report.status !== "pending" && report.status !== "generating") return;
 
     const interval = setInterval(async () => {
       const res = await getReportDetail(report.id);
-      if (res.success) {
-        setReport(res.data);
-        if (res.data.status === "completed") setDraft(res.data.content);
-      }
+      if (res.success) setReport(res.data);
     }, 3000);
 
     return () => clearInterval(interval);
@@ -48,15 +52,29 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
     setRetrying(false);
   };
 
-  const handleSave = async () => {
-    if (!draft) return;
-    setSaving(true);
-    const res = await updateReportContent(report.id, draft);
-    if (res.success) {
-      setReport({ ...report, content: draft });
-      setEditing(false);
+  const applyEdit = async (payload: { styleId?: string; instruction?: string }) => {
+    setApplying(true);
+    setEditError(null);
+    try {
+      const res = await fetch("/api/reports/edit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reportId: report.id, ...payload }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "No se pudo aplicar la edición.");
+      setReport((r) => ({ ...r, content: data.content, updatedAt: new Date().toISOString() }));
+      setInstruction("");
+      setEditPanelOpen(false);
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : "Error inesperado.");
+    } finally {
+      setApplying(false);
     }
-    setSaving(false);
+  };
+
+  const handleDownloadPdf = () => {
+    iframeRef.current?.contentWindow?.print();
   };
 
   // ── Generating / pending ─────────────────────────────────
@@ -95,101 +113,143 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
   }
 
   // ── Completed ─────────────────────────────────────────────
-  const content = report.content!;
+  const initials = (report.user.fullName ?? report.user.email ?? "U").slice(0, 2).toUpperCase();
+  
+  const fullHtml = buildReportHtml({
+    fragment: report.content ?? "",
+    testTitle: report.testTitle,
+    testDescription: report.testDescription,
+    userName: report.user.fullName,
+    updatedAt: report.updatedAt,
+  });
 
   return (
-    <div>
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-[19px] font-semibold text-black">{report.testTitle}</h1>
-          <p className="mt-1 text-[12px] text-black/40">
-            Actualizado{" "}
-            {new Date(report.updatedAt).toLocaleDateString("es", { month: "short", day: "numeric" })}
-          </p>
-        </div>
-        {!editing ? (
-          <button
-            onClick={() => setEditing(true)}
-            className="flex items-center gap-1.5 rounded-full border border-black/[0.08] px-3.5 py-1.5 text-[12.5px] font-medium text-black/60 hover:border-black/20 hover:text-black"
-          >
-            <Pencil className="h-3.5 w-3.5" /> Editar
-          </button>
-        ) : (
-          <div className="flex items-center gap-2">
+    <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+      {/* ── Content column ───────────────────────────────── */}
+      <div>
+        <div className="mb-6 flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-[19px] font-semibold text-black">{report.testTitle}</h1>
+            <p className="mt-1 text-[12px] text-black/40">
+              Actualizado{" "}
+              {new Date(report.updatedAt).toLocaleDateString("es", { month: "short", day: "numeric" })}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
             <button
-              onClick={() => {
-                setDraft(report.content);
-                setEditing(false);
-              }}
-              className="flex items-center gap-1 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium text-black/40 hover:text-black"
+              onClick={handleDownloadPdf}
+              className="flex items-center gap-1.5 rounded-full border border-black/[0.08] px-3.5 py-1.5 text-[12.5px] font-medium text-black/60 hover:border-black/20 hover:text-black"
             >
-              <X className="h-3.5 w-3.5" /> Cancelar
+              <Download className="h-3.5 w-3.5" /> Descargar PDF
             </button>
             <button
-              onClick={handleSave}
-              disabled={saving}
-              className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold text-white disabled:opacity-60"
+              onClick={() => setEditPanelOpen((v) => !v)}
+              className="flex items-center gap-1.5 rounded-full border border-black/[0.08] px-3.5 py-1.5 text-[12.5px] font-medium text-black/60 hover:border-black/20 hover:text-black"
+            >
+              <Sparkles className="h-3.5 w-3.5" /> Editar con IA
+            </button>
+          </div>
+        </div>
+
+        {editPanelOpen && (
+          <div className="mb-4 rounded-2xl border border-black/[0.08] bg-black/[0.02] p-4">
+            <p className="mb-2 text-[12px] font-medium text-black/60">Estilos rápidos</p>
+            <div className="mb-3 flex flex-wrap gap-2">
+              {QUICK_EDITS.map((q) => (
+                <button
+                  key={q.id}
+                  disabled={applying}
+                  onClick={() => applyEdit({ styleId: q.id })}
+                  className="rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-[12px] font-medium text-black/70 hover:border-black/20 disabled:opacity-50"
+                >
+                  {q.label}
+                </button>
+              ))}
+            </div>
+
+            <p className="mb-1.5 text-[12px] font-medium text-black/60">O describe el cambio</p>
+            <textarea
+              value={instruction}
+              onChange={(e) => setInstruction(e.target.value)}
+              rows={2}
+              placeholder="Ej. Enfócate más en las fortalezas de liderazgo del usuario..."
+              className="w-full resize-none rounded-xl border border-black/[0.08] p-3 text-[13px] text-black outline-none focus:border-black/25"
+            />
+
+            {editError && <p className="mt-2 text-[12px] text-red-500">{editError}</p>}
+
+            <div className="mt-3 flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setEditPanelOpen(false);
+                  setInstruction("");
+                  setEditError(null);
+                }}
+                className="rounded-full px-3.5 py-1.5 text-[12.5px] font-medium text-black/40 hover:text-black"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => instruction.trim() && applyEdit({ instruction: instruction.trim() })}
+                disabled={applying || !instruction.trim()}
+                className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[12.5px] font-semibold text-white disabled:opacity-60"
+                style={{ backgroundColor: ACCENT }}
+              >
+                {applying && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                Aplicar
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+          <iframe
+            ref={iframeRef}
+            title="Vista previa del informe"
+            srcDoc={fullHtml}
+            className="h-[70vh] w-full"
+            sandbox="allow-same-origin allow-modals"
+          />
+        </div>
+      </div>
+
+      {/* ── Snapshot sidebar ─────────────────────────────── */}
+      <div className="flex flex-col gap-4">
+        <div className="rounded-2xl border border-black/[0.06] bg-white p-5">
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-black/35">Usuario</p>
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[12px] font-semibold text-white"
               style={{ backgroundColor: ACCENT }}
             >
-              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-              Guardar
-            </button>
+              {initials}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-[13px] font-medium text-black">
+                {report.user.fullName ?? "Sin nombre"}
+              </p>
+              <p className="truncate text-[12px] text-black/40">{report.user.email}</p>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
 
-      <div className="rounded-2xl border border-black/[0.06] bg-white p-6">
-        {editing ? (
-          <textarea
-            value={draft?.summary ?? ""}
-            onChange={(e) => setDraft((d) => (d ? { ...d, summary: e.target.value } : d))}
-            rows={3}
-            className="w-full resize-none rounded-xl border border-black/[0.08] p-3 text-[13.5px] text-black outline-none focus:border-black/25"
-          />
-        ) : (
-          <p className="text-[14px] leading-relaxed text-black/75">{content.summary}</p>
-        )}
-      </div>
-
-      <div className="mt-4 flex flex-col gap-3">
-        {(editing ? draft?.sections : content.sections)?.map((section, i) => (
-          <div key={i} className="rounded-2xl border border-black/[0.06] bg-white p-6">
-            {editing ? (
-              <>
-                <input
-                  value={section.title}
-                  onChange={(e) =>
-                    setDraft((d) => {
-                      if (!d) return d;
-                      const sections = [...d.sections];
-                      sections[i] = { ...sections[i], title: e.target.value };
-                      return { ...d, sections };
-                    })
-                  }
-                  className="mb-2 w-full rounded-lg border border-black/[0.08] px-2.5 py-1.5 text-[13px] font-semibold text-black outline-none focus:border-black/25"
-                />
-                <textarea
-                  value={section.body}
-                  onChange={(e) =>
-                    setDraft((d) => {
-                      if (!d) return d;
-                      const sections = [...d.sections];
-                      sections[i] = { ...sections[i], body: e.target.value };
-                      return { ...d, sections };
-                    })
-                  }
-                  rows={4}
-                  className="w-full resize-none rounded-xl border border-black/[0.08] p-3 text-[13px] text-black outline-none focus:border-black/25"
-                />
-              </>
-            ) : (
-              <>
-                <h3 className="mb-2 text-[13.5px] font-semibold text-black">{section.title}</h3>
-                <p className="text-[13.5px] leading-relaxed text-black/65">{section.body}</p>
-              </>
-            )}
-          </div>
-        ))}
+        <div className="rounded-2xl border border-black/[0.06] bg-white p-5">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-black/35">Test</p>
+          <p className="text-[13px] font-medium text-black">{report.testTitle}</p>
+          {report.testDescription && (
+            <p className="mt-1 text-[12.5px] leading-relaxed text-black/55">{report.testDescription}</p>
+          )}
+          {report.attemptCompletedAt && (
+            <p className="mt-3 text-[11.5px] text-black/40">
+              Completado{" "}
+              {new Date(report.attemptCompletedAt).toLocaleDateString("es", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

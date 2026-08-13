@@ -55,56 +55,59 @@ export async function POST(request: NextRequest) {
     .map((item) => `Q: ${item.question}\nA: ${JSON.stringify(answers[item.id] ?? "no answer")}`)
     .join("\n\n");
 
-  const model = "gpt-3.5-mini";
+  const model = "openrouter/free";
 
   try {
-    const aiResponse = await fetch("https://openrouter.ai/v1/chat/completions", {
+    const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.OPENROUTER_API_KEY!}`,
+        "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL ?? "",
+        "X-Title": "Talent Diagnostic Reports",
       },
       body: JSON.stringify({
         model,
         max_tokens: 2000,
         messages: [
-          {
-            role: "system",
-            content:
-              "Eres un asistente que genera informes de diagnóstico de talento juvenil a partir de respuestas de un test. " +
-              "Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, con esta forma exacta: " +
-              '{"summary": string, "sections": [{"title": string, "body": string}]}',
-          },
-          {
-            role: "user",
-            content: `Test: ${test.title}\n${test.description ?? ""}\n\nRespuestas:\n${qaPairs}`,
-          },
-        ],
-      }),
-    });
+        {
+          role: "system",
+          content:
+            "Eres un asistente que genera informes de diagnóstico de talento juvenil a partir de respuestas de un test. " +
+            "Responde ÚNICAMENTE con un fragmento HTML (sin <!DOCTYPE>, <html>, <head> ni <body>), " +
+            "usando etiquetas semánticas: un <p> inicial de resumen, seguido de secciones con <h2> como título " +
+            "y <p>/<ul> para el contenido. No incluyas estilos inline ni texto fuera del HTML.",
+        },
+        {
+          role: "user",
+          content: `Test: ${test.title}\n${test.description ?? ""}\n\nRespuestas:\n${qaPairs}`,
+        },
+      ],
+    }),
+  });
 
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text();
-      throw new Error(`OpenRouter API error: ${aiResponse.status} ${errText}`);
-    }
+  if (!aiResponse.ok) {
+    const errText = await aiResponse.text();
+    throw new Error(`OpenRouter API error: ${aiResponse.status} ${errText}`);
+  }
 
-    const aiData = await aiResponse.json();
-    const content = aiData.choices?.[0]?.message?.content;
-    if (!content) throw new Error("No content in AI response");
+  const aiData = await aiResponse.json();
+  const rawContent = aiData.choices?.[0]?.message?.content;
+  if (!rawContent) throw new Error("No content in AI response");
 
-    const textResponse = typeof content === "string" ? content : JSON.stringify(content);
-    const cleaned = textResponse.replace(/```json|```/g, "").trim();
-    const parsedContent = JSON.parse(cleaned);
+  const htmlFragment = (typeof rawContent === "string" ? rawContent : JSON.stringify(rawContent))
+    .replace(/```html|```/g, "")
+    .trim();
 
-    const totalTokens = aiData.usage?.total_tokens ?? 0;
-    const creditsUsed = totalTokens / 1000; // adjust to your actual credit conversion
+  const totalTokens = aiData.usage?.total_tokens ?? 0;
+  const creditsUsed = totalTokens / 1000;
 
-    await supabase.from("reports").update({
-      status: "completed",
-      content: parsedContent,
-      ai_model: model,
-      error: null,
-    }).eq("id", reportId);
+  await supabase.from("reports").update({
+    status: "completed",
+    content: htmlFragment,
+    ai_model: model,
+    error: null,
+  }).eq("id", reportId);
 
     await supabase.from("ai_credits_usage").insert({
       profile_id: report.profile_id,

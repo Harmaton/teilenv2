@@ -19,7 +19,7 @@ export default async function ReportDetailPage({
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-10">
+    <div className="mx-auto w-full px-6 py-10">
       <ReportView initial={result.data} />
     </div>
   );

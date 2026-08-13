@@ -1,9 +1,8 @@
 import { requireAuth }  from "@/lib/auth";
 
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-
-import { AppSidebar } from "../components/dashboard/sidebar";
 import { Navbar } from "../(dashboard)/_componets/navbar";
+import { AppSidebar } from "./_components/admin-sidebar";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await requireAuth();
