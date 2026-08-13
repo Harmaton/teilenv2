@@ -1,11 +1,17 @@
 import { getPublishedTests } from "@/_actions/tests";
+import { getProfileValuesStrengths } from "@/_actions/profile";
 import { TestsTabs } from "@/app/components/tests/test-tab";
 
 export default async function TestsPage() {
-  const result = await getPublishedTests();
+  const [testsResult, valuesResult] = await Promise.all([
+    getPublishedTests(),
+    getProfileValuesStrengths(),
+  ]);
 
-  const free = result.success ? result.data.free : [];
-  const paid = result.success ? result.data.paid : [];
+  const free = testsResult.success ? testsResult.data.free : [];
+  const paid = testsResult.success ? testsResult.data.paid : [];
+  const values = valuesResult.success ? valuesResult.data.values : [];
+  const strengths = valuesResult.success ? valuesResult.data.strengths : [];
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
@@ -16,9 +22,9 @@ export default async function TestsPage() {
         </p>
       </div>
 
-      <TestsTabs free={free} paid={paid} />
+      <TestsTabs free={free} paid={paid} initialValues={values} initialStrengths={strengths} />
 
-      {!result.success && (
+      {!testsResult.success && (
         <p className="mt-6 text-[13px] text-red-600">
           No pudimos cargar los tests. Intenta de nuevo.
         </p>

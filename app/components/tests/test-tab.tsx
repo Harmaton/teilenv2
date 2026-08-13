@@ -5,17 +5,28 @@ import { useRouter } from "next/navigation";
 import { ArrowUpRight, ListChecks, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TestCard } from "@/_actions/tests";
+import { ProfileValuesStrengths } from "./profile-values-strengths";
 
 
 const ACCENT = "#FF5A1F";
 
-type Tab = "free" | "paid";
+type Tab = "free" | "paid" | "profile";
 
-export function TestsTabs({ free, paid }: { free: TestCard[]; paid: TestCard[] }) {
+export function TestsTabs({
+  free,
+  paid,
+  initialValues,
+  initialStrengths,
+}: {
+  free: TestCard[];
+  paid: TestCard[];
+  initialValues?: string[];
+  initialStrengths?: string[];
+}) {
   const [tab, setTab] = useState<Tab>("free");
   const router = useRouter();
 
-  const list = tab === "free" ? free : paid;
+  const list = tab === "free" ? free : tab === "paid" ? paid : [];
 
   return (
     <div>
@@ -29,10 +40,20 @@ export function TestsTabs({ free, paid }: { free: TestCard[]; paid: TestCard[] }
           Pago
           <Count>{paid.length}</Count>
         </TabButton>
+        <TabButton active={tab === "profile"} onClick={() => setTab("profile") }>
+          Perfil
+        </TabButton>
       </div>
 
-      {/* ── Grid ──────────────────────────────────────────── */}
-      {list.length === 0 ? (
+      {/* ── Grid/Content ──────────────────────────────────────────── */}
+      {tab === "profile" ? (
+        <div className="rounded-3xl border border-black/[0.08] bg-white p-6">
+          <ProfileValuesStrengths
+            initialValues={initialValues}
+            initialStrengths={initialStrengths}
+          />
+        </div>
+      ) : list.length === 0 ? (
         <div className="rounded-2xl border border-black/[0.06] bg-black/[0.02] px-6 py-10 text-center">
           <p className="text-[13px] text-black/45">
             {tab === "free" ? "No hay tests gratuitos disponibles todavía." : "No hay tests pagos disponibles todavía."}
