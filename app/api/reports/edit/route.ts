@@ -80,21 +80,39 @@ export async function POST(request: NextRequest) {
     }
 
     const aiData = await aiResponse.json();
-    const rawContent = aiData.choices?.[0]?.message?.content;
-    if (!rawContent) throw new Error("No content in AI response");
+const rawContent = aiData.choices?.[0]?.message?.content;
+if (!rawContent) throw new Error("No content in AI response");
 
-    const editedFragment = (typeof rawContent === "string" ? rawContent : JSON.stringify(rawContent))
-      .replace(/```html|```/g, "")
-      .trim();
+const cleaned = (typeof rawContent === "string" ? rawContent : JSON.stringify(rawContent))
+  .replace(/```json|```/g, "")
+  .trim();
 
-    const { error: updateError } = await supabase
-      .from("reports")
-      .update({ content: editedFragment, updated_at: new Date().toISOString() })
-      .eq("id", reportId);
+let parsed: { html: string; scores: { label: string; value: number }[] };
+try {
+  parsed = JSON.parse(cleaned);
+} catch {
+  throw new Error("AI response was not valid JSON");
+}
+
+// Validate scores so a bad model response can't corrupt the chart
+const scores = Array.isArray(parsed.scores)
+  ? parsed.scores
+      .filter((s) => typeof s?.label === "string" && typeof s?.value === "number")
+      .map((s) => ({ label: s.label, value: Math.max(0, Math.min(100, s.value)) }))
+  : [];
+
+const reportContent = { html: parsed.html ?? "", scores };
+
+    const { error: updateError } = await supabase.from("reports").update({
+    status: "completed",
+    content: reportContent,
+    ai_model: OPENROUTER_MODEL,
+    error: null,
+    }).eq("id", reportId);
 
     if (updateError) throw new Error(updateError.message);
 
-    return NextResponse.json({ ok: true, content: editedFragment });
+    return NextResponse.json({ ok: true, content: reportContent });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown edit error";
     return NextResponse.json({ error: message }, { status: 500 });

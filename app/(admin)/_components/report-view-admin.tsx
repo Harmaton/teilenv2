@@ -1,12 +1,13 @@
+// Suggested path: app/components/reports/admin-report-view.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import { Loader2, RefreshCcw, Sparkles, Download, X } from "lucide-react";
 import {
-  getReportDetail,
-  retryReportGeneration,
+  getReportDetailAdmin,
+  retryReportGenerationAdmin,
   type ReportDetail,
-} from "@/_actions/reports";
+} from "@/_actions/admin-reports";
 import { buildReportHtml } from "@/lib/report-html";
 
 const ACCENT = "#FF5A1F";
@@ -18,7 +19,7 @@ const QUICK_EDITS = [
   { id: "detailed", label: "Más detallado" },
 ];
 
-export function ReportView({ initial }: { initial: ReportDetail }) {
+export function AdminReportView({ initial }: { initial: ReportDetail }) {
   const [report, setReport] = useState(initial);
   const [retrying, setRetrying] = useState(false);
   const [editPanelOpen, setEditPanelOpen] = useState(false);
@@ -31,7 +32,7 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
     if (report.status !== "pending" && report.status !== "generating") return;
 
     const interval = setInterval(async () => {
-      const res = await getReportDetail(report.id);
+      const res = await getReportDetailAdmin(report.id);
       if (res.success) setReport(res.data);
     }, 3000);
 
@@ -40,7 +41,7 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
 
   const handleRetry = async () => {
     setRetrying(true);
-    const res = await retryReportGeneration(report.id);
+    const res = await retryReportGenerationAdmin(report.id);
     if (res.success) {
       setReport({ ...report, status: "pending", error: null });
       fetch("/api/reports/generate", {
@@ -82,7 +83,7 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
     return (
       <div className="flex flex-col items-center rounded-2xl border border-black/[0.06] bg-white px-8 py-16 text-center">
         <Loader2 className="h-6 w-6 animate-spin" style={{ color: ACCENT }} />
-        <h1 className="mt-4 text-[16px] font-semibold text-black">Generando tu informe</h1>
+        <h1 className="mt-4 text-[16px] font-semibold text-black">Generando el informe</h1>
         <p className="mt-1 text-[13px] text-black/45">
           {report.testTitle} — esto puede tardar un momento.
         </p>
@@ -95,7 +96,7 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
     return (
       <div className="flex flex-col items-center rounded-2xl border border-black/[0.06] bg-white px-8 py-16 text-center">
         <X className="h-6 w-6 text-red-500" />
-        <h1 className="mt-4 text-[16px] font-semibold text-black">No pudimos generar tu informe</h1>
+        <h1 className="mt-4 text-[16px] font-semibold text-black">No se pudo generar el informe</h1>
         {report.error && (
           <p className="mt-1 max-w-sm text-[12.5px] text-black/40">{report.error}</p>
         )}
@@ -115,14 +116,14 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
   // ── Completed ─────────────────────────────────────────────
   const initials = (report.user.fullName ?? report.user.email ?? "U").slice(0, 2).toUpperCase();
 
- const fullHtml = buildReportHtml({
-  fragment: report.content?.html ?? "",
-  scores: report.content?.scores,
-  testTitle: report.testTitle,
-  testDescription: report.testDescription,
-  userName: report.user.fullName,
-  updatedAt: report.updatedAt,
-});
+  const fullHtml = buildReportHtml({
+    fragment: report.content?.html ?? "",
+    scores: report.content?.scores,
+    testTitle: report.testTitle,
+    testDescription: report.testDescription,
+    userName: report.user.fullName,
+    updatedAt: report.updatedAt,
+  });
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_300px]">

@@ -1,11 +1,13 @@
 export function buildReportHtml({
   fragment,
+  scores,
   testTitle,
   testDescription,
   userName,
   updatedAt,
 }: {
   fragment: string;
+  scores?: { label: string; value: number }[];
   testTitle: string;
   testDescription?: string | null;
   userName?: string | null;
@@ -17,6 +19,8 @@ export function buildReportHtml({
     month: "long",
     year: "numeric",
   });
+
+  const chartHtml = scores && scores.length ? buildScoreChart(scores) : "";
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -101,12 +105,15 @@ export function buildReportHtml({
   </div>
   <div class="report-body">
     ${fragment}
+    ${chartHtml}
   </div>
   <div class="report-footer">
     ${testDescription ? escapeHtml(testDescription) : ""}
   </div>
 </body>
 </html>`;
+
+
 }
 
 function escapeHtml(str: string) {
@@ -115,4 +122,39 @@ function escapeHtml(str: string) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+
+
+function buildScoreChart(scores: { label: string; value: number }[]) {
+  if (!scores.length) return "";
+
+  const barHeight = 28;
+  const gap = 14;
+  const chartWidth = 480;
+  const labelWidth = 140;
+  const barMaxWidth = chartWidth - labelWidth - 50;
+  const height = scores.length * (barHeight + gap);
+  const ACCENT = "#FF5A1F";
+
+  const bars = scores
+    .map((s, i) => {
+      const y = i * (barHeight + gap);
+      const w = (s.value / 100) * barMaxWidth;
+      return `
+        <text x="0" y="${y + barHeight / 2 + 4}" font-size="12" fill="#333">${escapeHtml(s.label)}</text>
+        <rect x="${labelWidth}" y="${y}" width="${barMaxWidth}" height="${barHeight}" rx="6" fill="#f2f2f2" />
+        <rect x="${labelWidth}" y="${y}" width="${Math.max(w, 4)}" height="${barHeight}" rx="6" fill="${ACCENT}" />
+        <text x="${labelWidth + barMaxWidth + 8}" y="${y + barHeight / 2 + 4}" font-size="12" font-weight="600" fill="#111">${s.value}</text>
+      `;
+    })
+    .join("");
+
+  return `
+    <div style="margin: 24px 0;">
+      <svg viewBox="0 0 ${chartWidth} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg" font-family="inherit">
+        ${bars}
+      </svg>
+    </div>
+  `;
 }

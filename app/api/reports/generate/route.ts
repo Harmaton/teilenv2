@@ -69,20 +69,21 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         model,
         max_tokens: 2000,
-        messages: [
-        {
-          role: "system",
-          content:
-            "Eres un asistente que genera informes de diagnóstico de talento juvenil a partir de respuestas de un test. " +
-            "Responde ÚNICAMENTE con un fragmento HTML (sin <!DOCTYPE>, <html>, <head> ni <body>), " +
-            "usando etiquetas semánticas: un <p> inicial de resumen, seguido de secciones con <h2> como título " +
-            "y <p>/<ul> para el contenido. No incluyas estilos inline ni texto fuera del HTML.",
-        },
-        {
-          role: "user",
-          content: `Test: ${test.title}\n${test.description ?? ""}\n\nRespuestas:\n${qaPairs}`,
-        },
-      ],
+      messages: [
+  {
+    role: "system",
+    content:
+      "Eres un asistente que genera informes de diagnóstico de talento juvenil. " +
+      "Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, con esta forma exacta: " +
+      '{"html": string, "scores": [{"label": string, "value": number}]}. ' +
+      '"html" es un fragmento HTML (sin <!DOCTYPE>/<html>/<body>) con un <p> de resumen y secciones <h2>/<p>. ' +
+      '"scores" son 3 a 6 categorías evaluadas con un valor de 0 a 100 según las respuestas.',
+  },
+  {
+    role: "user",
+    content: `Test: ${test.title}\n${test.description ?? ""}\n\nRespuestas:\n${qaPairs}`,
+  },
+],
     }),
   });
 
@@ -91,23 +92,42 @@ export async function POST(request: NextRequest) {
     throw new Error(`OpenRouter API error: ${aiResponse.status} ${errText}`);
   }
 
-  const aiData = await aiResponse.json();
-  const rawContent = aiData.choices?.[0]?.message?.content;
-  if (!rawContent) throw new Error("No content in AI response");
 
-  const htmlFragment = (typeof rawContent === "string" ? rawContent : JSON.stringify(rawContent))
-    .replace(/```html|```/g, "")
-    .trim();
+    const aiData = await aiResponse.json();
+const rawContent = aiData.choices?.[0]?.message?.content;
+if (!rawContent) throw new Error("No content in AI response");
 
   const totalTokens = aiData.usage?.total_tokens ?? 0;
   const creditsUsed = totalTokens / 1000;
 
-  await supabase.from("reports").update({
+const cleaned = (typeof rawContent === "string" ? rawContent : JSON.stringify(rawContent))
+  .replace(/```json|```/g, "")
+  .trim();
+
+let parsed: { html: string; scores: { label: string; value: number }[] };
+try {
+  parsed = JSON.parse(cleaned);
+} catch {
+  throw new Error("AI response was not valid JSON");
+}
+
+// Validate scores so a bad model response can't corrupt the chart
+const scores = Array.isArray(parsed.scores)
+  ? parsed.scores
+      .filter((s) => typeof s?.label === "string" && typeof s?.value === "number")
+      .map((s) => ({ label: s.label, value: Math.max(0, Math.min(100, s.value)) }))
+  : [];
+
+const reportContent = { html: parsed.html ?? "", scores };
+
+    const { error: updateError } = await supabase.from("reports").update({
     status: "completed",
-    content: htmlFragment,
+    content: reportContent,
     ai_model: model,
     error: null,
-  }).eq("id", reportId);
+    }).eq("id", reportId);
+
+    if (updateError) throw new Error(updateError.message);
 
     await supabase.from("ai_credits_usage").insert({
       profile_id: report.profile_id,
@@ -115,7 +135,7 @@ export async function POST(request: NextRequest) {
       credits_used: creditsUsed,
       model,
       input_tokens: totalTokens,
-      output_tokens: totalTokens, // Assuming output tokens are the same as input tokens for simplicity
+      output_tokens: totalTokens, 
     });
 
     return NextResponse.json({ ok: true });

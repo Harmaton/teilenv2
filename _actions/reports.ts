@@ -13,7 +13,12 @@ export type ReportSummary = {
   createdAt: string;
 };
 
-export type ReportContent = string; 
+export type ReportScore = { label: string; value: number }; // value 0–100
+
+export type ReportContent = {
+  html: string;          
+  scores: ReportScore[]; 
+};
 
 export type ReportDetail = {
   id: string;
@@ -24,11 +29,7 @@ export type ReportDetail = {
   content: ReportContent | null;
   createdAt: string;
   updatedAt: string;
-  user: {
-    fullName: string | null;
-    email: string | null;
-    avatarUrl: string | null;
-  };
+  user: { fullName: string | null; email: string | null; avatarUrl: string | null };
   attemptCompletedAt: string | null;
 };
 
