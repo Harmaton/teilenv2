@@ -1,26 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Menu, X, LogOut, User as UserIcon } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
+import { theme } from "@/lib/theme";
 import { createClient } from "@/lib/supabase/client";
-import { logout } from "@/_actions/auth";
 
-const LINKS = [
-  { label: "¿Qué es?", href: "#what-is" },
-  { label: "Comparativa", href: "#comparison" },
-  { label: "Historias", href: "#testimonials" },
-] as const;
-
-export default function Navbar({ initialUser }: { initialUser: User | null }) {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+export default function Nav({ initialUser }: { initialUser: User | null }) {
   const [user, setUser] = useState<User | null>(initialUser);
-  const [loggingOut, setLoggingOut] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -29,170 +16,117 @@ export default function Navbar({ initialUser }: { initialUser: User | null }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Keep the navbar in sync with auth state changed elsewhere
-  // (login in another tab, OAuth redirect completing, token refresh, etc.)
+  // Keep in sync with auth state changed elsewhere (other tab, OAuth redirect, token refresh)
   useEffect(() => {
     const supabase = createClient();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
     return () => subscription.unsubscribe();
   }, []);
-
-  const handleLogout = async () => {
-    if (loggingOut) return;
-    setLoggingOut(true);
-    const result = await logout();
-    if (result.success) {
-      setUser(null);
-      setOpen(false);
-      router.replace("/");
-      router.refresh();
-    }
-    setLoggingOut(false);
-  };
 
   const displayName =
     (user?.user_metadata?.full_name as string | undefined)?.split(" ")[0] ??
     user?.email?.split("@")[0] ??
-    "Cuenta";
+    "";
+
+  const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
+  const initial = displayName ? displayName[0].toUpperCase() : "?";
 
   return (
-    <header
-      className={[
-        "fixed inset-x-0 top-0 z-50 w-full transition-all duration-300",
-        scrolled
-          ? "border-b border-white/10 bg-[#0a0e1a]/60 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl backdrop-saturate-150"
-          : "border-b border-transparent bg-[#0a0e1a]",
-      ].join(" ")}
+    <nav
+      style={{
+        position: "fixed",
+        top: scrolled ? 12 : 0,
+        left: scrolled ? 16 : 0,
+        right: scrolled ? 16 : 0,
+        zIndex: 999,
+        backgroundColor: theme.colors.white,
+        border: scrolled ? "none" : `1px solid ${theme.colors.border}`,
+        borderRadius: scrolled ? 999 : 0,
+        boxShadow: scrolled ? "0 8px 30px -12px rgba(0,0,0,0.25)" : "none",
+        height: 68,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 48px",
+        fontFamily: theme.font,
+        transition: "all 0.3s ease",
+      }}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-10">
-        <Link href="/">
-          <Image src="/logo.png" alt="Logo" width={40} height={40} />
-        </Link>
+      <div>
+        <img src="/logo.png" alt="Teilen Teens" style={{ height: 38, display: "block" }} />
+      </div>
 
-        {/* desktop links */}
-        <div className="hidden items-center gap-8 md:flex">
-          {LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm text-white/60 transition-colors duration-200 hover:text-white"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-
-        {/* desktop CTA */}
-        <div className="hidden items-center gap-3 md:flex">
-          {user ? (
-            <>
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2.5 text-[15px] font-medium text-white/80 transition-colors hover:text-white"
-              >
-                <UserIcon className="h-4 w-4" />
-                {displayName}
-              </Link>
-              <button
-                onClick={handleLogout}
-                disabled={loggingOut}
-                className="flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[15px] font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-60"
-              >
-                <LogOut className="h-4 w-4" />
-                {loggingOut ? "Saliendo..." : "Salir"}
-              </button>
-            </>
+      {user ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={displayName || "Usuario"}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                objectFit: "cover",
+                display: "block",
+              }}
+            />
           ) : (
-            <Link
-              href="/login"
-              className="flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[15px] font-medium text-black transition-opacity hover:opacity-90"
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                backgroundColor: theme.colors.orange,
+                color: theme.colors.white,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontFamily: theme.font,
+                fontWeight: 700,
+                fontSize: 14,
+              }}
             >
-              <span className="flex h-5 w-5 items-center justify-center rounded bg-amber-400">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-                  <rect x="3" y="3" width="7" height="7" rx="1.5" fill="#111" />
-                  <rect x="14" y="3" width="7" height="7" rx="1.5" fill="#111" />
-                  <rect x="3" y="14" width="7" height="7" rx="1.5" fill="#111" />
-                  <rect x="14" y="14" width="7" height="7" rx="1.5" fill="#111" />
-                </svg>
-              </span>
-              Probar diagnóstico
-            </Link>
+              {initial}
+            </div>
+          )}
+          {displayName && (
+            <span
+              style={{
+                fontFamily: theme.font,
+                fontWeight: 600,
+                fontSize: 14,
+                color: "#111",
+              }}
+            >
+              {displayName}
+            </span>
           )}
         </div>
-
-        {/* mobile toggle */}
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="inline-flex items-center justify-center rounded-lg border border-white/10 p-2 text-white md:hidden"
-          aria-label="Toggle menu"
+      ) : (
+        <a
+          href="/dashboard"
+          rel="noopener noreferrer"
+          style={{
+            backgroundColor: theme.colors.orange,
+            color: theme.colors.white,
+            padding: "10px 22px",
+            borderRadius: 50,
+            fontFamily: theme.font,
+            fontWeight: 700,
+            fontSize: 12,
+            letterSpacing: ".04em",
+            textTransform: "uppercase",
+            textDecoration: "none",
+            display: "inline-block",
+          }}
         >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
-      </nav>
-
-      {/* mobile menu */}
-      {open && (
-        <div
-          className={[
-            "border-t border-white/10 px-6 pb-6 pt-4 transition-colors duration-300 md:hidden",
-            scrolled ? "bg-[#0a0e1a]/70 backdrop-blur-xl" : "bg-[#0a0e1a]",
-          ].join(" ")}
-        >
-          <div className="flex flex-col gap-4">
-            {LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="text-sm text-white/70 transition-colors duration-200 hover:text-white"
-              >
-                {link.label}
-              </Link>
-            ))}
-
-            {user ? (
-              <>
-                <Link
-                  href="/dashboard"
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2.5 text-[15px] font-medium text-white/80"
-                >
-                  <UserIcon className="h-4 w-4" />
-                  {displayName}
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  disabled={loggingOut}
-                  className="flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[15px] font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-60"
-                >
-                  <LogOut className="h-4 w-4" />
-                  {loggingOut ? "Saliendo..." : "Salir"}
-                </button>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[15px] font-medium text-black transition-opacity hover:opacity-90"
-              >
-                <span className="flex h-5 w-5 items-center justify-center rounded bg-amber-400">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-                    <rect x="3" y="3" width="7" height="7" rx="1.5" fill="#111" />
-                    <rect x="14" y="3" width="7" height="7" rx="1.5" fill="#111" />
-                    <rect x="3" y="14" width="7" height="7" rx="1.5" fill="#111" />
-                    <rect x="14" y="14" width="7" height="7" rx="1.5" fill="#111" />
-                  </svg>
-                </span>
-                Probar diagnóstico
-              </Link>
-            )}
-          </div>
-        </div>
+          Hacer el test →
+        </a>
       )}
-    </header>
+    </nav>
   );
 }
