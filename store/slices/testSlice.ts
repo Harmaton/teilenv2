@@ -122,6 +122,8 @@ const testSlice = createSlice({
       }
     },
 
+
+
     // Update option text
     updateOptionText(
       state,
@@ -212,8 +214,12 @@ const testSlice = createSlice({
       state.error = null;
       state.lastSavedAt = null;
     },
+    updateTitle: (state, action: PayloadAction<string>) => {
+  state.title = action.payload;
+},
   },
 });
+
 
 export const {
   initializeTest,
@@ -230,6 +236,7 @@ export const {
   setLastSavedAt,
   setPublished,
   resetTest,
+  updateTitle
 } = testSlice.actions;
 
 export default testSlice.reducer;

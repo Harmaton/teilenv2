@@ -15,8 +15,9 @@ import {
   setError,
   setLastSavedAt,
   setPublished,
+  updateTitle,
 } from "@/store/slices/testSlice";
-import { updateTestQuestions, publishTest } from "@/_actions/admin-tests";
+import { updateTestQuestions, publishTest, updateTestTitle } from "@/_actions/admin-tests";
 import { Button } from "@/components/ui/button";
 import { X, Plus, Check } from "lucide-react";
 
@@ -31,6 +32,10 @@ export function TestBuilder() {
   const [publishLoading, setPublishLoading] = useState(false);
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
 
+  const [titleDraft, setTitleDraft] = useState(state.title);
+  const [savingTitle, setSavingTitle] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+
   const toastId = state.error
     ? `test-builder-error:${state.error}`
     : state.lastSavedAt
@@ -43,6 +48,15 @@ export function TestBuilder() {
         message: state.error ?? "Cambios guardados automáticamente.",
       }
     : null;
+
+  // Keep the local title draft in sync with Redux (e.g. once the test
+  // finishes loading asynchronously), but never clobber the field while
+  // the user is actively typing in it.
+  useEffect(() => {
+    if (!isEditingTitle) {
+      setTitleDraft(state.title);
+    }
+  }, [state.title, isEditingTitle]);
 
   // Auto-save on navigation
   useEffect(() => {
@@ -79,6 +93,31 @@ export function TestBuilder() {
     dispatch(addQuestion());
   };
 
+  const handleTitleBlur = async () => {
+    setIsEditingTitle(false);
+
+    const trimmed = titleDraft.trim();
+    if (!trimmed || trimmed === state.title || !state.testId) {
+      setTitleDraft(state.title); // revert if empty or unchanged
+      return;
+    }
+
+    dispatch(updateTitle(trimmed));
+    setSavingTitle(true);
+
+    const result = await updateTestTitle(state.testId, trimmed);
+
+    setSavingTitle(false);
+
+    if (result.success) {
+      dispatch(setLastSavedAt());
+    } else {
+      dispatch(setError('error'));
+      dispatch(updateTitle(state.title)); // revert on failure
+      setTitleDraft(state.title);
+    }
+  };
+
   const handlePublish = async () => {
     if (!state.testId) return;
 
@@ -102,7 +141,7 @@ export function TestBuilder() {
       dispatch(setPublished(true));
       dispatch(setLastSavedAt());
       setShowPublishConfirm(false);
-      
+
       // Redirect after 2 seconds
       setTimeout(() => {
         router.push("/admin/manage-tests");
@@ -144,7 +183,17 @@ export function TestBuilder() {
 
       {/* Header */}
       <div className="space-y-2 rounded-3xl border border-black/[0.08] bg-white p-6">
-        <h1 className="text-2xl font-semibold text-black">{state.title}</h1>
+        <input
+          type="text"
+          value={titleDraft}
+          onChange={(e) => setTitleDraft(e.target.value)}
+          onFocus={() => setIsEditingTitle(true)}
+          onBlur={handleTitleBlur}
+          disabled={state.isPublished}
+          placeholder="Título del test"
+          className="w-full rounded-lg border border-transparent bg-transparent text-2xl font-semibold text-black focus:border-black/[0.14] focus:bg-white focus:px-2 focus:py-1 focus:outline-none disabled:cursor-not-allowed"
+        />
+        {savingTitle && <p className="mt-1 text-xs text-black/40">Guardando título…</p>}
         {state.description && <p className="text-sm text-black/60">{state.description}</p>}
         <div className="mt-4 flex items-center justify-between">
           <div className="text-sm text-black/50">

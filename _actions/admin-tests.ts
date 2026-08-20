@@ -252,6 +252,17 @@ export async function publishTest(testId: string): Promise<{ success: true; mess
   return { success: true, message: "Test publicado correctamente." };
 }
 
+export async function updateTestTitle(testId: string, title: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("tests")
+    .update({ title })
+    .eq("id", testId);
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
 export async function deleteTest(testId: string): Promise<{ success: true; message: string } | { success: false; error: string }> {
   const authResult = await getAuthUser();
   if (!authResult.success) {
