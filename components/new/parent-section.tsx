@@ -1,5 +1,5 @@
 'use client'
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { theme } from "@/lib/theme";
 import { useBreakpoint, useFadeIn } from "@/hooks/use-breakpoint";
 
@@ -10,13 +10,112 @@ const benefits = [
 ];
 
 export default function ParentsSection() {
-  const { isTablet } = useBreakpoint();
+  const { isTablet, isMobile } = useBreakpoint();
   const { ref, style: fadeStyle } = useFadeIn<HTMLDivElement>();
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
+  // Gentle breathing float on the hero image so it feels alive, not pasted on.
+  useEffect(() => {
+    let tween: { kill: () => void } | undefined;
+
+    (async () => {
+      const gsapModule = await import("gsap");
+      const gsap = gsapModule.gsap ?? gsapModule.default;
+      if (!imgRef.current) return;
+
+      tween = gsap.to(imgRef.current, {
+        y: -14,
+        duration: 3.2,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+      });
+    })();
+
+    return () => tween?.kill();
+  }, []);
+
+  const imageHeight = isMobile ? 220 : isTablet ? 300 : 480;
+
+  const imageBlock = (
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: isTablet ? 40 : 0,
+      }}
+    >
+      {/* Layered glow behind the subject so it reads as part of the panel, not a sticker */}
+      <div
+        style={{
+          position: "absolute",
+          width: imageHeight * 1.15,
+          height: imageHeight * 1.15,
+          borderRadius: "50%",
+          background: `radial-gradient(circle, ${theme.colors.orange}33 0%, ${theme.colors.orange}00 70%)`,
+          filter: "blur(10px)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          width: imageHeight * 0.9,
+          height: imageHeight * 0.9,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,.05)",
+          border: "1px solid rgba(255,255,255,.08)",
+        }}
+      />
+
+      <img
+        ref={imgRef}
+        src="/img/2.png"
+        alt="Padre e hijo revisando juntos el reporte de Teilen Teens"
+        style={{
+          position: "relative",
+          height: imageHeight,
+          width: "auto",
+          objectFit: "contain",
+          filter: "drop-shadow(0 20px 50px rgba(0,0,0,.4))",
+        }}
+      />
+
+      {/* Floating chip — reinforces the parents-are-included message right next to the image */}
+      {!isMobile && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: isTablet ? 8 : 28,
+            left: isTablet ? "50%" : -12,
+            transform: isTablet ? "translateX(-50%)" : "none",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            backgroundColor: "rgba(255,255,255,.09)",
+            backdropFilter: "blur(6px)",
+            border: "1px solid rgba(255,255,255,.12)",
+            borderRadius: 50,
+            padding: "8px 16px",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span style={{ fontSize: 14 }}>💬</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,.85)" }}>
+            Salomón IA también acompaña a los padres
+          </span>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <section style={{ backgroundColor: theme.colors.navy, padding: "96px 0", fontFamily: theme.font }} ref={ref}>
       <div style={{ ...fadeStyle, maxWidth: 1140, margin: "0 auto", padding: "0 32px" }}>
         <div style={{ display: "grid", gridTemplateColumns: isTablet ? "1fr" : "1fr 1fr", gap: 72, alignItems: "center" }}>
+          {isTablet && imageBlock}
+
           <div>
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(255,255,255,.6)", display: "block", marginBottom: 14 }}>
               Para madres y padres
@@ -56,15 +155,7 @@ export default function ParentsSection() {
             </div>
           </div>
 
-          {!isTablet && (
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <img
-                src="img/2.png"
-                alt="Jóvenes revisando el diagnóstico"
-                style={{ height: 480, width: "auto", objectFit: "contain", filter: "drop-shadow(0 20px 60px rgba(0,0,0,.35))" }}
-              />
-            </div>
-          )}
+          {!isTablet && imageBlock}
         </div>
       </div>
     </section>

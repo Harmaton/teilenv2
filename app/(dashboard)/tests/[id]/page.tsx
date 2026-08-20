@@ -9,6 +9,8 @@ export default async function TestDetailPage({
   const { id } = await params;
   const result = await getTestWithAttempt(id);
 
+  console.log(JSON.stringify(result))
+
   if (!result.success) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-16 text-center">

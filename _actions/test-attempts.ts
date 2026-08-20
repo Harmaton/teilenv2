@@ -8,7 +8,7 @@ export type TestItem = {
   id: string;
   question: string;
   type: "single_choice" | "multi_choice" | "scale" | "text";
-  options?: { id: string; label: string }[];
+  options?: { id: string; text: string }[];
 };
 
 export type TestDetail = {

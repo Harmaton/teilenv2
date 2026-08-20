@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useQueryState, parseAsString } from "nuqs";
 import { redeemInvite } from "@/_actions/admin-users";
 
 const ACCENT = "#FF5A1F";
 
-export default function JoinPage() {
-  const params = useSearchParams();
+function JoinForm() {
   const router = useRouter();
-  const [code, setCode] = useState(params.get("code") ?? "");
+  const [code, setCode] = useQueryState("code", parseAsString.withDefault(""));
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -59,5 +59,13 @@ export default function JoinPage() {
         {error && <p className="text-[12.5px] text-red-600">{error}</p>}
       </form>
     </div>
+  );
+}
+
+export default function JoinPage() {
+  return (
+    <Suspense fallback={null}>
+      <JoinForm />
+    </Suspense>
   );
 }

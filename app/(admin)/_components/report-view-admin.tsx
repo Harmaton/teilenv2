@@ -116,14 +116,14 @@ export function AdminReportView({ initial }: { initial: ReportDetail }) {
   // ── Completed ─────────────────────────────────────────────
   const initials = (report.user.fullName ?? report.user.email ?? "U").slice(0, 2).toUpperCase();
 
-  const fullHtml = buildReportHtml({
-    fragment: report.content?.html ?? "",
-    scores: report.content?.scores,
-    testTitle: report.testTitle,
-    testDescription: report.testDescription,
-    userName: report.user.fullName,
-    updatedAt: report.updatedAt,
-  });
+  // const fullHtml = buildReportHtml({
+  //   fragment: report.content?.html ?? "",
+  //   scores: report.content.scores,
+  //   testTitle: report.testTitle,
+  //   testDescription: report.testDescription,
+  //   userName: report.user.fullName,
+  //   updatedAt: report.updatedAt,
+  // });
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
@@ -205,13 +205,13 @@ export function AdminReportView({ initial }: { initial: ReportDetail }) {
         )}
 
         <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
-          <iframe
+          {/* <iframe
             ref={iframeRef}
             title="Vista previa del informe"
             srcDoc={fullHtml}
             className="h-[70vh] w-full"
             sandbox="allow-same-origin allow-modals"
-          />
+          /> */}
         </div>
       </div>
 

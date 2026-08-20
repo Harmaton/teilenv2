@@ -3,6 +3,7 @@
 
 import { getAuthUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { ReportScore } from "./reports";
 
 /* ────────────────────────────────────────────────────────────────────── */
 /* Types                                                                  */
@@ -30,7 +31,7 @@ export type ReportDetail = {
   id: string;
   status: "pending" | "generating" | "completed" | "failed";
   error: string | null;
-  content: { html?: string; scores?: unknown } | null;
+  content: { html?: string; scores?: ReportScore } ;
   testTitle: string;
   testDescription: string | null;
   updatedAt: string;

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ReduxProvider } from "@/store/ReduxProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,13 +34,14 @@ export default function RootLayout({
   className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
 >
   <body className="min-h-full flex flex-col">
+    <NuqsAdapter>
     <ReduxProvider>
       <TooltipProvider>
       
       {children}
       </TooltipProvider>
     </ReduxProvider>
-
+</NuqsAdapter>
   </body>
 </html>
   );

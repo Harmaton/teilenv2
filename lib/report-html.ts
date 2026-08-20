@@ -1,3 +1,5 @@
+import { ReportScore } from "@/_actions/reports";
+
 export function buildReportHtml({
   fragment,
   scores,
@@ -7,7 +9,7 @@ export function buildReportHtml({
   updatedAt,
 }: {
   fragment: string;
-  scores?: { label: string; value: number }[];
+  scores?: ReportScore[];
   testTitle: string;
   testDescription?: string | null;
   userName?: string | null;

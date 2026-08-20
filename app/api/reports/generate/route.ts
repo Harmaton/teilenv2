@@ -48,12 +48,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing attempt or test data" }, { status: 500 });
   }
 
-  const items = attempt.items_snapshot as { id: string; question: string }[];
-  const answers = attempt.answers as Record<string, unknown>;
+ const items = attempt.items_snapshot as { id: string; question: string; options: { id: string; text: string }[] }[];
+const answers = attempt.answers as Record<string, string>;
 
-  const qaPairs = items
-    .map((item) => `Q: ${item.question}\nA: ${JSON.stringify(answers[item.id] ?? "no answer")}`)
-    .join("\n\n");
+const qaPairs = items
+  .map((item) => {
+    const selectedOptionId = answers[item.id] as string;
+    let answerText = "no answer";
+    
+    if (selectedOptionId) {
+      // Find the option with matching ID
+      const selectedOption = item.options.find(opt => opt.id === selectedOptionId);
+      answerText = selectedOption ? selectedOption.text : selectedOptionId;
+    }
+    
+    return `Q: ${item.question}\nA: ${answerText}`;
+  })
+  .join("\n\n");
+
+console.log('qa pairs', qaPairs);
 
   const model = "openrouter/free";
 
@@ -86,6 +99,8 @@ export async function POST(request: NextRequest) {
 ],
     }),
   });
+
+  console.log('ai Response', aiResponse)
 
   if (!aiResponse.ok) {
     const errText = await aiResponse.text();

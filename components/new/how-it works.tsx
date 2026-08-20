@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { theme } from "@/lib/theme";
 import { useBreakpoint, useFadeIn } from "@/hooks/use-breakpoint";
 
@@ -50,7 +50,10 @@ export default function HowItWorks() {
   useEffect(() => {
     if (stacked) return; // GSAP pin only runs on desktop layout
 
-    let ctx: import("gsap/all").Context | undefined;
+    // GSAP's context type isn't cleanly exported from "gsap/all" for this
+    // usage, so we type it structurally instead of importing gsap's
+    // internal Context class.
+    let ctx: { revert: () => void } | undefined;
     let scrollTriggerInstances: any[] = [];
 
     (async () => {
@@ -297,7 +300,9 @@ export default function HowItWorks() {
                   <div key={s.num} style={{ display: "flex", alignItems: "stretch", gap: 14 }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 14 }}>
                       <div
-                        ref={(el) => (dotRefs.current[i] = el)}
+                        ref={(el) => {
+                          dotRefs.current[i] = el;
+                        }}
                         style={{
                           width: 10,
                           height: 10,
@@ -308,7 +313,9 @@ export default function HowItWorks() {
                       />
                       {i !== steps.length - 1 && (
                         <div
-                          ref={(el) => (lineRefs.current[i] = el)}
+                          ref={(el) => {
+                            lineRefs.current[i] = el;
+                          }}
                           style={{
                             width: 2,
                             flex: 1,
@@ -319,7 +326,7 @@ export default function HowItWorks() {
                       )}
                     </div>
                     <span
-                      ref={(el) => (labelRefs.current[i] = el)}
+                      
                       style={{
                         fontSize: 12,
                         fontWeight: 600,
@@ -338,7 +345,9 @@ export default function HowItWorks() {
               {steps.map((s, i) => (
                 <div
                   key={s.num}
-                  ref={(el) => (panelRefs.current[i] = el)}
+                  ref={(el) => {
+                    panelRefs.current[i] = el;
+                  }}
                   style={{
                     minHeight: "58vh",
                     display: "flex",

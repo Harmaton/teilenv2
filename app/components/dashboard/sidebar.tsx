@@ -39,7 +39,9 @@ import {
   Settings,
   ChevronRight,
   LogOut,
+  AdIcon,
 } from "lucide-react"
+import { useEffect, useState } from "react"
 
 const NAV: NavGroup[] = [
   {
@@ -72,6 +74,27 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
+
+  const [isAdmin, setIsAdmin] = useState(false)
+
+    useEffect(() => {
+    async function checkAdmin() {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (error) {
+        console.error('Failed to fetch role:', error)
+        return
+      }
+
+      setIsAdmin(data?.role === 'admin')
+    }
+
+    checkAdmin()
+  }, [user.id, supabase])
 
   const email = user.email ?? "admin"
   const initials = email.slice(0, 2).toUpperCase()
@@ -159,7 +182,21 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
         {/* Sign out */}
         <SidebarMenu>
+          {isAdmin ?   <SidebarMenuItem className="px-1">
+            
+            <SidebarMenuButton
+              onClick={()=>router.push('/admin/dashboard')}
+              className="flex w-full items-center gap-2.5 rounded-full px-3 py-2 text-[13px] font-medium text-black/45 transition-colors hover:bg-black/[0.04] hover:text-black"
+            >
+              <AdIcon className="h-[15px] w-[15px]" />
+              <span>Admin Page</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem> : <div>
+            
+            </div>}
+         
           <SidebarMenuItem className="px-1">
+            
             <SidebarMenuButton
               onClick={handleLogout}
               className="flex w-full items-center gap-2.5 rounded-full px-3 py-2 text-[13px] font-medium text-black/45 transition-colors hover:bg-black/[0.04] hover:text-black"

@@ -156,12 +156,14 @@ function QuestionInput({
   value: unknown;
   onChange: (value: unknown) => void;
 }) {
-  if (item.type === "single_choice" && item.options) {
+  // Single-answer choice: render whenever options exist (type may be missing)
+  if (item.options && item.options.length > 0) {
     return (
       <div className="flex flex-col gap-2">
         {item.options.map((opt) => (
           <button
             key={opt.id}
+            type="button"
             onClick={() => onChange(opt.id)}
             className={cn(
               "rounded-xl border px-4 py-3 text-left text-[13.5px] transition-colors",
@@ -171,39 +173,9 @@ function QuestionInput({
             )}
             style={value === opt.id ? { backgroundColor: ACCENT } : undefined}
           >
-            {opt.label}
+            {opt.text}
           </button>
         ))}
-      </div>
-    );
-  }
-
-  if (item.type === "multi_choice" && item.options) {
-    const selected = Array.isArray(value) ? (value as string[]) : [];
-    return (
-      <div className="flex flex-col gap-2">
-        {item.options.map((opt) => {
-          const isSelected = selected.includes(opt.id);
-          return (
-            <button
-              key={opt.id}
-              onClick={() =>
-                onChange(
-                  isSelected ? selected.filter((id) => id !== opt.id) : [...selected, opt.id]
-                )
-              }
-              className={cn(
-                "rounded-xl border px-4 py-3 text-left text-[13.5px] transition-colors",
-                isSelected
-                  ? "border-transparent text-white"
-                  : "border-black/[0.08] text-black/70 hover:border-black/20"
-              )}
-              style={isSelected ? { backgroundColor: ACCENT } : undefined}
-            >
-              {opt.label}
-            </button>
-          );
-        })}
       </div>
     );
   }
@@ -215,6 +187,7 @@ function QuestionInput({
         {[1, 2, 3, 4, 5].map((n) => (
           <button
             key={n}
+            type="button"
             onClick={() => onChange(n)}
             className={cn(
               "flex h-11 w-11 items-center justify-center rounded-full border text-[14px] font-semibold transition-colors",
@@ -231,7 +204,7 @@ function QuestionInput({
     );
   }
 
-  // text
+  // text fallback — only when no options and not a scale question
   return (
     <textarea
       value={typeof value === "string" ? value : ""}

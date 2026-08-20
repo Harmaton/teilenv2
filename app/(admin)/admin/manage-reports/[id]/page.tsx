@@ -1,10 +1,8 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-
 import { cn } from "@/lib/utils";
 import { getReportDetailAdmin } from "@/_actions/admin-reports";
-
 
 const ACCENT = "#FF5A1F";
 
@@ -41,10 +39,10 @@ export default async function AdminReportDetailPage({ params }: { params: { id: 
 
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-[20px] font-semibold text-black">{report.test?.title ?? "Informe"}</h1>
-          <p className="mt-1 text-[13px] text-black/45">
+          {/* <h1 className="text-[20px] font-semibold text-black">{report.test?.title ?? "Informe"}</h1> */}
+          {/* <p className="mt-1 text-[13px] text-black/45">
             {report.profile?.fullName ?? "—"} · {report.profile?.email ?? "—"}
-          </p>
+          </p> */}
         </div>
         <span
           className={cn("shrink-0 rounded-full px-3 py-1 text-[12px] font-medium", !isGenerating && style.text)}
@@ -58,12 +56,12 @@ export default async function AdminReportDetailPage({ params }: { params: { id: 
         </span>
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+      {/* <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
         <InfoCard label="Modelo IA" value={report.aiModel ?? "—"} />
         <InfoCard label="Puntuación" value={report.attempt?.score ?? "—"} />
         <InfoCard label="Generado" value={formatDate(report.createdAt)} />
         <InfoCard label="Actualizado" value={formatDate(report.updatedAt)} />
-      </div>
+      </div> */}
 
       {report.status === "failed" && report.error && (
         <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700">

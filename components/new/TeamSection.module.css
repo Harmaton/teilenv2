@@ -1,0 +1,122 @@
+/* TeamSection.module.css */
+
+.teamBlockContainer {
+  margin-bottom: 88px;
+}
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: #e07820;
+  border-bottom: 2px solid #e07820;
+  padding-bottom: 10px;
+  margin-bottom: 32px;
+  display: block;
+}
+
+/* Image + bio intro block */
+.introGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 300px) 1fr;
+  gap: clamp(28px, 4vw, 56px);
+  align-items: start;
+  margin-bottom: 40px;
+}
+
+.name {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--navy, #0f3460);
+  margin-bottom: 3px;
+}
+
+.role {
+  font-size: 11px;
+  color: #e07820;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  margin-bottom: 14px;
+}
+
+.bio {
+  font-size: 15px;
+  color: var(--body-text, #3c4a5e);
+  line-height: 1.72;
+  margin-bottom: 18px;
+  max-width: 560px;
+}
+
+/* Skills as a static grid table */
+.skillsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.skillCard {
+  background: var(--bg-secondary, #f7f8fa);
+  border-radius: 12px;
+  padding: 22px 20px;
+  border-left: 3px solid #e07820;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.skillCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+}
+
+.skillIcon {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.skillTitle {
+  font-weight: 700;
+  color: var(--navy, #0f3460);
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.skillDesc {
+  font-size: 12px;
+  color: var(--muted, #6b7789);
+  line-height: 1.55;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .introGrid {
+    grid-template-columns: minmax(0, 260px) 1fr;
+    gap: clamp(20px, 3vw, 36px);
+  }
+
+  .skillsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .introGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .skillsGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .teamBlockContainer {
+    margin-bottom: 64px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skillCard {
+    transition: none !important;
+  }
+}

@@ -39,6 +39,7 @@ import {
   Settings,
   ChevronRight,
   LogOut,
+  AdIcon,
 } from "lucide-react"
 
 const NAV: NavGroup[] = [
@@ -165,6 +166,15 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
         {/* Sign out */}
         <SidebarMenu>
+          <SidebarMenuItem>
+          <SidebarMenuButton
+              onClick={()=>router.push('/dashboard')}
+              className="flex w-full items-center gap-2.5 rounded-full px-3 py-2 text-[13px] font-medium text-black/45 transition-colors hover:bg-black/[0.04] hover:text-black"
+            >
+              <AdIcon className="h-[15px] w-[15px]" />
+              <span>Usario Pago</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem className="px-1">
             <SidebarMenuButton
               onClick={handleLogout}
