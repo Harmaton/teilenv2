@@ -32,8 +32,24 @@ export default function Nav({ initialUser }: { initialUser: User | null }) {
     user?.email?.split("@")[0] ??
     "";
 
-  const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(
+    user?.user_metadata?.avatar_url as string | undefined
+  );
   const initial = displayName ? displayName[0].toUpperCase() : "?";
+
+  useEffect(() => {
+    if (!user) {
+      setAvatarUrl(undefined);
+      return;
+    }
+
+    createClient()
+      .from("profiles")
+      .select("avatar_url")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => setAvatarUrl(data?.avatar_url ?? undefined));
+  }, [user]);
 
   return (
     <nav

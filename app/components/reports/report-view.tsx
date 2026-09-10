@@ -43,7 +43,7 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
     const res = await retryReportGeneration(report.id);
     if (res.success) {
       setReport({ ...report, status: "pending", error: null });
-      fetch("/api/reports/generate", {
+      fetch("/api/reports/openai/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reportId: report.id }),
@@ -56,7 +56,7 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
     setApplying(true);
     setEditError(null);
     try {
-      const res = await fetch("/api/reports/edit", {
+      const res = await fetch("/api/reports/openai/edit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reportId: report.id, ...payload }),
@@ -219,12 +219,16 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
         <div className="rounded-2xl border border-black/[0.06] bg-white p-5">
           <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-black/35">Usuario</p>
           <div className="flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[12px] font-semibold text-white"
-              style={{ backgroundColor: ACCENT }}
-            >
-              {initials}
-            </div>
+            {report.user.avatarUrl ? (
+              <img src={report.user.avatarUrl} alt="Avatar" className="h-10 w-10 shrink-0 rounded-full object-cover" />
+            ) : (
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[12px] font-semibold text-white"
+                style={{ backgroundColor: ACCENT }}
+              >
+                {initials}
+              </div>
+            )}
             <div className="min-w-0">
               <p className="truncate text-[13px] font-medium text-black">
                 {report.user.fullName ?? "Sin nombre"}

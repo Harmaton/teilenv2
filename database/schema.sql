@@ -60,6 +60,7 @@ CREATE TABLE public.test_attempts (
   items_snapshot jsonb NOT NULL DEFAULT '[]'::jsonb,
   answers jsonb NOT NULL DEFAULT '[]'::jsonb,
   score numeric,
+  quadrant_scores jsonb NOT NULL DEFAULT '{}'::jsonb,
   status text NOT NULL DEFAULT 'not_started'::text CHECK (status = ANY (ARRAY['not_started'::text, 'in_progress'::text, 'completed'::text, 'abandoned'::text])),
   started_at timestamp with time zone,
   completed_at timestamp with time zone,

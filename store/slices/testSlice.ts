@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
+import type { BenzingerQuadrant } from "@/lib/benzinger-scoring";
 
 export type TestOption = {
   id: string;
@@ -10,6 +11,11 @@ export type TestQuestion = {
   id: string;
   question: string;
   options: TestOption[];
+  scoring?: {
+    quadrant: BenzingerQuadrant;
+    pointsByOption: Record<string, number>;
+    maxPoints: number;
+  };
 };
 
 export interface TestEditorState {
@@ -94,7 +100,7 @@ const testSlice = createSlice({
 
     // Add question
     addQuestion(state) {
-      if (state.questions.length >= 60) return;
+      if (state.questions.length >= 100) return;
 
       const newQuestion: TestQuestion = {
         id: uuidv4(),
@@ -120,6 +126,26 @@ const testSlice = createSlice({
       if (question) {
         question.question = action.payload.text;
       }
+    },
+
+    updateQuestionQuadrant(
+      state,
+      action: PayloadAction<{ questionId: string; quadrant: BenzingerQuadrant | null }>
+    ) {
+      const question = state.questions.find((q) => q.id === action.payload.questionId);
+      if (!question) return;
+      if (!action.payload.quadrant) {
+        delete question.scoring;
+        return;
+      }
+      question.scoring = {
+        quadrant: action.payload.quadrant,
+        pointsByOption: {
+          [question.options[0]?.id ?? "yes"]: 1,
+          [question.options[1]?.id ?? "no"]: 0,
+        },
+        maxPoints: 1,
+      };
     },
 
 
@@ -227,6 +253,7 @@ export const {
   updateTestMetadata,
   addQuestion,
   updateQuestionText,
+  updateQuestionQuadrant,
   updateOptionText,
   addOption,
   removeOption,

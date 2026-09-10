@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, ListChecks, Lock } from "lucide-react";
+import { ArrowUpRight, ListChecks, Lock, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TestCard } from "@/_actions/tests";
 import { ProfileValuesStrengths } from "./profile-values-strengths";
@@ -91,8 +91,9 @@ export function TestsTabs({
                 </p>
               )}
 
-              <div className="mt-3 flex items-center gap-2 text-[11.5px] text-black/35">
-                <span>{test.itemCount} {test.itemCount === 1 ? "pregunta" : "preguntas"}</span>
+              <div className="mt-4 flex items-center gap-2 text-[11.5px] text-slate-400">
+                <Sparkles className="h-3.5 w-3.5 text-orange-500" />
+                <span>Un momento para conocerte mejor</span>
                 {!test.isFree && (
                   <>
                     <span>·</span>

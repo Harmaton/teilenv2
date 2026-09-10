@@ -3,12 +3,15 @@
 import { getAuthUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { calculateBenzingerScores, type BenzingerItem } from "@/lib/benzinger-scoring";
+import { getTestProfileEligibility } from "@/lib/test-eligibility";
 
 export type TestItem = {
   id: string;
   question: string;
   type: "single_choice" | "multi_choice" | "scale" | "text";
   options?: { id: string; text: string }[];
+  scoring?: BenzingerItem["scoring"];
 };
 
 export type TestDetail = {
@@ -33,6 +36,9 @@ export async function getTestWithAttempt(
   if (!authResult.success) return { success: false, error: authResult.error };
 
   const supabase = await createClient();
+
+  const eligibility = await getTestProfileEligibility(authResult.user.id);
+  if (!eligibility.eligible) return { success: false, error: eligibility.error };
 
   const { data: test, error: testError } = await supabase
     .from("tests")
@@ -82,6 +88,9 @@ export async function startAttempt(
   if (!authResult.success) return { success: false, error: authResult.error };
 
   const supabase = await createClient();
+
+  const eligibility = await getTestProfileEligibility(authResult.user.id);
+  if (!eligibility.eligible) return { success: false, error: eligibility.error };
 
   const { data: test, error: testError } = await supabase
     .from("tests")
@@ -149,6 +158,32 @@ export async function submitAttempt(
     .eq("profile_id", authResult.user.id);
 
   if (updateError) return { success: false, error: updateError.message };
+
+  const { data: attempt, error: attemptError } = await supabase
+    .from("test_attempts")
+    .select("items_snapshot")
+    .eq("id", attemptId)
+    .eq("profile_id", authResult.user.id)
+    .single();
+  if (attemptError || !attempt) return { success: false, error: attemptError?.message ?? "Attempt not found." };
+
+  const scores = calculateBenzingerScores(
+    (attempt.items_snapshot as BenzingerItem[]) ?? [],
+    answers,
+  );
+
+  const { error: scoreError } = await supabase
+    .from("test_attempts")
+    .update({
+      score: Math.round(
+        (scores.percentages.RB + scores.percentages.LB + scores.percentages.RF + scores.percentages.LF) / 4,
+      ),
+      quadrant_scores: scores,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", attemptId)
+    .eq("profile_id", authResult.user.id);
+  if (scoreError) return { success: false, error: scoreError.message };
 
   // Queue the report — generation itself happens out-of-band (see note below).
   const { data: report, error: reportError } = await supabase

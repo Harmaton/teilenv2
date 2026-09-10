@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const OPENROUTER_MODEL = "openrouter/free";
+const OPENAI_MODEL = "gpt-4.1-mini";
 
 const STYLE_INSTRUCTIONS: Record<string, string> = {
   concise: "Haz el informe más conciso y directo, sin perder la información clave.",
@@ -45,42 +45,44 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is not configured");
+    }
+
+    const reportHtml = (report.content as { html?: string } | null)?.html ?? "";
+    const aiResponse = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY!}`,
-        "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL ?? "https://theartsoko.com",
-        "X-Title": "Report Editing",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY!}`,
       },
       body: JSON.stringify({
-        model: OPENROUTER_MODEL,
-        max_tokens: 2000,
-        messages: [
-          {
-            role: "system",
-            content:
-              "Eres un asistente que edita informes de diagnóstico de talento juvenil. " +
-              "Recibirás un fragmento HTML actual y una instrucción de edición. " +
-              "Aplica la instrucción manteniendo la información factual del informe. " +
-              "Responde ÚNICAMENTE con el fragmento HTML editado (sin <!DOCTYPE>, <html>, <head> ni <body>), " +
-              "usando <p>, <h2>, <ul> según corresponda. No incluyas texto fuera del HTML.",
+        model: OPENAI_MODEL,
+        max_output_tokens: 6000,
+        input: `Edita solamente el contenido textual del informe HTML. Conserva exactamente cinco elementos .report-page, el diseño, el idioma español, los hechos y la información del estudiante. No añadas scripts, estilos, imágenes externas ni puntuaciones internas.\n\nHTML actual:\n${reportHtml}\n\nInstrucción:\n${resolvedInstruction}`,
+        text: {
+          format: {
+            type: "json_schema",
+            name: "edited_identity_report",
+            strict: true,
+            schema: {
+              type: "object",
+              additionalProperties: false,
+              properties: { html: { type: "string" } },
+              required: ["html"],
+            },
           },
-          {
-            role: "user",
-            content: `Fragmento HTML actual:\n${report.content}\n\nInstrucción de edición:\n${resolvedInstruction}`,
-          },
-        ],
+        },
       }),
     });
 
     if (!aiResponse.ok) {
       const errText = await aiResponse.text();
-      throw new Error(`OpenRouter API error: ${aiResponse.status} ${errText}`);
+      throw new Error(`OpenAI API error: ${aiResponse.status} ${errText}`);
     }
 
     const aiData = await aiResponse.json();
-const rawContent = aiData.choices?.[0]?.message?.content;
+const rawContent = aiData.output_text ?? aiData.output?.flatMap((item: { content?: { text?: string }[] }) => item.content ?? []).map((part: { text?: string }) => part.text ?? "").join("");
 if (!rawContent) throw new Error("No content in AI response");
 
 const cleaned = (typeof rawContent === "string" ? rawContent : JSON.stringify(rawContent))
@@ -101,13 +103,18 @@ const scores = Array.isArray(parsed.scores)
       .map((s) => ({ label: s.label, value: Math.max(0, Math.min(100, s.value)) }))
   : [];
 
-const reportContent = { html: parsed.html ?? "", scores };
+    const pageCount = (parsed.html.match(/class=["'][^"']*\breport-page\b[^"']*["']/g) ?? []).length;
+    if (pageCount !== 5) {
+      throw new Error("Edited report must contain exactly five report pages");
+    }
+
+    const reportContent = { html: parsed.html ?? "", scores };
 
     const { error: updateError } = await supabase.from("reports").update({
-    status: "completed",
-    content: reportContent,
-    ai_model: OPENROUTER_MODEL,
-    error: null,
+      status: "completed",
+      content: reportContent,
+      ai_model: OPENAI_MODEL,
+      error: null,
     }).eq("id", reportId);
 
     if (updateError) throw new Error(updateError.message);

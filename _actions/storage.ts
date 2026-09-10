@@ -36,6 +36,14 @@ export async function uploadTeamMemberImage(file: File): Promise<UploadResult> {
 export async function uploadProfileAvatar(file: File, profileId: string): Promise<UploadResult> {
   const supabase = await createClient()
 
+  if (!file.type.startsWith("image/")) {
+    return { success: false, error: "El avatar debe ser una imagen." }
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    return { success: false, error: "El avatar no puede superar los 5 MB." }
+  }
+
   const ext      = file.name.split(".").pop()?.toLowerCase() ?? "jpg"
   const filename = `${profileId}-${Date.now()}.${ext}`
   const path     = `${profileId}/${filename}`
@@ -54,6 +62,16 @@ export async function uploadProfileAvatar(file: File, profileId: string): Promis
   const { data } = supabase.storage
     .from("user_images")
     .getPublicUrl(path)
+
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .update({ avatar_url: data.publicUrl, updated_at: new Date().toISOString() })
+    .eq("id", profileId)
+
+  if (profileError) {
+    await supabase.storage.from("user_images").remove([path])
+    return { success: false, error: profileError.message }
+  }
 
   return { success: true, url: data.publicUrl }
 }

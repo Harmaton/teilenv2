@@ -8,6 +8,7 @@ import {
   addQuestion,
   removeQuestion,
   updateQuestionText,
+  updateQuestionQuadrant,
   updateOptionText,
   addOption,
   removeOption,
@@ -86,8 +87,8 @@ export function TestBuilder() {
   }, [state.testId, state.questions, dispatch]);
 
   const handleAddQuestion = () => {
-    if (state.questions.length >= 60) {
-      dispatch(setError("Máximo 60 preguntas permitidas."));
+    if (state.questions.length >= 100) {
+      dispatch(setError("Máximo 100 preguntas permitidas."));
       return;
     }
     dispatch(addQuestion());
@@ -197,7 +198,7 @@ export function TestBuilder() {
         {state.description && <p className="text-sm text-black/60">{state.description}</p>}
         <div className="mt-4 flex items-center justify-between">
           <div className="text-sm text-black/50">
-            <span className="font-semibold">{state.questions.length}</span> preguntas de 60
+            <span className="font-semibold">{state.questions.length}</span> preguntas de 100
           </div>
           {state.isPublished && (
             <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
@@ -240,6 +241,27 @@ export function TestBuilder() {
                     className="mt-2 w-full resize-none rounded-lg border border-black/[0.08] bg-white px-3 py-2 text-sm text-black placeholder-black/30 focus:border-black/[0.14] focus:outline-none"
                     rows={2}
                   />
+                  <label className="mt-3 block text-xs font-semibold uppercase tracking-[0.18em] text-black/50">
+                    Scoring interno
+                    <select
+                      value={question.scoring?.quadrant ?? ""}
+                      onChange={(e) =>
+                        dispatch(
+                          updateQuestionQuadrant({
+                            questionId: question.id,
+                            quadrant: (e.target.value || null) as "RB" | "LB" | "RF" | "LF" | null,
+                          })
+                        )
+                      }
+                      className="ml-3 rounded-md border border-black/[0.12] bg-white px-2 py-1 text-xs font-normal normal-case tracking-normal text-black"
+                    >
+                      <option value="">Sin asignar</option>
+                      <option value="RB">RB</option>
+                      <option value="LB">LB</option>
+                      <option value="RF">RF</option>
+                      <option value="LF">LF</option>
+                    </select>
+                  </label>
                   {!question.question.trim() && (
                     <p className="mt-1 text-xs text-red-600">La pregunta es requerida.</p>
                   )}

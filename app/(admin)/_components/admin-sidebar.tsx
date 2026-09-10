@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import {
@@ -76,6 +77,24 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
   const email = user.email ?? "admin"
   const initials = email.slice(0, 2).toUpperCase()
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    createClient()
+      .from("profiles")
+      .select("avatar_url")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => setAvatarUrl(data?.avatar_url ?? null))
+  }, [user.id])
+
+  useEffect(() => {
+    const handleAvatarUpdate = (event: Event) => {
+      setAvatarUrl((event as CustomEvent<string>).detail)
+    }
+    window.addEventListener("profile-avatar-updated", handleAvatarUpdate)
+    return () => window.removeEventListener("profile-avatar-updated", handleAvatarUpdate)
+  }, [])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -152,12 +171,16 @@ export function AppSidebar({ user }: AppSidebarProps) {
       <SidebarFooter className="border-t border-black/[0.06] p-3">
         {/* User card */}
         <div className="mb-1.5 flex items-center gap-2.5 rounded-2xl bg-black/[0.03] px-3 py-2.5">
-          <div
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
-            style={{ backgroundColor: ACCENT }}
-          >
-            {initials}
-          </div>
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Avatar" className="h-8 w-8 shrink-0 rounded-full object-cover" />
+          ) : (
+            <div
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
+              style={{ backgroundColor: ACCENT }}
+            >
+              {initials}
+            </div>
+          )}
           <div className="flex min-w-0 flex-col">
             <span className="truncate text-[12px] font-medium text-black">{email}</span>
             <span className="text-[11px] text-black/40">Administrador</span>

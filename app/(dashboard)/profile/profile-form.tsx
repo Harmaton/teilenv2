@@ -21,6 +21,9 @@ type ProfileFormProps = {
   role: string | null;
   is_active: boolean;
   userId: string;
+  age: number | null;
+  city: string | null;
+  country: string | null;
 };
 
 type ProfileState =
@@ -36,12 +39,19 @@ export default function ProfileForm({
   role,
   is_active,
   userId,
+  age,
+  city,
+  country,
 }: ProfileFormProps) {
   const [state, formAction] = useActionState(updateProfile, initialState);
   const [name, setName] = useState(full_name ?? "");
   const [avatarUrl, setAvatarUrl] = useState(avatar_url ?? "");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(avatar_url);
+  const [ageValue, setAgeValue] = useState(age?.toString() ?? "");
+  const [cityValue, setCityValue] = useState(city ?? "");
+  const [countryValue, setCountryValue] = useState(country ?? "");
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [dismissedToast, setDismissedToast] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -71,11 +81,16 @@ export default function ProfileForm({
 
     // Upload to storage
     setUploading(true);
+    setUploadError(null);
     const result = await uploadProfileAvatar(file, userId);
     setUploading(false);
 
     if (result.success) {
       setAvatarUrl(result.url);
+      window.dispatchEvent(new CustomEvent("profile-avatar-updated", { detail: result.url }));
+    } else {
+      setAvatarPreview(avatar_url);
+      setUploadError(result.error);
     }
   };
 
@@ -131,6 +146,44 @@ export default function ProfileForm({
             />
           </Field>
 
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field>
+              <FieldLabel htmlFor="age">Edad</FieldLabel>
+              <Input
+                id="age"
+                name="age"
+                type="number"
+                min="1"
+                max="120"
+                value={ageValue}
+                onChange={(event) => setAgeValue(event.target.value)}
+                required
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="city">Ciudad</FieldLabel>
+              <Input
+                id="city"
+                name="city"
+                value={cityValue}
+                onChange={(event) => setCityValue(event.target.value)}
+                placeholder="Lima"
+                required
+              />
+            </Field>
+          </div>
+
+          <Field>
+            <FieldLabel htmlFor="country">País</FieldLabel>
+            <Input
+              id="country"
+              name="country"
+              value={countryValue}
+              onChange={(event) => setCountryValue(event.target.value)}
+              placeholder="Perú"
+            />
+          </Field>
+
           <Field>
             <FieldLabel htmlFor="avatar_file">Avatar</FieldLabel>
             <input type="hidden" name="avatar_url" value={avatarUrl} />
@@ -152,6 +205,7 @@ export default function ProfileForm({
                 className="hidden"
               />
             </div>
+            {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
             <FieldDescription>Selecciona una imagen para tu avatar (JPG, PNG, etc.)</FieldDescription>
           </Field>
 

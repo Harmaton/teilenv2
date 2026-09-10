@@ -15,6 +15,9 @@ type SettingsTabsProps = {
     avatar_url: string | null;
     role: string | null;
     is_active: boolean;
+    age: number | null;
+    city: string | null;
+    country: string | null;
   };
   settings: {
     theme: "auto" | "light" | "dark";
@@ -48,6 +51,9 @@ export default function SettingsTabs({ profile, settings }: SettingsTabsProps) {
               avatar_url={profile.avatar_url}
               role={profile.role}
               is_active={profile.is_active}
+              age={profile.age}
+              city={profile.city}
+              country={profile.country}
               userId={profile.id}
             />
           ) : (

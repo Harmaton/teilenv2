@@ -142,8 +142,8 @@ export async function updateTestQuestions(
   }
 
   // Validate question count
-  if (questions.length > 60) {
-    return { success: false, error: "Máximo 60 preguntas permitidas." };
+  if (questions.length > 100) {
+    return { success: false, error: "Máximo 100 preguntas permitidas." };
   }
 
   // Validate each question has at least 2 options

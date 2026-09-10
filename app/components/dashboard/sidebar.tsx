@@ -76,12 +76,13 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const supabase = createClient()
 
   const [isAdmin, setIsAdmin] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
     useEffect(() => {
     async function checkAdmin() {
       const { data, error } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, avatar_url')
         .eq('id', user.id)
         .single()
 
@@ -91,10 +92,19 @@ export function AppSidebar({ user }: AppSidebarProps) {
       }
 
       setIsAdmin(data?.role === 'admin')
+      setAvatarUrl(data?.avatar_url ?? null)
     }
 
     checkAdmin()
   }, [user.id, supabase])
+
+  useEffect(() => {
+    const handleAvatarUpdate = (event: Event) => {
+      setAvatarUrl((event as CustomEvent<string>).detail)
+    }
+    window.addEventListener("profile-avatar-updated", handleAvatarUpdate)
+    return () => window.removeEventListener("profile-avatar-updated", handleAvatarUpdate)
+  }, [])
 
   const email = user.email ?? "admin"
   const initials = email.slice(0, 2).toUpperCase()
@@ -168,12 +178,16 @@ export function AppSidebar({ user }: AppSidebarProps) {
       <SidebarFooter className="border-t border-black/[0.06] p-3">
         {/* User card */}
         <div className="mb-1.5 flex items-center gap-2.5 rounded-2xl bg-black/[0.03] px-3 py-2.5">
-          <div
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
-            style={{ backgroundColor: ACCENT }}
-          >
-            {initials}
-          </div>
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Avatar" className="h-8 w-8 shrink-0 rounded-full object-cover" />
+          ) : (
+            <div
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
+              style={{ backgroundColor: ACCENT }}
+            >
+              {initials}
+            </div>
+          )}
           <div className="flex min-w-0 flex-col">
             <span className="truncate text-[12px] font-medium text-black">{email}</span>
 
