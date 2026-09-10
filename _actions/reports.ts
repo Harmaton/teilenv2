@@ -29,7 +29,7 @@ export type ReportDetail = {
   content: ReportContent | null;
   createdAt: string;
   updatedAt: string;
-  user: { fullName: string | null; email: string | null; avatarUrl: string | null };
+  user: { fullName: string | null; email: string | null; avatarUrl: string | null; age: number | null; city: string | null; country: string | null };
   attemptCompletedAt: string | null;
 };
 
@@ -78,6 +78,12 @@ export async function getReportDetail(
 
   if (error || !data) return { success: false, error: "Report not found." };
 
+  const { data: details } = await supabase
+    .from("profile_details")
+    .select("age, city, country")
+    .eq("profile_id", authResult.user.id)
+    .maybeSingle();
+
   return {
     success: true,
     data: {
@@ -93,6 +99,9 @@ export async function getReportDetail(
         fullName: (data as any).profiles?.full_name ?? null,
         email: (data as any).profiles?.email ?? null,
         avatarUrl: (data as any).profiles?.avatar_url ?? null,
+        age: details?.age ?? null,
+        city: details?.city ?? null,
+        country: details?.country ?? null,
       },
       attemptCompletedAt: (data as any).test_attempts?.created_at ?? null,
     },

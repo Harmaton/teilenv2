@@ -123,6 +123,10 @@ export function AdminReportView({ initial }: { initial: ReportDetail }) {
     testDescription: report.testDescription,
     userName: report.user.fullName,
     updatedAt: report.updatedAt,
+    avatarUrl: report.user.avatarUrl,
+    age: report.user.age,
+    city: report.user.city,
+    country: report.user.country,
   });
 
   return (

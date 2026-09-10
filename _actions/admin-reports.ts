@@ -40,6 +40,9 @@ export type ReportDetail = {
     fullName: string | null;
     email: string | null;
     avatarUrl: string | null;
+    age: number | null;
+    city: string | null;
+    country: string | null;
   };
 };
 
@@ -137,7 +140,7 @@ export async function getReportDetailAdmin(id: string): Promise<ActionResult<Rep
     .select(
       `id, status, error, content, updated_at,
        tests ( title, description ),
-      profiles ( full_name, email, avatar_url ),
+      profiles ( id, full_name, email, avatar_url ),
        test_attempts ( completed_at )`
     )
     .eq("id", id)
@@ -148,6 +151,11 @@ export async function getReportDetailAdmin(id: string): Promise<ActionResult<Rep
   const test = data.tests as any;
   const profile = data.profiles as any;
   const attempt = data.test_attempts as any;
+  const { data: details } = await supabase
+    .from("profile_details")
+    .select("age, city, country")
+    .eq("profile_id", data.profiles ? (data.profiles as any).id : "")
+    .maybeSingle();
 
   return {
     success: true,
@@ -164,6 +172,9 @@ export async function getReportDetailAdmin(id: string): Promise<ActionResult<Rep
         fullName: profile?.full_name ?? null,
         email: profile?.email ?? null,
         avatarUrl: profile?.avatar_url ?? null,
+        age: details?.age ?? null,
+        city: details?.city ?? null,
+        country: details?.country ?? null,
       },
     },
   };

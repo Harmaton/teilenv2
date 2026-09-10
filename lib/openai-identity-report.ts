@@ -199,7 +199,7 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
     const [{ data: attempt }, { data: test }, { data: profile }, { data: details }] = await Promise.all([
       supabase.from("test_attempts").select("answers, items_snapshot, quadrant_scores").eq("id", report.attempt_id).single(),
       supabase.from("tests").select("title").eq("id", report.test_id).single(),
-      supabase.from("profiles").select("full_name, values, strengths").eq("id", report.profile_id).single(),
+      supabase.from("profiles").select("full_name, avatar_url, values, strengths").eq("id", report.profile_id).single(),
       supabase.from("profile_details").select("age, sex, country, city").eq("profile_id", report.profile_id).maybeSingle(),
     ]);
     if (!attempt || !test || !profile) throw new Error("Missing report dependencies");
@@ -222,7 +222,13 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
 
     stage = "render_report";
     const { renderIdentityReportHtml } = await import("@/lib/report-html");
-    const html = renderIdentityReportHtml(generated.pages);
+    const html = renderIdentityReportHtml(generated.pages, {
+      avatarUrl: profile.avatar_url,
+      studentName: profile.full_name,
+      age: profileDetails.age,
+      city: profileDetails.city,
+      country: profileDetails.country,
+    });
     const content = { html, scores: [] };
 
     const { error: updateError } = await supabase.from("reports").update({

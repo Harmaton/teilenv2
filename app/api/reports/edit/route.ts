@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { extractIdentityReportPages, renderIdentityReportHtml } from "@/lib/report-html";
 
 const OPENAI_MODEL = "gpt-4.1-mini";
 
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
 
   const { data: report, error: reportError } = await supabase
     .from("reports")
-    .select("id, content, status, profile_id")
+    .select("id, content, status, profile_id, profiles ( avatar_url )")
     .eq("id", reportId)
     .eq("profile_id", user.id)
     .single();
@@ -50,6 +51,13 @@ export async function POST(request: NextRequest) {
     }
 
     const reportHtml = (report.content as { html?: string } | null)?.html ?? "";
+    const currentPages = extractIdentityReportPages(reportHtml);
+    if (currentPages.length !== 5) throw new Error("Stored report does not contain five pages");
+    const { data: profileDetails } = await supabase
+      .from("profile_details")
+      .select("age, city, country")
+      .eq("profile_id", report.profile_id)
+      .maybeSingle();
     const aiResponse = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
@@ -59,7 +67,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         model: OPENAI_MODEL,
         max_output_tokens: 6000,
-        input: `Edita solamente el contenido textual del informe HTML. Conserva exactamente cinco elementos .report-page, el diseño, el idioma español, los hechos y la información del estudiante. No añadas scripts, estilos, imágenes externas ni puntuaciones internas.\n\nHTML actual:\n${reportHtml}\n\nInstrucción:\n${resolvedInstruction}`,
+        input: `Edita solamente el contenido textual de estas cinco páginas. Devuelve exactamente cinco objetos pages con title y html. No devuelvas HTML de documento, secciones .report-page, CSS, scripts, imágenes ni coordenadas. Conserva el orden, la estructura semántica, el idioma español y los hechos del estudiante.\n\nPÁGINAS ACTUALES:\n${JSON.stringify(currentPages)}\n\nINSTRUCCIÓN:\n${resolvedInstruction}`,
         text: {
           format: {
             type: "json_schema",
@@ -68,8 +76,20 @@ export async function POST(request: NextRequest) {
             schema: {
               type: "object",
               additionalProperties: false,
-              properties: { html: { type: "string" } },
-              required: ["html"],
+              properties: {
+                pages: {
+                  type: "array",
+                  minItems: 5,
+                  maxItems: 5,
+                  items: {
+                    type: "object",
+                    additionalProperties: false,
+                    properties: { title: { type: "string" }, html: { type: "string" } },
+                    required: ["title", "html"],
+                  },
+                },
+              },
+              required: ["pages"],
             },
           },
         },
@@ -89,26 +109,28 @@ const cleaned = (typeof rawContent === "string" ? rawContent : JSON.stringify(ra
   .replace(/```json|```/g, "")
   .trim();
 
-let parsed: { html: string; scores: { label: string; value: number }[] };
+let parsed: { pages: { title: string; html: string }[] };
 try {
   parsed = JSON.parse(cleaned);
 } catch {
   throw new Error("AI response was not valid JSON");
 }
 
-// Validate scores so a bad model response can't corrupt the chart
-const scores = Array.isArray(parsed.scores)
-  ? parsed.scores
-      .filter((s) => typeof s?.label === "string" && typeof s?.value === "number")
-      .map((s) => ({ label: s.label, value: Math.max(0, Math.min(100, s.value)) }))
-  : [];
-
-    const pageCount = (parsed.html.match(/class=["'][^"']*\breport-page\b[^"']*["']/g) ?? []).length;
-    if (pageCount !== 5) {
+    if (!Array.isArray(parsed.pages) || parsed.pages.length !== 5 || parsed.pages.some((page) => !page.title || !page.html)) {
       throw new Error("Edited report must contain exactly five report pages");
     }
 
-    const reportContent = { html: parsed.html ?? "", scores };
+    const avatarUrl = (report.profiles as { avatar_url?: string | null } | null)?.avatar_url ?? null;
+    const reportContent = {
+      html: renderIdentityReportHtml(parsed.pages, {
+        avatarUrl,
+        studentName: (report.profiles as { full_name?: string | null } | null)?.full_name,
+        age: profileDetails?.age ?? null,
+        city: profileDetails?.city ?? null,
+        country: profileDetails?.country ?? null,
+      }),
+      scores: [],
+    };
 
     const { error: updateError } = await supabase.from("reports").update({
       status: "completed",
