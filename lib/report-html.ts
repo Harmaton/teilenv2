@@ -27,8 +27,8 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
       </header>
       ${buildStudentContext(options)}
       ${index === 0 ? buildIdentityFrameworkVisual() : ""}
-      <div class="page-content">${decorateGeneratedHtml(cleanGeneratedHtml(page.html), index)}</div>
-      ${index === 4 && !/salom[oó]n\s*ai/i.test(page.html) ? `<div class="report-callout salomon-callout"><strong>PROFUNDIZA TU PROCESO</strong><p>Si quieres conversar sobre tus resultados y convertir estas ideas en decisiones concretas, escribe a Salomón AI por WhatsApp: <b>+54 351 756 8043</b>.</p></div>` : ""}
+      <div class="page-content">${preparePageHtml(page.html, index)}</div>
+      ${index === 4 ? buildSalomonFooter() : ""}
       <footer class="page-footer">IDENTIDAD EVOLUTIVA · INFORME PERSONAL</footer>
     </section>
   `).join("");
@@ -55,7 +55,7 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
   .page-header h1 { margin: 3mm auto 1.5mm; max-width: 178mm; color: var(--orange); font-family: Georgia, "Times New Roman", serif; font-size: 27px; font-weight: 400; letter-spacing: .02em; text-transform: uppercase; }
   .title-rule { height: 1px; width: 92mm; margin: 0 auto; background: var(--orange); position: relative; }
   .title-rule i { position: absolute; left: 50%; top: -3px; width: 7px; height: 7px; border-radius: 50%; background: var(--orange); }
-  .page-content { font-size: 9.2pt; line-height: 1.38; }
+  .page-content { font-size: 9.6pt; line-height: 1.36; }
   .student-context { display: flex; align-items: center; justify-content: center; gap: 3mm; margin: 0 auto 3mm; color: var(--muted); font-size: 8.5px; }
   .student-context img { width: 14mm; height: 14mm; border-radius: 50%; object-fit: cover; border: 1px solid var(--line); }
   .student-context strong { color: var(--ink); font-family: Georgia, serif; font-size: 14px; }
@@ -82,26 +82,32 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
   .salomon-callout { display: grid; grid-template-columns: 1fr; gap: 1mm; }
   .salomon-callout strong { color: var(--orange); font-size: 10px; letter-spacing: .08em; }
   .salomon-callout b { color: var(--orange); }
-  .report-page-0 .page-content { font-size: 8.8pt; }
-  .framework-visual { position: relative; height: 57mm; margin: 0 auto 3mm; max-width: 174mm; }
+  .report-page-0 .page-content { font-size: 8.9pt; line-height: 1.28; }
+  .framework-visual { position: relative; height: 43mm; margin: 0 auto 2mm; max-width: 174mm; }
   .framework-visual svg { display: block; width: 100%; height: 100%; }
-  .framework-core { position: absolute; left: 50%; top: 50%; width: 43mm; height: 43mm; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1.5px solid var(--orange); border-radius: 50%; background: #fff; text-align: center; }
+  .framework-core { position: absolute; left: 50%; top: 50%; width: 34mm; height: 34mm; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1.5px solid var(--orange); border-radius: 50%; background: #fff; text-align: center; }
   .framework-core strong { color: var(--ink); font-family: Georgia, serif; font-size: 13px; line-height: 1.05; text-transform: uppercase; }
   .framework-core span { margin-top: 1.5mm; color: var(--orange); font-family: Georgia, serif; font-size: 11px; font-style: italic; }
-  .framework-node { position: absolute; width: 29mm; height: 13mm; padding: 2mm; border: .7pt solid var(--line); border-radius: 9px; background: #fff; color: var(--orange); font-size: 7.5px; font-weight: 600; text-align: center; text-transform: uppercase; }
+  .framework-node { position: absolute; width: 27mm; height: 11mm; padding: 1.5mm; border: .7pt solid var(--line); border-radius: 9px; background: #fff; color: var(--orange); font-size: 7px; font-weight: 600; text-align: center; text-transform: uppercase; }
   .framework-node strong { display: block; color: var(--ink); font-size: 8px; }
   .framework-node.n1 { left: 3%; top: 1%; } .framework-node.n2 { right: 3%; top: 1%; }
   .framework-node.n3 { left: 0; top: 39%; } .framework-node.n4 { right: 0; top: 39%; }
   .framework-node.n5 { left: 14%; bottom: 0; } .framework-node.n6 { right: 14%; bottom: 0; }
-  .report-page-0 .report-card { min-height: 24mm; }
+  .report-page-0 .report-card { min-height: 20mm; }
   .report-page-0 .report-grid { gap: 3mm; }
-  .report-page-0 .report-callout { min-height: 20mm; }
+  .report-page-0 .report-callout { min-height: 16mm; }
   .report-page-3 .report-grid { gap: 4mm; }
   .report-page-4 { counter-reset: life-section; }
   .report-page-4 .page-content h2 { counter-increment: life-section; }
   .report-page-4 .page-content h2::before { content: counter(life-section) ". "; }
   .report-page-4 .report-card { min-height: 25mm; }
   .salomon-callout { border-left-color: var(--orange); background: var(--warm); }
+  .salomon-footer { margin: 3mm 0 0; padding: 4mm 6mm; display: grid; grid-template-columns: 10mm 1fr auto; align-items: center; gap: 4mm; border: .8pt solid var(--line); border-left: 4px solid var(--orange); border-radius: 12px; background: var(--warm); }
+  .salomon-footer .salomon-icon { display: grid; place-items: center; width: 9mm; height: 9mm; border-radius: 50%; background: var(--orange); color: white; font-size: 15px; }
+  .salomon-footer strong { display: block; color: var(--orange); font-size: 10px; letter-spacing: .08em; }
+  .salomon-footer p { margin: 1mm 0 0; color: var(--ink); font-size: 9pt; line-height: 1.3; }
+  .salomon-footer .phone { color: var(--orange); font-size: 11pt; font-weight: 700; white-space: nowrap; }
+  .report-page-4 .page-footer { bottom: 6mm; }
   .page-footer { position: absolute; bottom: 7mm; left: 12mm; right: 12mm; padding-top: 2mm; border-top: .5pt solid var(--line); color: var(--muted); font-size: 7.5px; text-align: center; letter-spacing: .08em; }
   @media screen { .report-page { margin: 20px auto; box-shadow: 0 0 0 1px #eee; } body { background: #f7f7f6; } }
   @media print { .report-page { margin: 0; } }
@@ -132,6 +138,24 @@ function decorateGeneratedHtml(html: string, pageIndex: number) {
     const icon = iconForHeading(`${heading} ${pageIndex} ${iconIndex++}`);
     return `<h3${attributes}><span class="box-icon">${icon}</span>${heading}</h3>`;
   });
+}
+
+function preparePageHtml(html: string, pageIndex: number) {
+  let prepared = cleanGeneratedHtml(html);
+  if (pageIndex === 4) {
+    prepared = prepared
+      .replace(/<p\b[^>]*>[\s\S]*?salom[oó]n\s*ai[\s\S]*?<\/p>/gi, "")
+      .replace(/<h[23]\b[^>]*>[\s\S]*?salom[oó]n\s*ai[\s\S]*?<\/h[23]>/gi, "");
+  }
+  return decorateGeneratedHtml(prepared, pageIndex);
+}
+
+function buildSalomonFooter() {
+  return `<div class="salomon-footer">
+    <div class="salomon-icon">✦</div>
+    <div><strong>PROFUNDIZA TU PROCESO</strong><p>Reconoce que el crecimiento es continuo y requiere paciencia y apertura. Trabaja tus tensiones internas para enfrentar desafíos con resiliencia. Tu identidad se construye eligiendo con claridad.</p></div>
+    <div class="phone">+54 351<br />756 8043</div>
+  </div>`;
 }
 
 function iconForHeading(value: string) {
