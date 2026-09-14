@@ -45,23 +45,23 @@ import {
 
 const NAV: NavGroup[] = [
   {
-    label: "Main",
+    label: "Principal",
     items: [
-      { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-       { label: "Manage Users", href: "/admin/manage-users", icon: UserCircle },
+      { label: "Panel", href: "/admin/dashboard", icon: LayoutDashboard },
+      { label: "Gestionar Usuarios", href: "/admin/manage-users", icon: UserCircle },
     ],
   },
   {
-    label: "Assessments",
+    label: "Evaluaciones",
     items: [
-      { label: "Manage Tests", href: "/admin/manage-tests", icon: ClipboardList },
-      { label: "View Reports", href: "/admin/manage-reports", icon: FileBarChart2 },
+      { label: "Gestionar Tests", href: "/admin/manage-tests", icon: ClipboardList },
+      { label: "Ver Informes", href: "/admin/manage-reports", icon: FileBarChart2 },
     ],
   },
   {
-    label: "Account",
+    label: "Cuenta",
     items: [
-      { label: "Settings", href: "/admin/settings", icon: Settings },
+      { label: "Configuración", href: "/admin/settings", icon: Settings },
     ],
   },
 ]

@@ -45,23 +45,23 @@ import { useEffect, useState } from "react"
 
 const NAV: NavGroup[] = [
   {
-    label: "Main",
+    label: "Principal",
     items: [
-      { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { label: "Panel", href: "/dashboard", icon: LayoutDashboard },
     ],
   },
   {
-    label: "Assessments",
+    label: "Evaluaciones",
     items: [
       { label: "Tests", href: "/tests", icon: ClipboardList },
-      { label: "Reports", href: "/reports", icon: FileBarChart2 },
+      { label: "Informes", href: "/reports", icon: FileBarChart2 },
     ],
   },
   {
-    label: "Account",
+    label: "Cuenta",
     items: [
-      // { label: "Profile", href: "/profile", icon: UserCircle },
-      { label: "Settings", href: "/settings", icon: Settings },
+      // { label: "Perfil", href: "/profile", icon: UserCircle },
+      { label: "Configuración", href: "/settings", icon: Settings },
     ],
   },
 ]
