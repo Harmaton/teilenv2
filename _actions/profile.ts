@@ -2,6 +2,7 @@
 
 import { getAuthUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { pushNotification } from "@/_actions/notifications";
 
 export type ProfileRow = {
   id: string;
@@ -99,6 +100,14 @@ export async function updateProfile(
     country: country || null,
   }, { onConflict: "profile_id" });
   if (detailsError) return { success: false, error: detailsError.message };
+
+  await pushNotification({
+    profile_id: authResult.user.id,
+    title: "Perfil actualizado",
+    body: "Tus datos personales están listos para personalizar tus informes.",
+    type: "success",
+    href: "/settings",
+  });
 
   return { success: true, message: "Perfil actualizado correctamente." };
 }

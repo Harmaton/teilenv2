@@ -13,8 +13,6 @@ import {
 } from "@/_actions/notifications";
 import type { AppNotification, NotificationType } from "@/_actions/notifications";
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
-
 type RouteEntry = { label: string; path: string; group: string };
 
 const ROUTES: RouteEntry[] = [
@@ -234,6 +232,11 @@ export function Navbar() {
     return () => window.clearTimeout(timer);
   }, [load]);
 
+  useEffect(() => {
+    const interval = window.setInterval(() => void load(), 30000);
+    return () => window.clearInterval(interval);
+  }, [load]);
+
   // ── Supabase Realtime subscription ────────────────────────────────────────
 
   useEffect(() => {
@@ -285,6 +288,8 @@ export function Navbar() {
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           console.debug('[Realtime] notifications channel subscribed');
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          void load();
         }
       });
 

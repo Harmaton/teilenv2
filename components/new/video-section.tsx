@@ -59,7 +59,7 @@ export default function VideoSection() {
               }}
             >
               <iframe
-                src="https://www.youtube.com/embed/9-6X6oHT4-s"
+                src="https://youtube.com/shorts/g97uj3JIvHk?feature=share"
                 title="Teilen Teens"
                 allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"
                 allowFullScreen

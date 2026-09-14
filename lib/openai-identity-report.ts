@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { emailReportPdf } from "@/lib/report-email";
 
 export const OPENAI_REPORT_MODEL = "gpt-4.1-mini";
 
@@ -199,7 +200,7 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
     const [{ data: attempt }, { data: test }, { data: profile }, { data: details }] = await Promise.all([
       supabase.from("test_attempts").select("answers, items_snapshot, quadrant_scores").eq("id", report.attempt_id).single(),
       supabase.from("tests").select("title").eq("id", report.test_id).single(),
-      supabase.from("profiles").select("full_name, avatar_url, values, strengths").eq("id", report.profile_id).single(),
+      supabase.from("profiles").select("email, full_name, avatar_url, values, strengths").eq("id", report.profile_id).single(),
       supabase.from("profile_details").select("age, sex, country, city").eq("profile_id", report.profile_id).maybeSingle(),
     ]);
     if (!attempt || !test || !profile) throw new Error("Missing report dependencies");
@@ -239,6 +240,41 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
     }).eq("id", reportId);
     if (updateError) throw new Error(updateError.message);
 
+    await supabase.from("notifications").insert({
+      profile_id: report.profile_id,
+      title: "Tu informe está listo",
+      body: "Ya puedes consultar tu Identidad Evolutiva.",
+      type: "success",
+      href: `/reports/${reportId}`,
+    });
+
+    if (profile.email) {
+      try {
+        await emailReportPdf({
+          recipient: profile.email,
+          studentName: profile.full_name,
+          reportHtml: html,
+          reportId,
+        });
+        await supabase.from("notifications").insert({
+          profile_id: report.profile_id,
+          title: "Informe enviado por correo",
+          body: "Revisa tu bandeja de entrada para descargar el PDF.",
+          type: "info",
+          href: `/reports/${reportId}`,
+        });
+      } catch (emailError) {
+        console.error("[report-email] failed", emailError);
+        await supabase.from("notifications").insert({
+          profile_id: report.profile_id,
+          title: "No pudimos enviar el PDF por correo",
+          body: "Puedes descargarlo desde tu cuenta de Teilen Teens.",
+          type: "warning",
+          href: `/reports/${reportId}`,
+        });
+      }
+    }
+
     await supabase.from("ai_credits_usage").insert({
       profile_id: report.profile_id,
       report_id: reportId,
@@ -254,6 +290,16 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
     console.error(`[reports/openai/generate] FAILED stage=${stage} reportId=${reportId}`, error);
     if (supabase && reportId) {
       await supabase.from("reports").update({ status: "failed", error: `[${stage}] ${message}` }).eq("id", reportId);
+      const { data: failedReport } = await supabase.from("reports").select("profile_id").eq("id", reportId).maybeSingle();
+      if (failedReport?.profile_id) {
+        await supabase.from("notifications").insert({
+          profile_id: failedReport.profile_id,
+          title: "No pudimos generar tu informe",
+          body: "Puedes intentarlo de nuevo desde la sección de informes.",
+          type: "error",
+          href: `/reports/${reportId}`,
+        });
+      }
     }
     return NextResponse.json({ error: message, stage }, { status: 500 });
   }

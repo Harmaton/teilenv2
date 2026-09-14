@@ -8,7 +8,6 @@ import PainSection from "@/components/new/pain-section";
 import HowItWorks from "@/components/new/how-it works";
 import VideoSection from "@/components/new/video-section";
 import CompareSection from "@/components/new/compare-section";
-// import Testimonials from "@/components/new/testimonials";
 import StorySection from "@/components/new/stort-section";
 import ParentsSection from "@/components/new/parent-section";
 import TeamSection from "@/components/new/team-section";

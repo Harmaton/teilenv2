@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { calculateBenzingerScores, type BenzingerItem } from "@/lib/benzinger-scoring";
 import { getTestProfileEligibility } from "@/lib/test-eligibility";
+import { pushNotification } from "@/_actions/notifications";
 
 export type TestItem = {
   id: string;
@@ -115,6 +116,13 @@ export async function startAttempt(
   if (error) return { success: false, error: error.message };
 
   revalidatePath(`/tests/${testId}`);
+  await pushNotification({
+    profile_id: authResult.user.id,
+    title: "Test iniciado",
+    body: "Tómate tu tiempo y responde con honestidad.",
+    type: "info",
+    href: `/tests/${testId}`,
+  });
   return { success: true, attemptId: data.id };
 }
 
@@ -201,5 +209,12 @@ export async function submitAttempt(
 
   revalidatePath("/dashboard");
   revalidatePath("/reports");
+  await pushNotification({
+    profile_id: authResult.user.id,
+    title: "Test completado",
+    body: "Estamos preparando tu informe de Identidad Evolutiva.",
+    type: "success",
+    href: `/reports/${report.id}`,
+  });
   return { success: true, reportId: report.id };
 }
