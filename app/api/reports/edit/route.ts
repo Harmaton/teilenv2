@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { extractIdentityReportPages, renderIdentityReportHtml } from "@/lib/report-html";
 
-const OPENAI_MODEL = "gpt-6-astra";
+const OPENAI_MODEL = "gpt-5.6-terra";
 
 const STYLE_INSTRUCTIONS: Record<string, string> = {
   concise: "Haz el informe más conciso y directo, sin perder la información clave.",
