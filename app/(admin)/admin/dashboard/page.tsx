@@ -54,7 +54,7 @@ export default async function AdminDashboardPage() {
   const maxTrend = Math.max(1, ...trend.map((p) => p.attempts));
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="mx-auto w-full px-6 py-8">
       <div className="mb-8">
         <h1 className="text-[22px] font-semibold text-black">Panel de administración</h1>
         <p className="mt-1 text-[13px] text-black/45">
@@ -159,7 +159,7 @@ export default async function AdminDashboardPage() {
                   <Th>Estado</Th>
                   <Th>Puntuación</Th>
                   <Th>Iniciado</Th>
-                  <Th align="right">Informe</Th>
+              
                 </tr>
               </thead>
               <tbody>
@@ -189,19 +189,7 @@ export default async function AdminDashboardPage() {
                       </Td>
                       <Td>{a.score !== null ? a.score : "—"}</Td>
                       <Td className="text-black/45">{formatDate(a.startedAt)}</Td>
-                      <Td align="right">
-                        {a.hasReport ? (
-                          <Link
-                            href={`/admin/reports/${a.id}`}
-                            className="inline-flex items-center gap-1 font-medium"
-                            style={{ color: ACCENT }}
-                          >
-                            Ver <ArrowUpRight className="h-3 w-3" />
-                          </Link>
-                        ) : (
-                          <span className="text-black/25">—</span>
-                        )}
-                      </Td>
+                      
                     </tr>
                   );
                 })}
