@@ -17,7 +17,7 @@ export default async function ReportsPage() {
   const reports = result.success ? result.data : [];
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
+    <div className="mx-auto max-w-6xl px-6 py-8">
       <div className="mb-8">
         <h1 className="text-[22px] font-semibold text-black">Informes</h1>
         <p className="mt-1 text-[13px] text-black/45">

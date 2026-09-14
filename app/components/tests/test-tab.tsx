@@ -41,7 +41,7 @@ export function TestsTabs({
           <Count>{paid.length}</Count>
         </TabButton>
         <TabButton active={tab === "profile"} onClick={() => setTab("profile") }>
-          Perfil
+          valores y fortalezas
         </TabButton>
       </div>
 

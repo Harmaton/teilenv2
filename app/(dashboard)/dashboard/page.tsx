@@ -12,6 +12,10 @@ import {
 
 import { cn } from "@/lib/utils";
 import { getDashboardStats, getUserTestAttempts } from "@/_actions/dashbaord";
+import { QuickAction } from "../_componets/quick-actions";
+import { ProfileValuesStrengths } from "@/app/components/tests/profile-values-strengths";
+import { getProfileValuesStrengths } from "@/_actions/profile";
+import { ReadinessRequirement, TestReadinessTab } from "../_componets/TestReadinessFAB";
 
 const ACCENT = "#FF5A1F";
 
@@ -23,10 +27,14 @@ const STATUS_STYLES: Record<string, { label: string; dot: string; text: string }
 };
 
 export default async function DashboardPage() {
-  const [statsResult, attemptsResult] = await Promise.all([
+  const [statsResult, attemptsResult, valuesResult] = await Promise.all([
     getDashboardStats(),
     getUserTestAttempts(),
+    getProfileValuesStrengths(),
   ]);
+
+    const values = valuesResult.success ? valuesResult.data.values : [];
+  const strengths = valuesResult.success ? valuesResult.data.strengths : [];
 
   const stats = statsResult.success
     ? statsResult.data
@@ -34,8 +42,27 @@ export default async function DashboardPage() {
 
   const attempts = attemptsResult.success ? attemptsResult.data : [];
 
+  const requirements: ReadinessRequirement[] = [
+  // {
+  //   id: "profile",
+  //   label: "Detalles del perfil",
+  //   description: "Nombre, edad, ciudad y foto de perfil.",
+  //   href: "/profile",
+  //   met: Boolean(user.name && user.age && user.city && user.avatarUrl),
+  // },
+  {
+    id: "values-strengths",
+    label: "Valores y fortalezas",
+    description: "Selecciona al menos un valor y una fortaleza.",
+    href: "/profile#values-strengths",
+    met: values.length > 14 && strengths.length > 12,
+  },
+];
+
+<TestReadinessTab requirements={requirements} />
+
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="mx-auto w-full px-6 py-8">
       <div className="mb-8">
         <h1 className="text-[22px] font-semibold text-black">Panel</h1>
         <p className="mt-1 text-[13px] text-black/45">
@@ -69,15 +96,42 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Quick actions ─────────────────────────────────── */}
-      <div className="mb-10 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <QuickAction href="/tests" icon={ClipboardList} label="Realizar prueba" />
-        <QuickAction href="/reports" icon={FileBarChart2} label="Ver informes" />
-        <QuickAction href="/profile" icon={UserCircle} label="Actualizar perfil" />
-        <QuickAction href="/settings" icon={Settings} label="Configuración" />
-      </div>
+     <div className="mb-10">
+  <h2 className="text-[15px] font-bold text-black/85">
+    Acciones rápidas
+  </h2>
+  <p className="mt-1 text-[13px] text-black/45">
+    Lo que harás con más frecuencia, a un toque de distancia.
+  </p>
 
-      {/* ── Attempts table ────────────────────────────────── */}
-      <div>
+  <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+    <QuickAction href="/tests" icon={ClipboardList} label="Realizar prueba" />
+    <QuickAction href="/reports" icon={FileBarChart2} label="Ver informes" />
+    <QuickAction href="/profile" icon={UserCircle} label="Actualizar perfil" />
+    <QuickAction href="/settings" icon={Settings} label="Configuración" />
+  </div>
+</div>
+      
+
+
+       <div className="mt-4 rounded-3xl border border-black/[0.08] bg-white p-6">
+  <div className="mb-6">
+    <h2 className="text-[15px] font-bold text-black/85">
+      Valores y fortalezas
+    </h2>
+    <p className="mt-1 text-[13px] text-black/45">
+      Complétalos antes de poder realizar una prueba.
+    </p>
+  </div>
+
+  <ProfileValuesStrengths
+    initialValues={values}
+    initialStrengths={strengths}
+  />
+</div>
+
+              {/* ── Attempts table ────────────────────────────────── */}
+      <div className="mt-4">
         <h2 className="mb-3 text-[15px] font-semibold text-black">Tus intentos de prueba</h2>
 
         {attempts.length === 0 ? (
@@ -103,7 +157,6 @@ export default async function DashboardPage() {
                   <Th>Puntuación</Th>
                   <Th>Iniciado</Th>
                   <Th>Finalizado</Th>
-                  <Th align="right">Informe</Th>
                 </tr>
               </thead>
               <tbody>
@@ -133,26 +186,7 @@ export default async function DashboardPage() {
                       <Td>{a.score !== null ? a.score : "—"}</Td>
                       <Td className="text-black/45">{formatDate(a.startedAt)}</Td>
                       <Td className="text-black/45">{formatDate(a.completedAt)}</Td>
-                      <Td align="right">
-                        {a.hasReport ? (
-                          <Link
-                            href={`/reports/${a.id}`}
-                            className="inline-flex items-center gap-1 font-medium"
-                            style={{ color: ACCENT }}
-                          >
-                            Ver <ArrowUpRight className="h-3 w-3" />
-                          </Link>
-                        ) : isInProgress ? (
-                          <Link
-                            href={`/tests/${a.id}`}
-                            className="font-medium text-black/70 hover:text-black"
-                          >
-                            Continuar
-                          </Link>
-                        ) : (
-                          <span className="text-black/25">—</span>
-                        )}
-                      </Td>
+                     
                     </tr>
                   );
                 })}
@@ -177,40 +211,30 @@ function StatCard({
   highlight?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-black/[0.06] bg-white px-4 py-4">
-      <div
-        className="mb-3 flex h-8 w-8 items-center justify-center rounded-full"
-        style={{
-          backgroundColor: highlight ? ACCENT : "rgba(0,0,0,0.04)",
-        }}
-      >
-        <Icon className={cn("h-4 w-4", highlight ? "text-white" : "text-black/50")} />
-      </div>
-      <div className="text-[20px] font-semibold text-black">{value}</div>
-      <div className="mt-0.5 text-[12px] text-black/45">{label}</div>
-    </div>
-  );
-}
-
-function QuickAction({
-  href,
-  icon: Icon,
-  label,
-}: {
-  href: string;
-  icon: React.ElementType;
-  label: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group flex items-center gap-2.5 rounded-2xl border border-black/[0.06] bg-white px-4 py-3.5 transition-colors hover:border-black/[0.12]"
+    <div
+      className="group relative overflow-hidden rounded-lg border border-black/[0.08] bg-white px-4 py-4 transition-shadow duration-300 hover:shadow-[inset_0_0_0_1px_var(--accent)]"
+      style={{ "--accent": ACCENT } as React.CSSProperties}
     >
-      <Icon className="h-4 w-4 text-black/40 transition-colors group-hover:text-black/70" />
-      <span className="text-[13px] font-medium text-black/70 group-hover:text-black">
-        {label}
-      </span>
-    </Link>
+      <div
+        className="mb-3 flex h-8 w-8 items-center justify-center rounded-md transition-colors duration-300"
+        style={{ backgroundColor: highlight ? ACCENT : "rgba(0,0,0,0.04)" }}
+      >
+        <Icon
+          className={cn(
+            "h-4 w-4 transition-colors duration-300",
+            highlight ? "text-white" : "text-black/50 group-hover:text-[var(--accent)]"
+          )}
+        />
+      </div>
+
+      <div className="text-[20px] font-semibold text-black tabular-nums">{value}</div>
+      <div className="mt-0.5 text-[12px] text-black/45">{label}</div>
+
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-4 bottom-0 h-px origin-left scale-x-0 bg-[var(--accent)] transition-transform duration-300 ease-out group-hover:scale-x-100"
+      />
+    </div>
   );
 }
 

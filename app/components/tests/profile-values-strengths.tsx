@@ -101,7 +101,7 @@ export function ProfileValuesStrengths({
     <form action={formAction} className="space-y-6">
       {toast && (
         <div
-          className={`rounded-3xl border px-4 py-3 text-sm shadow-sm transition duration-200 ${
+          className={`flex items-start justify-between gap-4 rounded-lg border px-4 py-3 text-sm shadow-sm transition duration-200 ${
             toast.type === "success"
               ? "border-emerald-200 bg-emerald-50 text-emerald-700"
               : "border-red-200 bg-red-50 text-red-700"
@@ -109,24 +109,25 @@ export function ProfileValuesStrengths({
           role="status"
           aria-live="polite"
         >
-          <div className="flex items-start justify-between gap-4">
-            <span>{toast.message}</span>
-            <button
-              type="button"
-              className="text-sm font-semibold uppercase tracking-[0.24em] text-black/50 hover:text-black"
-              onClick={() => setDismissedToast(toastId)}
-            >
-              Cerrar
-            </button>
-          </div>
+          <span>{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setDismissedToast(toastId)}
+            aria-label="Cerrar"
+            className="shrink-0 rounded-md p-1 text-current/60 transition-colors hover:bg-black/5"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
 
       {/* Values Section */}
       <div className="space-y-4">
         <div>
-          <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-black/50">Valores</h3>
-          <p className="mt-1 text-sm text-black/60">Selecciona hasta 4 valores que te definen.</p>
+          <h3 className="text-[15px] font-medium text-black/85">Valores</h3>
+          <p className="mt-1 text-[13px] text-black/45">
+            Selecciona hasta 4 valores que te definen.
+          </p>
         </div>
 
         {selectedValues.length > 0 && (
@@ -134,13 +135,14 @@ export function ProfileValuesStrengths({
             {selectedValues.map((value) => (
               <div
                 key={value}
-                className="flex items-center justify-between rounded-2xl border border-orange-500/30 bg-orange-50 p-4"
+                className="flex items-center justify-between rounded-lg border border-orange-200 bg-gradient-to-br from-orange-50 to-white p-4 transition-all duration-300 hover:border-orange-300 hover:shadow-[0_4px_16px_-4px_rgba(249,115,22,0.3)]"
               >
                 <span className="text-sm font-medium text-black">{value}</span>
                 <button
                   type="button"
                   onClick={() => removeValue(value)}
-                  className="text-orange-500 hover:text-orange-600"
+                  aria-label={`Quitar ${value}`}
+                  className="rounded-full p-1 text-orange-400 transition-all duration-200 hover:rotate-90 hover:bg-orange-100 hover:text-orange-600"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -160,10 +162,10 @@ export function ProfileValuesStrengths({
                 type="button"
                 onClick={() => toggleValue(value)}
                 disabled={selectedValues.length >= 4 && !selectedValues.includes(value)}
-                className={`rounded-lg border px-3 py-2 text-xs font-medium transition ${
+                className={`rounded-lg border px-3 py-2 text-xs font-medium transition-all duration-200 active:scale-95 disabled:pointer-events-none disabled:opacity-40 ${
                   selectedValues.includes(value)
-                    ? "border-orange-500 bg-orange-500 text-white"
-                    : "border-black/[0.08] bg-white text-black hover:border-black/[0.14] disabled:cursor-not-allowed disabled:opacity-50"
+                    ? "border-transparent bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-sm shadow-orange-500/25"
+                    : "border-black/[0.08] bg-white text-black/70 hover:-translate-y-0.5 hover:border-orange-200 hover:bg-gradient-to-br hover:from-orange-50 hover:to-white hover:text-orange-700 hover:shadow-[0_4px_12px_-4px_rgba(249,115,22,0.35)]"
                 }`}
               >
                 {value}
@@ -180,8 +182,10 @@ export function ProfileValuesStrengths({
       {/* Strengths Section */}
       <div className="space-y-4 border-t border-black/[0.08] pt-6">
         <div>
-          <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-black/50">Fortalezas</h3>
-          <p className="mt-1 text-sm text-black/60">Selecciona hasta 4 fortalezas tuyas.</p>
+          <h3 className="text-[15px] font-medium text-black/85">Fortalezas</h3>
+          <p className="mt-1 text-[13px] text-black/45">
+            Selecciona hasta 4 fortalezas tuyas.
+          </p>
         </div>
 
         {selectedStrengths.length > 0 && (
@@ -189,13 +193,14 @@ export function ProfileValuesStrengths({
             {selectedStrengths.map((strength) => (
               <div
                 key={strength}
-                className="flex items-center justify-between rounded-2xl border border-blue-500/30 bg-blue-50 p-4"
+                className="flex items-center justify-between rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-white p-4 transition-all duration-300 hover:border-blue-300 hover:shadow-[0_4px_16px_-4px_rgba(59,130,246,0.3)]"
               >
                 <span className="text-sm font-medium text-black">{strength}</span>
                 <button
                   type="button"
                   onClick={() => removeStrength(strength)}
-                  className="text-blue-500 hover:text-blue-600"
+                  aria-label={`Quitar ${strength}`}
+                  className="rounded-full p-1 text-blue-400 transition-all duration-200 hover:rotate-90 hover:bg-blue-100 hover:text-blue-600"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -215,10 +220,10 @@ export function ProfileValuesStrengths({
                 type="button"
                 onClick={() => toggleStrength(strength)}
                 disabled={selectedStrengths.length >= 4 && !selectedStrengths.includes(strength)}
-                className={`rounded-lg border px-3 py-2 text-xs font-medium transition ${
+                className={`rounded-lg border px-3 py-2 text-xs font-medium transition-all duration-200 active:scale-95 disabled:pointer-events-none disabled:opacity-40 ${
                   selectedStrengths.includes(strength)
-                    ? "border-blue-500 bg-blue-500 text-white"
-                    : "border-black/[0.08] bg-white text-black hover:border-black/[0.14] disabled:cursor-not-allowed disabled:opacity-50"
+                    ? "border-transparent bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-sm shadow-blue-500/25"
+                    : "border-black/[0.08] bg-white text-black/70 hover:-translate-y-0.5 hover:border-orange-200 hover:bg-gradient-to-br hover:from-orange-50 hover:to-white hover:text-orange-700 hover:shadow-[0_4px_12px_-4px_rgba(249,115,22,0.35)]"
                 }`}
               >
                 {strength}
@@ -235,7 +240,7 @@ export function ProfileValuesStrengths({
       <div className="flex justify-end border-t border-black/[0.08] pt-6">
         <Button
           type="submit"
-          className="bg-orange-500 text-white hover:bg-orange-600 focus-visible:ring-orange-500"
+          className="bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-sm shadow-orange-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:from-orange-600 hover:to-orange-700 hover:shadow-md hover:shadow-orange-500/30 active:translate-y-0 focus-visible:ring-orange-500"
         >
           Guardar cambios
         </Button>
