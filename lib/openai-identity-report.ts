@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { emailReportPdf } from "@/lib/report-email";
 
-export const OPENAI_REPORT_MODEL = "gpt-4.1-mini";
+export const OPENAI_REPORT_MODEL = "gpt-6-astra";
 
 type ProfileDetails = {
   age: number | null;
