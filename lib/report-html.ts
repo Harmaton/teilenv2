@@ -17,7 +17,20 @@ export function extractIdentityReportPages(document: string): IdentityReportPage
 }
 
 export function renderIdentityReportHtml(pages: IdentityReportPage[], options: { avatarUrl?: string | null; studentName?: string | null; age?: number | null; city?: string | null; country?: string | null } = {}) {
-  const pageMarkup = pages.slice(0, 5).map((page, index) => `
+  const pageMarkup = pages.slice(0, 5).map((page, index) => {
+    let html = cleanGeneratedHtml(page.html);
+
+    const { body: withoutClosing, closing } = extractClosing(html);
+    html = withoutClosing;
+
+    let needsBar = "";
+    if (index === 3) {
+      const { body, needs } = extractScenarioNeeds(html);
+      html = body;
+      needsBar = buildScenarioNeedsBar(needs);
+    }
+
+    return `
     <section class="report-page report-page-${index}" aria-labelledby="report-page-title-${index}">
       <div class="page-kicker">TEILEN TEENS <span>${index === 0 ? "MAPA DE IDENTIDAD" : `PÁGINA ${index}`}</span></div>
       <header class="page-header">
@@ -27,11 +40,13 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
       </header>
       ${buildStudentContext(options)}
       ${index === 0 ? buildIdentityFrameworkVisual() : ""}
-      <div class="page-content">${decorateGeneratedHtml(cleanGeneratedHtml(page.html), index)}</div>
-      ${index === 4 && !/salom[oó]n\s*ai/i.test(page.html) ? `<div class="report-callout salomon-callout"><strong>PROFUNDIZA TU PROCESO</strong><p>Si quieres conversar sobre tus resultados y convertir estas ideas en decisiones concretas, escribe a Salomón AI por WhatsApp: <b>+54 351 756 8043</b>.</p></div>` : ""}
-      <footer class="page-footer">IDENTIDAD EVOLUTIVA · INFORME PERSONAL</footer>
+      <div class="page-content">${decorateGeneratedHtml(html, index)}</div>
+      ${needsBar}
+      ${index === 4 ? buildSalomonCallout() : ""}
+      <footer class="page-footer">${closing ? escapeHtml(closing) : "Cada página de este informe suma a tu mapa de identidad."}</footer>
     </section>
-  `).join("");
+  `;
+  }).join("");
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -39,13 +54,14 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Identidad evolutiva</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1&display=swap" rel="stylesheet" />
 <style>
   @page { size: A4 portrait; margin: 0; }
   :root { --orange: #D97B1A; --ink: #25282B; --muted: #6F7479; --warm: #FBF7F2; --line: #E7D8C8; }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: #fff; color: var(--ink); }
   body { font-family: Montserrat, "Avenir Next", Arial, sans-serif; }
-  .report-page { width: 210mm; height: 297mm; padding: 10mm 12mm 11mm; overflow: hidden; position: relative; page-break-after: always; background: #fff; }
+  .report-page { width: 210mm; height: 297mm; padding: 10mm 12mm 11mm; overflow: hidden; position: relative; page-break-after: always; background: #fff; display: flex; flex-direction: column; }
   .report-page:last-child { page-break-after: auto; }
   .page-kicker { display: flex; justify-content: space-between; color: var(--muted); font-size: 8px; font-weight: 600; letter-spacing: .14em; }
   .page-kicker span { color: var(--orange); }
@@ -55,7 +71,7 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
   .page-header h1 { margin: 3mm auto 1.5mm; max-width: 178mm; color: var(--orange); font-family: Georgia, "Times New Roman", serif; font-size: 27px; font-weight: 400; letter-spacing: .02em; text-transform: uppercase; }
   .title-rule { height: 1px; width: 92mm; margin: 0 auto; background: var(--orange); position: relative; }
   .title-rule i { position: absolute; left: 50%; top: -3px; width: 7px; height: 7px; border-radius: 50%; background: var(--orange); }
-  .page-content { font-size: 9.2pt; line-height: 1.38; }
+  .page-content { font-size: 9.2pt; line-height: 1.38; flex: 1; display: flex; flex-direction: column; }
   .student-context { display: flex; align-items: center; justify-content: center; gap: 3mm; margin: 0 auto 3mm; color: var(--muted); font-size: 8.5px; }
   .student-context img { width: 14mm; height: 14mm; border-radius: 50%; object-fit: cover; border: 1px solid var(--line); }
   .student-context strong { color: var(--ink); font-family: Georgia, serif; font-size: 14px; }
@@ -79,9 +95,6 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
   .report-callout { margin: 3mm 0; background: var(--warm); border-left: 3px solid var(--orange); }
   .report-callout { position: relative; padding-left: 12mm; }
   .report-callout::before { content: "✦"; position: absolute; left: 3mm; top: 3mm; color: var(--orange); font-size: 14px; }
-  .salomon-callout { display: grid; grid-template-columns: 1fr; gap: 1mm; }
-  .salomon-callout strong { color: var(--orange); font-size: 10px; letter-spacing: .08em; }
-  .salomon-callout b { color: var(--orange); }
   .report-page-0 .page-content { font-size: 8.8pt; }
   .framework-visual { position: relative; height: 57mm; margin: 0 auto 3mm; max-width: 174mm; }
   .framework-visual svg { display: block; width: 100%; height: 100%; }
@@ -97,12 +110,57 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
   .report-page-0 .report-grid { gap: 3mm; }
   .report-page-0 .report-callout { min-height: 20mm; }
   .report-page-3 .report-grid { gap: 4mm; }
+  .report-page-3 .page-content { justify-content: space-between; }
   .report-page-4 { counter-reset: life-section; }
   .report-page-4 .page-content h2 { counter-increment: life-section; }
   .report-page-4 .page-content h2::before { content: counter(life-section) ". "; }
   .report-page-4 .report-card { min-height: 25mm; }
-  .salomon-callout { border-left-color: var(--orange); background: var(--warm); }
-  .page-footer { position: absolute; bottom: 7mm; left: 12mm; right: 12mm; padding-top: 2mm; border-top: .5pt solid var(--line); color: var(--muted); font-size: 7.5px; text-align: center; letter-spacing: .08em; }
+  .report-page-4 .page-content { justify-content: space-between; }
+
+  /* numbered badges on page 2, replacing the outline icon */
+  .report-page-2 .report-grid { counter-reset: quad; }
+  .report-page-2 .report-card { counter-increment: quad; }
+  .report-page-2 .report-card .box-icon { display: none; }
+  .report-page-2 .report-card::before {
+    content: counter(quad);
+    position: absolute; left: 3mm; top: 3mm;
+    width: 6.5mm; height: 6.5mm; border-radius: 50%;
+    background: var(--orange); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: Georgia, serif; font-weight: 700; font-size: 11px;
+  }
+
+  /* closing tagline footer, matches PDF's dot-rule style */
+  .page-footer {
+    position: absolute; bottom: 7mm; left: 12mm; right: 12mm;
+    text-align: center; font-style: italic;
+    color: var(--muted); font-size: 8.5px; font-family: Georgia, serif;
+  }
+  .page-footer::before {
+    content: ""; display: block; margin: 0 auto 2mm; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--orange);
+  }
+
+  /* scenario needs bar, page 3 */
+  .scenario-needs { margin-top: 3mm; border-top: .7pt solid var(--line); padding-top: 3mm; }
+  .scenario-needs-title { text-align: center; color: var(--orange); font-size: 9px; letter-spacing: .1em; font-weight: 700; margin-bottom: 2.5mm; text-transform: uppercase; }
+  .scenario-needs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2mm; }
+  .scenario-need { text-align: center; padding: 0 2mm; }
+  .scenario-need .box-icon { position: static; margin: 0 auto 1.5mm; width: 6mm; height: 6mm; color: var(--orange); }
+  .scenario-need-label { font-size: 7.5px; font-weight: 700; color: var(--ink); }
+  .scenario-need-text { font-size: 7.5px; color: var(--muted); }
+
+  /* Salomón AI closer, two-column card */
+  .salomon-callout { display: grid; grid-template-columns: 10mm 1fr auto; align-items: center; gap: 3mm; padding: 3mm 3mm 3mm 3mm; margin-top: auto; }
+  .salomon-callout::before { display: none; }
+  .salomon-callout .box-icon { position: static; }
+  .salomon-text strong { display: block; color: var(--orange); font-size: 10px; letter-spacing: .08em; margin-bottom: .8mm; }
+  .salomon-text p { margin: 0; font-size: 8.5px; color: var(--ink); }
+  .salomon-text b { color: var(--orange); }
+  .salomon-signature { text-align: right; white-space: nowrap; }
+  .salomon-logo { display: block; font-family: "Playfair Display", Georgia, serif; font-style: italic; color: var(--orange); font-size: 16px; }
+  .salomon-caption { display: block; font-size: 6.5px; letter-spacing: .18em; color: var(--muted); margin-top: 1mm; }
+
   @media screen { .report-page { margin: 20px auto; box-shadow: 0 0 0 1px #eee; } body { background: #f7f7f6; } }
   @media print { .report-page { margin: 0; } }
 </style>
@@ -117,6 +175,71 @@ function cleanGeneratedHtml(html: string) {
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "")
     .replace(/\son[a-z]+\s*=\s*(["']).*?\1/gi, "");
+}
+
+/**
+ * Pulls a trailing <p class="page-closing">...</p> out of a page's HTML
+ * so it can be rendered in the footer instead of inline in the body.
+ */
+function extractClosing(html: string): { body: string; closing: string | null } {
+  const match = html.match(/<p[^>]*class=["'][^"']*\bpage-closing\b[^"']*["'][^>]*>([\s\S]*?)<\/p>/i);
+  if (!match || match.index === undefined) return { body: html, closing: null };
+  const closing = stripTags(match[1]).trim();
+  const body = html.slice(0, match.index) + html.slice(match.index + match[0].length);
+  return { body, closing };
+}
+
+/**
+ * Strips the "Qué necesita de ti: ..." trailing clause out of each of the
+ * four page-3 scenarios and returns them in order for the summary bar.
+ */
+function extractScenarioNeeds(html: string): { body: string; needs: string[] } {
+  const needs: string[] = [];
+  const body = html
+    .replace(/\s*Qué necesita de ti:?\s*([^.<]+)\.?/gi, (_m, text) => {
+      needs.push(text.trim());
+      return "";
+    })
+    .replace(/<p>\s*<\/p>/gi, "");
+  return { body, needs };
+}
+
+const SCENARIO_ICONS = [
+  "M12 22s8-3 8-9V6l-8-3-8 3v7c0 6 8 9 8 9Z M12 8v4M9 6l3-1 3 1", // formación académica
+  "M8 14a7 7 0 1 1 8 0c-1 1-2 2-2 4h-4c0-2-1-3-2-4Z M9 18h6M10 22h4", // profesión emergente
+  "M5 19l6-14 6 14M8 15h8 M12 5V3", // emprendimiento
+  "M4 21V9l8-5 8 5v12M9 21v-6h6v6", // entorno laboral
+];
+
+const SCENARIO_LABELS = ["FORMACIÓN ACADÉMICA", "PROFESIÓN EMERGENTE", "EMPRENDIMIENTO", "ENTORNO LABORAL"];
+
+function buildScenarioNeedsBar(needs: string[]) {
+  if (needs.length < 4) return "";
+  return `<div class="scenario-needs">
+    <div class="scenario-needs-title">QUÉ NECESITA CADA ESCENARIO</div>
+    <div class="scenario-needs-grid">
+      ${needs.slice(0, 4).map((need, i) => `
+        <div class="scenario-need">
+          <div class="box-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${SCENARIO_ICONS[i]}" /></svg></div>
+          <div class="scenario-need-label">${escapeHtml(SCENARIO_LABELS[i])}</div>
+          <div class="scenario-need-text">${escapeHtml(need)}</div>
+        </div>`).join("")}
+    </div>
+  </div>`;
+}
+
+function buildSalomonCallout() {
+  return `<div class="report-callout salomon-callout">
+    <div class="box-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H8l-4 4V4Z" /></svg></div>
+    <div class="salomon-text">
+      <strong>PROFUNDIZA TU PROCESO</strong>
+      <p>Si quieres conversar sobre tus resultados y convertir estas ideas en decisiones concretas, escríbele a Salomón AI por WhatsApp: <b>+54 351 756 8043</b>.</p>
+    </div>
+    <div class="salomon-signature">
+      <span class="salomon-logo">Salomón AI</span>
+      <span class="salomon-caption">INTELIGENCIA QUE ACOMPAÑA</span>
+    </div>
+  </div>`;
 }
 
 function buildStudentContext(options: { avatarUrl?: string | null; studentName?: string | null; age?: number | null; city?: string | null; country?: string | null }) {

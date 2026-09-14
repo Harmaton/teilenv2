@@ -96,13 +96,17 @@ REGLAS DE CONTENIDO
 - No escribas coordenadas, SVG complejo, imágenes externas, scripts ni estilos globales. El renderer ya controla el diseño.
 - Devuelve HTML semántico pequeño dentro de cada página: h2, h3, p, ul, ol, blockquote, div class="report-card", div class="report-grid", div class="report-pill" y div class="report-callout".
 - El HTML debe ser texto real, sin markdown ni etiquetas de documento.
+- Cada página (excepto la página 4) debe terminar con <p class="page-closing">una frase de cierre de 12-20 palabras</p> ligada al contenido de esa página. No repitas la misma frase de cierre entre páginas.
+- En la página 4, envuelve la frase fija final en <p class="page-closing">Tu identidad no se descubre de una vez. Se construye cada vez que eliges con mayor claridad.</p> y no agregues ninguna otra frase de cierre.
+- En la página 3, numera cada escenario en su encabezado en este orden exacto: <h3>1. Formación académica</h3>, <h3>2. Profesión emergente</h3>, <h3>3. Emprendimiento</h3>, <h3>4. Entorno laboral ideal</h3>.
+- En la página 3, cada uno de los cuatro escenarios debe terminar su párrafo con la frase exacta "Qué necesita de ti: " seguida de una frase corta de 4-8 palabras y un punto final. No pongas esta frase en ningún otro lugar del informe.
 
 LAS CINCO PÁGINAS, EN ESTE ORDEN
 0. “IDENTIDAD EVOLUTIVA”: resumen visual de 30 segundos. Incluye meta del estudiante, talento predominante, esencia, cuatro habilidades observables, cuatro condiciones para aprender, cuatro aspectos a cuidar, proyección en dos líneas, cuatro valores y tres indicadores: potencia, freno y dónde brillas. Usa tarjetas compactas y una frase final. No agregues análisis nuevo.
 1. “QUIÉN SOY HOY”: 130-180 palabras de apertura usando el nombre dos veces; una cita espejo de 18-30 palabras; cuatro tarjetas de personalidad en acción: cómo te mueves, piensas, decides e impactas; cuatro filas de ADN natural; tres patrones recurrentes; tres rasgos que distinguen. No hables de carreras ni acciones futuras.
 2. “EN QUÉ ERES BUENO Y CÓMO FUNCIONAS MEJOR”: narrativa de aprendizaje de 140-190 palabras, exactamente cuatro bullets de aprendizaje; cuatro habilidades con expresión observable; narrativa de resolución de 110-160 palabras y exactamente tres condiciones de mejor desempeño; cuatro fricciones concretas y tres ajustes específicos para empezar a trabajarlas. No menciones carreras.
-3. “DÓNDE PUEDES GENERAR MÁS VALOR”: cuatro escenarios con el mismo peso y 110-150 palabras cada uno: formación académica con 2-4 familias de estudio, profesión emergente con un rol realista, emprendimiento con estilo y ejemplo concreto, y entorno laboral ideal sin cargo. Cada escenario termina con “Qué necesita de ti”. Nunca digas mejor, recomendado, ideal para ti o deberías.
-4. “MI PROYECTO DE VIDA”: frase espejo de 18-30 palabras y explicación de 70-110 palabras; tres orientaciones de 65-95 palabras centradas en criterios; tres acciones observables para las próximas 2-3 semanas que produzcan evidencia; reflexión sobria de 80-120 palabras; termina exactamente con “Tu identidad no se descubre de una vez. Se construye cada vez que eliges con mayor claridad.” No incluyas Salomón AI ni un número de WhatsApp: el renderer añade ese cierre visual de forma fija. No repitas fortalezas, habilidades o escenarios como resumen.
+3. “DÓNDE PUEDES GENERAR MÁS VALOR”: cuatro escenarios con el mismo peso y 110-150 palabras cada uno: formación académica con 2-4 familias de estudio, profesión emergente con un rol realista, emprendimiento con estilo y ejemplo concreto, y entorno laboral ideal sin cargo. Cada escenario termina con “Qué necesita de ti” según la regla de formato indicada arriba. Nunca digas mejor, recomendado, ideal para ti o deberías.
+4. “MI PROYECTO DE VIDA”: frase espejo de 18-30 palabras y explicación de 70-110 palabras; tres orientaciones de 65-95 palabras centradas en criterios; tres acciones observables para las próximas 2-3 semanas que produzcan evidencia; reflexión sobria de 80-120 palabras; termina con la frase fija indicada arriba envuelta en <p class="page-closing">. No incluyas Salomón AI ni un número de WhatsApp: el renderer añade ese cierre visual de forma fija. No repitas fortalezas, habilidades o escenarios como resumen.
 
 FORMATO
 Devuelve solamente JSON válido con exactamente cinco objetos en pages. Cada objeto tiene title y html. No incluyas markdown, explicaciones ni texto fuera del JSON.`;
@@ -120,8 +124,7 @@ async function generateWithOpenAI(prompt: string): Promise<{ report: GeneratedRe
     },
     body: JSON.stringify({
       model: OPENAI_REPORT_MODEL,
-      temperature: 0.35,
-      max_output_tokens: 12000,
+      max_output_tokens: 15000,
       input: [
         {
           role: "system",

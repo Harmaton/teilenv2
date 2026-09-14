@@ -33,7 +33,6 @@ type NavGroup = {
 
 import {
   LayoutDashboard,
-  UserCircle,
   FileBarChart2,
   ClipboardList,
   Settings,
@@ -60,7 +59,6 @@ const NAV: NavGroup[] = [
   {
     label: "Cuenta",
     items: [
-      // { label: "Perfil", href: "/profile", icon: UserCircle },
       { label: "Configuración", href: "/settings", icon: Settings },
     ],
   },
@@ -203,7 +201,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
               className="flex w-full items-center gap-2.5 rounded-full px-3 py-2 text-[13px] font-medium text-black/45 transition-colors hover:bg-black/[0.04] hover:text-black"
             >
               <AdIcon className="h-[15px] w-[15px]" />
-              <span>Admin Page</span>
+              <span>Página de administración</span>
             </SidebarMenuButton>
           </SidebarMenuItem> : <div>
             
