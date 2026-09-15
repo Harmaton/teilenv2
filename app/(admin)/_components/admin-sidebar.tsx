@@ -49,6 +49,7 @@ const NAV: NavGroup[] = [
     items: [
       { label: "Panel", href: "/admin/dashboard", icon: LayoutDashboard },
       { label: "Gestionar Usuarios", href: "/admin/manage-users", icon: UserCircle },
+      {label: "Codigo", href: "/admin/manage-access", icon: AdIcon}
     ],
   },
   {

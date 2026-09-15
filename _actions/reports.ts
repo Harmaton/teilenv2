@@ -31,6 +31,8 @@ export type ReportDetail = {
   updatedAt: string;
   user: { fullName: string | null; email: string | null; avatarUrl: string | null; age: number | null; city: string | null; country: string | null };
   attemptCompletedAt: string | null;
+  accessType: "locked" | "paid" | "free_code" | "admin_granted";
+  hasAccess: boolean;
 };
 
 export async function getUserReports(): Promise<{ success: true; data: ReportSummary[] } | { success: false; error: string }> {
@@ -64,25 +66,45 @@ export async function getReportDetail(
   if (!authResult.success) return { success: false, error: authResult.error };
 
   const supabase = await createClient();
+
   const { data, error } = await supabase
     .from("reports")
     .select(
-      `id, status, error, content, created_at, updated_at,
+      `id, status, error, content, access_type, created_at, updated_at,
        tests ( title, description ),
-       profiles ( full_name, avatar_url, email ),
+       profiles!reports_profile_id_fkey ( full_name, avatar_url, email ),
        test_attempts ( created_at )`
     )
     .eq("id", reportId)
     .eq("profile_id", authResult.user.id)
     .single();
 
-  if (error || !data) return { success: false, error: "Report not found." };
+  if (error) {
+    console.error("[getReportDetail] Supabase error:", {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      reportId,
+    });
+    return { success: false, error: `Error al cargar el informe: ${error.message}` };
+  }
+
+  if (!data) return { success: false, error: "Report not found." };
 
   const { data: details } = await supabase
     .from("profile_details")
     .select("age, city, country")
     .eq("profile_id", authResult.user.id)
     .maybeSingle();
+
+  const accessType = (data.access_type ?? "locked") as
+    | "locked"
+    | "paid"
+    | "free_code"
+    | "admin_granted";
+
+  // ✅ Single rule: anything other than 'locked' means unlocked
+  const hasAccess = accessType !== "locked";
 
   return {
     success: true,
@@ -92,9 +114,15 @@ export async function getReportDetail(
       testDescription: (data as any).tests?.description ?? null,
       status: data.status,
       error: data.error,
-      content: data.status === "completed" ? (data.content as ReportContent) : null,
+      // 🔒 Only ship content when the user actually has access
+      content:
+        hasAccess && data.status === "completed"
+          ? (data.content as ReportContent)
+          : null,
       createdAt: data.created_at,
       updatedAt: data.updated_at,
+      accessType,
+      hasAccess,
       user: {
         fullName: (data as any).profiles?.full_name ?? null,
         email: (data as any).profiles?.email ?? null,
