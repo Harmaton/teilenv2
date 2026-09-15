@@ -62,19 +62,6 @@ export default async function AdminDashboardPage() {
         </p>
       </div>
 
-      {/* ── Usuarios ──────────────────────────────────────── */}
-      {/* <SectionLabel>Usuarios</SectionLabel>
-      <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard icon={Users} label="Usuarios totales" value={stats.totalUsers} />
-        <StatCard icon={UserPlus} label="Nuevos esta semana" value={stats.newUsersThisWeek} sub={`+${stats.newUsersToday} hoy`} />
-        <StatCard icon={Activity} label="Activos (7 días)" value={stats.activeUsers7d} highlight />
-        <StatCard
-          icon={TrendingDown}
-          label="Tasa de abandono"
-          value={`${stats.churnRate.toFixed(1)}%`}
-          warn={stats.churnRate > 30}
-        />
-      </div> */}
 
       {/* ── Pruebas ───────────────────────────────────────── */}
       <SectionLabel>Pruebas</SectionLabel>

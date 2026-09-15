@@ -253,12 +253,12 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
 
     if (profile.email) {
       try {
-        await emailReportPdf({
-          recipient: profile.email,
-          studentName: profile.full_name,
-          reportHtml: html,
-          reportId,
-        });
+        // await emailReportPdf({
+        //   recipient: profile.email,
+        //   studentName: profile.full_name,
+        //   reportHtml: html,
+        //   reportId,
+        // });
         await supabase.from("notifications").insert({
           profile_id: report.profile_id,
           title: "Informe enviado por correo",
