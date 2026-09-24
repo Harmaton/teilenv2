@@ -31,7 +31,7 @@ const EmbeddedHotmartCheckout = () => {
   return (
     <div className="flex w-full justify-center">
       <Link
-        href="https://pay.hotmart.com/K107749170P"
+        href="https://pay.hotmart.com/B107749079F"
         className="hotmart-fb hotmart__button-checkout inline-flex items-center justify-center rounded-lg shadow-md transition-transform duration-150 hover:scale-[1.03] hover:shadow-lg"
         onClick={(e) => e.preventDefault()}
       >

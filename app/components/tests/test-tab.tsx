@@ -2,108 +2,107 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, ListChecks, Lock, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowUpRight, ListChecks, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TestCard } from "@/_actions/tests";
-import { ProfileValuesStrengths } from "./profile-values-strengths";
+import { ProfileValues } from "./Profile-Values";
+import { ProfileStrengths } from "./Profile-Strengths";
 
 
 const ACCENT = "#FF5A1F";
 
-type Tab = "free" | "paid" | "profile";
+type Tab = "values" | "strengths" | "tests";
 
 export function TestsTabs({
   free,
-  paid,
   initialValues,
   initialStrengths,
 }: {
   free: TestCard[];
-  paid: TestCard[];
   initialValues?: string[];
   initialStrengths?: string[];
 }) {
-  const [tab, setTab] = useState<Tab>("free");
+  const [tab, setTab] = useState<Tab>("values");
   const router = useRouter();
-
-  const list = tab === "free" ? free : tab === "paid" ? paid : [];
 
   return (
     <div>
       {/* ── Tabs ──────────────────────────────────────────── */}
       <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-black/[0.06] bg-black/[0.02] p-1">
-        <TabButton active={tab === "free"} onClick={() => setTab("free") }>
-          Gratis
+        <TabButton active={tab === "values"} onClick={() => setTab("values")}>
+          Estudio 1
+        </TabButton>
+        <TabButton active={tab === "strengths"} onClick={() => setTab("strengths")}>
+          Estudio 2
+        </TabButton>
+        <TabButton active={tab === "tests"} onClick={() => setTab("tests")}>
+          Estudio 3
           <Count>{free.length}</Count>
-        </TabButton>
-        <TabButton active={tab === "paid"} onClick={() => setTab("paid") }>
-          Pago
-          <Count>{paid.length}</Count>
-        </TabButton>
-        <TabButton active={tab === "profile"} onClick={() => setTab("profile") }>
-          valores y fortalezas
         </TabButton>
       </div>
 
-      {/* ── Grid/Content ──────────────────────────────────────────── */}
-      {tab === "profile" ? (
+      {/* ── Content ──────────────────────────────────────────── */}
+      {tab === "values" ? (
         <div className="rounded-3xl border border-black/[0.08] bg-white p-6">
-          <ProfileValuesStrengths
-            initialValues={initialValues}
-            initialStrengths={initialStrengths}
-          />
+          <ProfileValues initialValues={initialValues} />
         </div>
-      ) : list.length === 0 ? (
+      ) : tab === "strengths" ? (
+        <div className="rounded-3xl border border-black/[0.08] bg-white p-6">
+          <ProfileStrengths initialStrengths={initialStrengths} />
+        </div>
+      ) : free.length === 0 ? (
         <div className="rounded-2xl border border-black/[0.06] bg-black/[0.02] px-6 py-10 text-center">
-          <p className="text-[13px] text-black/45">
-            {tab === "free" ? "No hay tests gratuitos disponibles todavía." : "No hay tests pagos disponibles todavía."}
-          </p>
+          <p className="text-[13px] text-black/45">No hay tests disponibles todavía.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {list.map((test) => (
-            <button
+        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+          {free.map((test, i) => (
+            <motion.button
               key={test.id}
               onClick={() => router.push(`/tests/${test.id}`)}
-              className="group flex flex-col items-start rounded-2xl border border-black/[0.06] bg-white p-5 text-left transition-colors hover:border-black/[0.14]"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+              whileHover={{ y: -3 }}
+              whileTap={{ scale: 0.98 }}
+              className="group relative flex flex-col items-start overflow-hidden rounded-2xl border border-black/[0.06] bg-white p-5 text-left shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-[border-color,box-shadow] duration-300 hover:border-orange-200 hover:shadow-[0_12px_28px_-12px_rgba(255,90,31,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/40"
             >
-              <div className="mb-3 flex w-full items-center justify-between">
-                <div
-                  className="flex h-8 w-8 items-center justify-center rounded-full"
-                  style={{
-                    backgroundColor: test.isFree ? "rgba(0,0,0,0.04)" : "rgba(255,90,31,0.1)",
-                  }}
-                >
-                  {test.isFree ? (
-                    <ListChecks className="h-4 w-4 text-black/50" />
-                  ) : (
-                    <Lock className="h-4 w-4" style={{ color: ACCENT }} />
-                  )}
+              {/* subtle directional glow on hover */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-orange-500/0 blur-2xl transition-colors duration-300 group-hover:bg-orange-500/10"
+              />
+
+              <div className="mb-4 flex w-full items-center justify-between">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-50 to-black/[0.02] ring-1 ring-black/[0.04] transition-transform duration-300 group-hover:scale-105 group-hover:ring-orange-200">
+                  <ListChecks className="h-4 w-4 text-orange-500/80" />
                 </div>
-                <ArrowUpRight className="h-4 w-4 text-black/20 transition-colors group-hover:text-black/50" />
+                <ArrowUpRight className="h-4 w-4 -translate-x-0.5 translate-y-0.5 text-black/20 transition-all duration-300 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:text-orange-500" />
               </div>
 
-              <h3 className="text-[14px] font-semibold text-black">{test.title}</h3>
+              <h3 className="text-[14px] font-semibold leading-snug text-black">
+                {test.title}
+              </h3>
 
-              {test.description && (
-                <p className="mt-1 line-clamp-2 text-[12.5px] text-black/45">
+              {test.description ? (
+                <p className="mt-1.5 line-clamp-2 text-[12.5px] leading-relaxed text-black/45">
                   {test.description}
                 </p>
+              ) : (
+                <div className="mt-1.5 h-[2.6em]" aria-hidden />
               )}
 
-              <div className="mt-4 flex items-center gap-2 text-[11.5px] text-slate-400">
-                <Sparkles className="h-3.5 w-3.5 text-orange-500" />
-                <span>Un momento para conocerte mejor</span>
-                {!test.isFree && (
-                  <>
-                    <span>·</span>
-                    <span style={{ color: ACCENT }} className="font-medium">
-                      Premium
-                    </span>
-                  </>
-                )}
+              <div className="mt-4 flex w-full items-center justify-between border-t border-black/[0.05] pt-3">
+                <div className="flex items-center gap-1.5 text-[11px] text-black/35">
+                  <Sparkles className="h-3.5 w-3.5 text-orange-500/70" />
+                  <span>Un momento para conocerte mejor</span>
+                </div>
+                <span className="translate-x-1 text-[11px] font-medium text-orange-600 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+                  Empezar →
+                </span>
               </div>
-            </button>
+            </motion.button>
           ))}
         </div>
       )}

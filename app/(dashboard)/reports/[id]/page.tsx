@@ -1,8 +1,6 @@
-
 import { getReportDetail } from "@/_actions/reports";
 import Checkout from "@/app/components/payments/checkout";
 import { ReportView } from "@/app/components/reports/report-view";
-
 
 export default async function ReportDetailPage({
   params,

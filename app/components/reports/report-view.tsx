@@ -7,25 +7,27 @@ import {
   retryReportGeneration,
   type ReportDetail,
 } from "@/_actions/reports";
+import { getSalomonConversation, type SalomonMessage } from "@/_actions/salomon";
 import { buildReportHtml } from "@/lib/report-html";
+import { cn } from "@/lib/utils";
+import SalomonCheckout from "../payments/SalomonCheckout";
 
 const ACCENT = "#FF5A1F";
 
-const QUICK_EDITS = [
-  { id: "concise", label: "Más conciso" },
-  { id: "formal", label: "Más formal" },
-  { id: "motivational", label: "Más motivador" },
-  { id: "detailed", label: "Más detallado" },
-];
+type ChatMessage = SalomonMessage;
 
 export function ReportView({ initial }: { initial: ReportDetail }) {
   const [report, setReport] = useState(initial);
   const [retrying, setRetrying] = useState(false);
   const [editPanelOpen, setEditPanelOpen] = useState(false);
-  const [instruction, setInstruction] = useState("");
-  const [applying, setApplying] = useState(false);
-  const [editError, setEditError] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [question, setQuestion] = useState("");
+  const [asking, setAsking] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (report.status !== "pending" && report.status !== "generating") return;
@@ -37,6 +39,28 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
 
     return () => clearInterval(interval);
   }, [report.status, report.id]);
+
+  // ── Hydrate chat history + cap status from the DB so it survives reloads ──
+  useEffect(() => {
+    if (report.status !== "completed") return;
+    let active = true;
+    (async () => {
+      const res = await getSalomonConversation(report.id);
+      if (!active) return;
+      if (res.success) {
+        setMessages(res.data.messages);
+        setLimitReached(res.data.limitReached);
+      }
+      setHistoryLoaded(true);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [report.id, report.status]);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, asking]);
 
   const handleRetry = async () => {
     setRetrying(true);
@@ -52,24 +76,42 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
     setRetrying(false);
   };
 
-  const applyEdit = async (payload: { styleId?: string; instruction?: string }) => {
-    setApplying(true);
-    setEditError(null);
+  const askSalomon = async () => {
+    const q = question.trim();
+    if (!q || asking || limitReached) return;
+
+    setChatError(null);
+    setMessages((m) => [...m, { role: "user", content: q }]);
+    setQuestion("");
+    setAsking(true);
     try {
-      const res = await fetch("/api/reports/openai/edit", {
+      const res = await fetch("/api/reports/openai/salomonai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reportId: report.id, ...payload }),
+        body: JSON.stringify({
+          reportId: report.id,
+          question: q,
+          testTitle: report.testTitle,
+        }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "No se pudo aplicar la edición.");
-      setReport((r) => ({ ...r, content: data.content, updatedAt: new Date().toISOString() }));
-      setInstruction("");
-      setEditPanelOpen(false);
+
+      if (!res.ok) {
+        if (data.limitReached) setLimitReached(true);
+        throw new Error(data.error ?? "No se pudo obtener una respuesta.");
+      }
+
+      setMessages((m) => [...m, { role: "assistant", content: data.answer }]);
+
+      // If this was the last free reply, switch straight to the checkout
+      // state instead of waiting for the next question to get blocked.
+      if (typeof data.repliesRemaining === "number" && data.repliesRemaining <= 0) {
+        setLimitReached(true);
+      }
     } catch (err) {
-      setEditError(err instanceof Error ? err.message : "Error inesperado.");
+      setChatError(err instanceof Error ? err.message : "Error inesperado.");
     } finally {
-      setApplying(false);
+      setAsking(false);
     }
   };
 
@@ -140,72 +182,129 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
               {new Date(report.updatedAt).toLocaleDateString("es", { month: "short", day: "numeric" })}
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              onClick={handleDownloadPdf}
-              className="flex items-center gap-1.5 rounded-full border border-black/[0.08] px-3.5 py-1.5 text-[12.5px] font-medium text-black/60 hover:border-black/20 hover:text-black"
-            >
-              <Download className="h-3.5 w-3.5" /> Descargar PDF
-            </button>
-            <button
-              onClick={() => setEditPanelOpen((v) => !v)}
-              className="flex items-center gap-1.5 rounded-full border border-black/[0.08] px-3.5 py-1.5 text-[12.5px] font-medium text-black/60 hover:border-black/20 hover:text-black"
-            >
-              <Sparkles className="h-3.5 w-3.5" /> Editar con IA
-            </button>
-          </div>
+          <div className="relative flex shrink-0 items-center gap-2">
+<button
+  onClick={handleDownloadPdf}
+  className="group relative flex items-center gap-1.5 overflow-hidden rounded-full bg-gradient-to-br from-red-500 to-red-600 px-3.5 py-1.5 text-[12.5px] font-medium text-white shadow-sm shadow-red-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:from-red-600 hover:to-red-700 hover:shadow-md hover:shadow-red-500/30 active:translate-y-0 active:scale-95"
+>
+  <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+  <Download className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-y-0.5 group-hover:scale-110" />
+  Descargar PDF
+</button>
+
+  <button
+    onClick={() => setEditPanelOpen((v) => !v)}
+    aria-pressed={editPanelOpen}
+    className={cn(
+      "group flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-all duration-200 active:scale-95",
+      editPanelOpen
+        ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-sm shadow-orange-500/25"
+        : "border border-orange-200 bg-gradient-to-br from-orange-50 to-white text-orange-700 hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-[0_4px_12px_-4px_rgba(249,115,22,0.35)]"
+    )}
+  >
+    <Sparkles
+      className={cn(
+        "h-3.5 w-3.5 transition-transform duration-200",
+        editPanelOpen ? "text-white" : "text-orange-500 group-hover:rotate-12"
+      )}
+    />
+    Pregúntale a Salomon AI
+  </button>
+
+  {/* ── Floating chat panel ──────────────────────────── */}
+  {editPanelOpen && (
+    <div className="absolute right-0 top-full z-20 mt-2 flex h-[420px] w-[380px] flex-col overflow-hidden rounded-2xl border border-black/[0.08] bg-white shadow-[0_16px_40px_-12px_rgba(0,0,0,0.18)]">
+      <div className="flex shrink-0 items-center justify-between border-b border-black/[0.06] px-4 py-3">
+        <div className="flex items-center gap-1.5 text-[12.5px] font-semibold text-black">
+          <Sparkles className="h-3.5 w-3.5 text-orange-500" />
+          Salomon AI
         </div>
+        <button
+          onClick={() => setEditPanelOpen(false)}
+          aria-label="Cerrar chat"
+          className="rounded-full p-1 text-black/30 hover:bg-black/5 hover:text-black/60"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
 
-        {editPanelOpen && (
-          <div className="mb-4 rounded-2xl border border-black/[0.08] bg-black/[0.02] p-4">
-            <p className="mb-2 text-[12px] font-medium text-black/60">Estilos rápidos</p>
-            <div className="mb-3 flex flex-wrap gap-2">
-              {QUICK_EDITS.map((q) => (
-                <button
-                  key={q.id}
-                  disabled={applying}
-                  onClick={() => applyEdit({ styleId: q.id })}
-                  className="rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-[12px] font-medium text-black/70 hover:border-black/20 disabled:opacity-50"
-                >
-                  {q.label}
-                </button>
-              ))}
+      <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
+        {!historyLoaded ? (
+          <div className="flex items-center gap-1.5 text-[12px] text-black/35">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            Cargando conversación...
+          </div>
+        ) : messages.length === 0 ? (
+          <p className="text-[12.5px] leading-relaxed text-black/40">
+            Pregúntame lo que quieras sobre tu informe — por ejemplo: "¿Cuál es mi mayor fortaleza según este informe, y por qué?"
+          </p>
+        ) : (
+          messages.map((m, i) => (
+            <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
+              <div
+                className={cn(
+                  "max-w-[85%] rounded-2xl px-3.5 py-2 text-[12.5px] leading-relaxed",
+                  m.role === "user"
+                    ? "bg-black/[0.06] text-black"
+                    : "border border-orange-100 bg-orange-50/60 text-black/80"
+                )}
+              >
+                {m.content}
+              </div>
             </div>
-
-            <p className="mb-1.5 text-[12px] font-medium text-black/60">O describe el cambio</p>
-            <textarea
-              value={instruction}
-              onChange={(e) => setInstruction(e.target.value)}
-              rows={2}
-              placeholder="Ej. Enfócate más en las fortalezas de liderazgo del usuario..."
-              className="w-full resize-none rounded-xl border border-black/[0.08] p-3 text-[13px] text-black outline-none focus:border-black/25"
-            />
-
-            {editError && <p className="mt-2 text-[12px] text-red-500">{editError}</p>}
-
-            <div className="mt-3 flex justify-end gap-2">
-              <button
-                onClick={() => {
-                  setEditPanelOpen(false);
-                  setInstruction("");
-                  setEditError(null);
-                }}
-                className="rounded-full px-3.5 py-1.5 text-[12.5px] font-medium text-black/40 hover:text-black"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => instruction.trim() && applyEdit({ instruction: instruction.trim() })}
-                disabled={applying || !instruction.trim()}
-                className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[12.5px] font-semibold text-white disabled:opacity-60"
-                style={{ backgroundColor: ACCENT }}
-              >
-                {applying && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                Aplicar
-              </button>
+          ))
+        )}
+        {asking && (
+          <div className="flex justify-start">
+            <div className="flex items-center gap-1.5 rounded-2xl border border-orange-100 bg-orange-50/60 px-3.5 py-2 text-[12px] text-black/50">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Pensando...
             </div>
           </div>
         )}
+
+        {limitReached && (
+          <div className="rounded-2xl border border-orange-100 bg-orange-50/40 p-4">
+            <p className="mb-3 text-[12.5px] leading-relaxed text-black/60">
+              Has alcanzado el límite de preguntas gratuitas para este informe. Desbloquea el chat para seguir hablando con Salomon AI.
+            </p>
+            <SalomonCheckout reportId={report.id} />
+          </div>
+        )}
+
+        <div ref={chatEndRef} />
+      </div>
+
+      {chatError && !limitReached && <p className="px-4 pb-2 text-[12px] text-red-500">{chatError}</p>}
+
+      {!limitReached && (
+        <div className="flex shrink-0 items-center gap-2 border-t border-black/[0.06] p-3">
+          <input
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                askSalomon();
+              }
+            }}
+            placeholder="Escribe tu pregunta..."
+            className="flex-1 rounded-full border border-black/[0.08] px-3.5 py-2 text-[13px] text-black outline-none focus:border-black/25"
+          />
+          <button
+            onClick={askSalomon}
+            disabled={asking || !question.trim()}
+            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-[12.5px] font-semibold text-white disabled:opacity-60"
+            style={{ backgroundColor: ACCENT }}
+          >
+            {asking ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Enviar"}
+          </button>
+        </div>
+      )}
+    </div>
+  )}
+</div>
+        </div>
 
         <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
           <iframe

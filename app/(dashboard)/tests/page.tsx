@@ -22,7 +22,7 @@ export default async function TestsPage() {
         </p>
       </div>
 
-      <TestsTabs free={free} paid={paid} initialValues={values} initialStrengths={strengths} />
+      <TestsTabs free={free} initialValues={values} initialStrengths={strengths} />
 
       {!testsResult.success && (
         <p className="mt-6 text-[13px] text-red-600">

@@ -139,6 +139,10 @@ export async function getProfileValuesStrengths(): Promise<
   };
 }
 
+// Kept for backward compatibility if anything still calls it directly.
+// Note: this writes BOTH columns every time, so it will null out
+// whichever field isn't present in formData. Prefer the two split
+// actions below when a form only manages one of the two fields.
 export async function updateProfileValuesStrengths(
   _prevState: { success: true; message: string } | { success: false; error: string },
   formData: FormData
@@ -166,4 +170,64 @@ export async function updateProfileValuesStrengths(
   }
 
   return { success: true, message: "Valores y fortalezas actualizados correctamente." };
+}
+
+// Updates only `values`, leaving `strengths` untouched.
+export async function updateProfileValues(
+  _prevState: { success: true; message: string } | { success: false; error: string },
+  formData: FormData
+): Promise<{ success: true; message: string } | { success: false; error: string }> {
+  const authResult = await getAuthUser();
+  if (!authResult.success) return { success: false, error: authResult.error ?? "No se pudo autenticar." };
+
+  const values = formData.getAll("values") as string[];
+
+  if (values.length > 4) {
+    return { success: false, error: "Máximo 4 valores permitidos." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      values: values.length > 0 ? values : null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", authResult.user.id);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, message: "Valores actualizados correctamente." };
+}
+
+// Updates only `strengths`, leaving `values` untouched.
+export async function updateProfileStrengths(
+  _prevState: { success: true; message: string } | { success: false; error: string },
+  formData: FormData
+): Promise<{ success: true; message: string } | { success: false; error: string }> {
+  const authResult = await getAuthUser();
+  if (!authResult.success) return { success: false, error: authResult.error ?? "No se pudo autenticar." };
+
+  const strengths = formData.getAll("strengths") as string[];
+
+  if (strengths.length > 4) {
+    return { success: false, error: "Máximo 4 fortalezas permitidas." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      strengths: strengths.length > 0 ? strengths : null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", authResult.user.id);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, message: "Fortalezas actualizadas correctamente." };
 }

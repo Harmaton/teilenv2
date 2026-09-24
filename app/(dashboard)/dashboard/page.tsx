@@ -65,13 +65,13 @@ export default async function DashboardPage() {
     <div className="mx-auto w-full px-6 py-8">
       <div className="mb-8">
         <h1 className="text-[22px] font-semibold text-black">Panel</h1>
-        <p className="mt-1 text-[13px] text-black/45">
+        {/* <p className="mt-1 text-[13px] text-black/45">
           Una vista general de tus pruebas, informes y uso de créditos de IA.
-        </p>
+        </p> */}
       </div>
 
       {/* ── Telemetry ─────────────────────────────────────── */}
-      <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
+      {/* <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard
           icon={CheckCircle2}
           label="Pruebas completadas"
@@ -93,7 +93,7 @@ export default async function DashboardPage() {
           label="Créditos de IA usados"
           value={stats.creditsUsed.toFixed(1)}
         />
-      </div>
+      </div> */}
 
       {/* ── Quick actions ─────────────────────────────────── */}
      <div className="mb-10">
