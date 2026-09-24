@@ -72,10 +72,16 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
   .title-rule { height: 1px; width: 92mm; margin: 0 auto; background: var(--orange); position: relative; }
   .title-rule i { position: absolute; left: 50%; top: -3px; width: 7px; height: 7px; border-radius: 50%; background: var(--orange); }
   .page-content { font-size: 9.2pt; line-height: 1.38; flex: 1; display: flex; flex-direction: column; }
-  .student-context { display: flex; align-items: center; justify-content: center; gap: 3mm; margin: 0 auto 3mm; color: var(--muted); font-size: 8.5px; }
-  .student-context img { width: 14mm; height: 14mm; border-radius: 50%; object-fit: cover; border: 1px solid var(--line); }
-  .student-context strong { color: var(--ink); font-family: Georgia, serif; font-size: 14px; }
-  .student-context span { padding-left: 3mm; border-left: 1px solid var(--line); }
+
+  /* student masthead — replaces the old inline pill */
+  .student-masthead { display: flex; align-items: center; gap: 4mm; width: 174mm; max-width: 100%; margin: 0 auto 4mm; padding-bottom: 3mm; border-bottom: .7pt solid var(--line); flex-shrink: 0; }
+  .masthead-avatar { width: 18mm; height: 18mm; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--orange); flex-shrink: 0; }
+  .masthead-avatar-fallback { display: flex; align-items: center; justify-content: center; background: var(--warm); color: var(--orange); font-family: Georgia, serif; font-size: 15px; font-weight: 600; }
+  .masthead-name { font-family: Georgia, serif; color: var(--ink); font-size: 19px; font-weight: 400; line-height: 1.1; }
+  .masthead-meta { display: flex; flex-wrap: wrap; gap: 4mm; margin-top: 1.5mm; color: var(--muted); font-size: 9px; }
+  .meta-item { display: inline-flex; align-items: center; gap: 1.3mm; }
+  .meta-item svg { width: 3.4mm; height: 3.4mm; fill: none; stroke: var(--orange); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
   .page-content h2, .page-content h3 { color: var(--orange); font-size: 12px; line-height: 1.2; margin: 3mm 0 1.5mm; text-transform: uppercase; }
   .page-content h2:first-child, .page-content h3:first-child { margin-top: 0; }
   .page-content p { margin: 0 0 1.8mm; }
@@ -96,7 +102,7 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
   .report-callout { position: relative; padding-left: 12mm; }
   .report-callout::before { content: "✦"; position: absolute; left: 3mm; top: 3mm; color: var(--orange); font-size: 14px; }
   .report-page-0 .page-content { font-size: 8.8pt; }
-  .framework-visual { position: relative; height: 57mm; margin: 0 auto 3mm; max-width: 174mm; }
+  .framework-visual { position: relative; width: 174mm; max-width: 100%; height: 57mm; margin: 0 auto 3mm; flex-shrink: 0; }
   .framework-visual svg { display: block; width: 100%; height: 100%; }
   .framework-core { position: absolute; left: 50%; top: 50%; width: 43mm; height: 43mm; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1.5px solid var(--orange); border-radius: 50%; background: #fff; text-align: center; }
   .framework-core strong { color: var(--ink); font-family: Georgia, serif; font-size: 13px; line-height: 1.05; text-transform: uppercase; }
@@ -174,6 +180,12 @@ function cleanGeneratedHtml(html: string) {
     .replace(/<span\b[^>]*class=["'][^"']*\bbox-icon\b[^"']*["'][^>]*>[\s\S]*?<\/span>/gi, "")
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "")
+    // unwrap stray <mark>/<u>/<font> tags the model sometimes emits — their
+    // default browser styling (yellow highlight, underline) was leaking
+    // through untouched and overriding the report's own design
+    .replace(/<\/?(mark|u|font)(\s[^>]*)?>/gi, "")
+    // strip any inline style="" attributes for the same reason
+    .replace(/\sstyle\s*=\s*(["']).*?\1/gi, "")
     .replace(/\son[a-z]+\s*=\s*(["']).*?\1/gi, "");
 }
 
@@ -242,11 +254,42 @@ function buildSalomonCallout() {
   </div>`;
 }
 
+/**
+ * Renders the student identity strip shown at the top of every page.
+ * Previously a small inline pill of avatar + name + age/location text;
+ * now a proper masthead — bigger avatar, the name as a real heading,
+ * and icon-labeled meta underneath.
+ */
 function buildStudentContext(options: { avatarUrl?: string | null; studentName?: string | null; age?: number | null; city?: string | null; country?: string | null }) {
   const name = options.studentName?.trim();
   const location = [options.city, options.country].filter(Boolean).join(", ");
   if (!name && !options.avatarUrl && !options.age && !location) return "";
-  return `<div class="student-context">${options.avatarUrl ? `<img src="${escapeHtml(options.avatarUrl)}" alt="Avatar de ${escapeHtml(name ?? "estudiante")}" />` : ""}<strong>${escapeHtml(name ?? "Estudiante")}</strong>${options.age ? `<span>${options.age} años</span>` : ""}${location ? `<span>${escapeHtml(location)}</span>` : ""}</div>`;
+
+  const initials = (name ?? "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("") || "?";
+
+  const avatar = options.avatarUrl
+    ? `<img class="masthead-avatar" src="${escapeHtml(options.avatarUrl)}" alt="Avatar de ${escapeHtml(name ?? "estudiante")}" />`
+    : `<div class="masthead-avatar masthead-avatar-fallback">${escapeHtml(initials)}</div>`;
+
+  const ageItem = options.age
+    ? `<span class="meta-item"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2" /><path d="M5 20c0-4.5 3-7 7-7s7 2.5 7 7" /></svg>${options.age} años</span>`
+    : "";
+  const locationItem = location
+    ? `<span class="meta-item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-7.5 7-12a7 7 0 1 0-14 0c0 4.5 7 12 7 12Z" /><circle cx="12" cy="9" r="2.3" /></svg>${escapeHtml(location)}</span>`
+    : "";
+
+  return `<div class="student-masthead">
+    ${avatar}
+    <div class="masthead-info">
+      <div class="masthead-name">${escapeHtml(name ?? "Estudiante")}</div>
+      <div class="masthead-meta">${ageItem}${locationItem}</div>
+    </div>
+  </div>`;
 }
 
 function decorateGeneratedHtml(html: string, pageIndex: number) {
@@ -259,13 +302,15 @@ function decorateGeneratedHtml(html: string, pageIndex: number) {
 
 function iconForHeading(value: string) {
   const text = value.toLowerCase();
-  let path = "M12 3v18M3 12h18";
-  if (/valor|respeto|empat|impact|persona/.test(text)) path = "M20 12c0 5-8 9-8 9s-8-4-8-9a4 4 0 0 1 8-2 4 4 0 0 1 8 2Z";
-  else if (/habil|talento|creativ|innov|idea/.test(text)) path = "M9 18h6M10 22h4M8 14a7 7 0 1 1 8 0c-1 1-2 2-2 4h-4c0-2-1-3-2-4Z";
-  else if (/aprend|pens|razon|anal/.test(text)) path = "M4 5h6a4 4 0 0 1 4 4v10a4 4 0 0 0-4-4H4zM20 5h-6v14h6z";
-  else if (/proyec|escenar|futuro|entorno/.test(text)) path = "M4 20h16M6 17l4-5 3 3 5-8M18 7h-4M18 7v4";
-  else if (/cuidado|frena|ajust|watch/.test(text)) path = "M12 3 3 7v5c0 5 4 8 9 9 5-1 9-4 9-9V7zM12 9v4M12 16h.01";
-  else if (/vida|mov|acción|orient/.test(text)) path = "M12 3v18M3 12h18M12 3l3 3M12 3 9 6M12 21l3-3M12 21l-3-3";
+  // sparkle fallback (echoes the brand mark) instead of a bare plus-sign,
+  // so any heading that still misses every category below looks intentional
+  let path = "M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z";
+  if (/valor|respeto|empat|impact|person|v[ií]nculo|relaci/.test(text)) path = "M20 12c0 5-8 9-8 9s-8-4-8-9a4 4 0 0 1 8-2 4 4 0 0 1 8 2Z";
+  else if (/habil|talento|creativ|innov|idea|potenc/.test(text)) path = "M9 18h6M10 22h4M8 14a7 7 0 1 1 8 0c-1 1-2 2-2 4h-4c0-2-1-3-2-4Z";
+  else if (/aprend|piensa|pens|razon|anal|decid|adn/.test(text)) path = "M4 5h6a4 4 0 0 1 4 4v10a4 4 0 0 0-4-4H4zM20 5h-6v14h6z";
+  else if (/proyec|escenar|futuro|entorno|meta/.test(text)) path = "M4 20h16M6 17l4-5 3 3 5-8M18 7h-4M18 7v4";
+  else if (/cuidado|frena|freno|ajust|tensi|riesgo/.test(text)) path = "M12 3 3 7v5c0 5 4 8 9 9 5-1 9-4 9-9V7zM12 9v4M12 16h.01";
+  else if (/mueve|mov|acci[oó]n|orient|esencia/.test(text)) path = "M12 3v18M3 12h18M12 3l3 3M12 3 9 6M12 21l3-3M12 21l-3-3";
   return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}" /></svg>`;
 }
 
