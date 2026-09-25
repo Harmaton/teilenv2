@@ -36,8 +36,7 @@ export default function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const passwordStrength = getPasswordStrength(password);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -71,7 +70,9 @@ export default function SignupForm() {
     }
 
     // Pass email to OTP page via search param
-    router.push(`/auth/check-email?email=${encodeURIComponent(email)}`);
+    if (result.success) {
+      router.push(`/auth/check-email?email=${encodeURIComponent(email)}`);
+    }
   }
 
   return (

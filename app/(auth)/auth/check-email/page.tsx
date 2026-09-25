@@ -1,8 +1,9 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import { useQueryState, parseAsString } from "nuqs";
+import { resendVerification } from "@/_actions/auth";
 
 export default function CheckEmailPage() {
   return (
@@ -14,34 +15,28 @@ export default function CheckEmailPage() {
 
 function CheckEmailContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const email = searchParams.get("email") ?? "";
+  const [email] = useQueryState("email", parseAsString.withDefault(""));
+  const normalizedEmail = email.trim().toLowerCase();
 
   const [resending, setResending] = useState(false);
   const [resent, setResent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleResend = async () => {
-    if (!email || resending) return;
+    if (!normalizedEmail || resending) return;
 
     setResending(true);
     setError(null);
 
     try {
-      const supabase = createClient();
-      const { error: resendError } = await supabase.auth.resend({
-        type: "signup",
-        email,
-        options: {
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-        },
-      });
+      const result = await resendVerification(normalizedEmail);
 
-      if (resendError) {
+      if (!result.success) {
+        const resendError = result.error ?? "No se pudo reenviar el enlace. Inténtalo de nuevo.";
         setError(
-          resendError.message === "For security purposes, you can only request this after 60 seconds."
-            ? "Espera unos segundos antes de reenviar."
-            : "No pudimos reenviar el enlace. Intenta de nuevo."
+          resendError?.includes("60 seconds")
+            ? "Espera unos segundos antes de volver a solicitarlo."
+            : resendError || "No se pudo reenviar el enlace. Inténtalo de nuevo."
         );
         return;
       }
@@ -49,7 +44,7 @@ function CheckEmailContent() {
       setResent(true);
       setTimeout(() => setResent(false), 4000);
     } catch {
-      setError("Ocurrió un error inesperado. Intenta de nuevo.");
+      setError("Ocurrió un error inesperado. Inténtalo de nuevo.");
     } finally {
       setResending(false);
     }
@@ -69,16 +64,16 @@ function CheckEmailContent() {
           <EnvelopeIcon />
         </div>
 
-        <h1 style={styles.title}>Revisa tu correo</h1>
+        <h1 style={styles.title}>Revisa tu correo electrónico</h1>
 
         <p style={styles.subtitle}>
-          {email ? (
+          {normalizedEmail ? (
             <>
               Enviamos un enlace de acceso a{" "}
-              <span style={styles.emailHighlight}>{email}</span>.
+              <span style={styles.emailHighlight}>{normalizedEmail}</span>.
             </>
           ) : (
-            "Enviamos un enlace de acceso a tu correo."
+            "Enviamos un enlace de acceso a tu correo electrónico."
           )}{" "}
           Ábrelo desde este dispositivo para continuar.
         </p>
@@ -87,27 +82,25 @@ function CheckEmailContent() {
 
         <p style={styles.helperText}>
           {resent
-            ? "Enlace reenviado. Revisa tu bandeja de entrada."
-            : "¿No lo encuentras? Revisa spam o promociones."}
+            ? "Enlace enviado correctamente. Revisa tu bandeja de entrada."
+            : "¿No lo encuentras? Revisa la carpeta de correo no deseado o promociones."}
         </p>
 
         <button
           style={{
             ...styles.resendBtn,
-            opacity: resending || !email ? 0.6 : 1,
-            cursor: resending || !email ? "default" : "pointer",
+            opacity: resending || !normalizedEmail ? 0.6 : 1,
+            cursor: resending || !normalizedEmail ? "default" : "pointer",
           }}
           onClick={handleResend}
-          disabled={resending || !email}
+          disabled={resending || !normalizedEmail}
         >
-          {resending ? "Reenviando..." : "Reenviar enlace"}
+          {resending ? "Enviando..." : "Reenviar enlace"}
         </button>
 
         {error && <p style={styles.errorText}>{error}</p>}
 
-        <button style={styles.backBtn} onClick={() => router.replace("/login")}>
-          Usar otro correo
-        </button>
+       
       </div>
 
       <style jsx global>{`
@@ -129,8 +122,8 @@ export function PageShell() {
         <div style={styles.iconWrap}>
           <EnvelopeIcon />
         </div>
-        <h1 style={styles.title}>Revisa tu correo</h1>
-        <p style={styles.subtitle}>Cargando...</p>
+        <h1 style={styles.title}>Revisa tu correo electrónico</h1>
+        <p style={styles.subtitle}>Cargando la información…</p>
       </div>
     </div>
   );
@@ -278,3 +271,18 @@ const styles: Record<string, React.CSSProperties> = {
     textDecoration: "none",
   },
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

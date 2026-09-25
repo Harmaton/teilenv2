@@ -40,10 +40,30 @@ export async function logout() {
   }
 }
 
+export async function resendVerification(email: string) {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      },
+    });
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "No se pudo reenviar el código.",
+    };
+  }
+}
+
 export async function signup(email: string, password: string, fullName?: string) {
   try {
     const supabase = await createClient();
-     const { error } = await supabase.auth.signUp({
+     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -52,7 +72,7 @@ export async function signup(email: string, password: string, fullName?: string)
       },
     });
     if (error) throw error;
-    return { success: true };
+    return { success: true, needsEmailConfirmation: !data.session };
   } catch (error) {
     return {
       success: false,
