@@ -80,15 +80,15 @@ export async function getReportsGroupedByUser(): Promise<ActionResult<UserReport
   if (!auth.success) return auth;
   const { supabase } = auth;
 
-  const { data, error } = await supabase
-    .from("reports")
-    .select(
-      `id, status, ai_model, created_at,
-       profiles ( id, full_name, email ),
-       tests ( title ),
-       test_attempts ( score )`
-    )
-    .order("created_at", { ascending: false });
+ const { data, error } = await supabase
+  .from("reports")
+  .select(
+    `id, status, ai_model, created_at,
+     profiles!reports_profile_id_fkey ( id, full_name, email ),
+     tests ( title ),
+     test_attempts ( score )`
+  )
+  .order("created_at", { ascending: false });
 
   if (error) return { success: false, error: error.message };
 
