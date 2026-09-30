@@ -54,7 +54,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (user && ["/login", "/signup", "/"].includes(pathname)) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/tests", request.url));
   }
 
   return supabaseResponse;

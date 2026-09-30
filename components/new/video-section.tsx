@@ -1,5 +1,6 @@
 'use client'
 import React from "react";
+import Link from "next/link";
 import { theme } from "@/lib/theme";
 import { useBreakpoint, useFadeIn } from "@/hooks/use-breakpoint";
 
@@ -23,8 +24,8 @@ export default function VideoSection() {
               No es un adulto explicándote qué hacer. Es alguien de tu edad contándote qué cambió
               cuando finalmente pudo ver quién era. Mirá el video y después hacé tu propio diagnóstico.
             </p>
-            <a
-              href="/dashboard"
+            <Link
+              href="/tests"
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -41,7 +42,7 @@ export default function VideoSection() {
               }}
             >
               → Hacer mi diagnóstico ahora
-            </a>
+            </Link>
           </div>
 
           <div style={{ display: "flex", justifyContent: "center" }}>

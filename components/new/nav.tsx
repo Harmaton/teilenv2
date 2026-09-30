@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { theme } from "@/lib/theme";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 export default function Nav({ initialUser }: { initialUser: User | null }) {
@@ -107,8 +108,8 @@ export default function Nav({ initialUser }: { initialUser: User | null }) {
           )}
         </div>
       ) : (
-        <a
-          href="/dashboard"
+        <Link
+          href="/tests"
           rel="noopener noreferrer"
           style={{
             backgroundColor: theme.colors.orange,
@@ -125,7 +126,7 @@ export default function Nav({ initialUser }: { initialUser: User | null }) {
           }}
         >
           Hacer el test →
-        </a>
+        </Link>
       )}
     </nav>
   );

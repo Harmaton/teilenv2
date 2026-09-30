@@ -48,7 +48,7 @@ export function VerifyPage() {
       setStatus("success");
       // Hold on the confirmation tick briefly before redirecting.
       setTimeout(() => {
-        router.replace("/dashboard");
+        router.replace("/tests");
       }, 1400);
     };
 

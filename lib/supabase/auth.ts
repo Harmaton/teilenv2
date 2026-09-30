@@ -31,9 +31,9 @@ export async function requireAuth() {
 
 /**
  * Use in auth pages (login, signup, etc).
- * Redirects to /dashboard if the user is already signed in.
+ * Redirects to /tests if the user is already signed in.
  */
-export async function redirectIfAuthenticated(destination = "/dashboard") {
+export async function redirectIfAuthenticated(destination = "/tests") {
   const session = await getServerSession();
   if (session) redirect(destination);
 }

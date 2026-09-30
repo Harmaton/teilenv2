@@ -123,11 +123,11 @@ export default function Hero({ hasSession }: { hasSession: boolean }) {
         <div className="mt-9 flex items-center justify-start gap-4 sm:flex-row">
           {hasSession ? (
             <Link
-              href="/dashboard"
+              href="/tests"
               className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[15px] font-medium text-black transition-opacity hover:opacity-90"
             >
               <UserIcon className="h-4 w-4" />
-              Ir al panel
+              Ir al test
             </Link>
           ) : (
             <Link

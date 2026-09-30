@@ -26,7 +26,7 @@ export async function login(
     return { success: false, error: error.message }
   }
 
-  redirect("/dashboard")
+  redirect("/tests")
 }
 
 export async function logout() {

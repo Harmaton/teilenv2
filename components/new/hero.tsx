@@ -24,7 +24,7 @@ export default function Hero({ initialUser }: { initialUser: User | null }) {
     (user?.user_metadata?.full_name as string | undefined)?.split(" ")[0] ??
     user?.email?.split("@")[0];
 
-  const ctaHref = user ? "/dashboard" : "/dashboard";
+  const ctaHref = "/tests";
   const ctaLabel = user
     ? `→ Ver mi Identidad Evolutiva`
     : "→ Descubrí tu Identidad Evolutiva";
