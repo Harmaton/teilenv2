@@ -1,16 +1,14 @@
-import nodemailer from "nodemailer";
 import crypto from "crypto";
 
-export function createTransporter() {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: process.env.SMTP_SECURE === "true",
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
+/** Email sending goes through Resend — see @/lib/report-email. */
+export async function sendEmailViaResend(input: {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+}) {
+  const { sendEmail } = await import("@/lib/report-email");
+  return sendEmail(input);
 }
 
 export function generateInviteToken(): string {

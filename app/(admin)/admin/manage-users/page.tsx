@@ -4,6 +4,7 @@ import { Users, UserPlus, Activity, MailCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getUsersOverview, listUsers, listInvites } from "@/_actions/admin-users";
 import { InviteForm } from "../../_components/invite-form";
+import { ExportUsersButton } from "../../_components/export-users-button";
 
 
 const ACCENT = "#FF5A1F";
@@ -29,9 +30,12 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
-      <div className="mb-8">
-        <h1 className="text-[22px] font-semibold text-black">Usuarios</h1>
-        <p className="mt-1 text-[13px] text-black/45">Gestiona cuentas, roles e invitaciones.</p>
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-[22px] font-semibold text-black">Usuarios</h1>
+          <p className="mt-1 text-[13px] text-black/45">Gestiona cuentas, roles e invitaciones.</p>
+        </div>
+        <ExportUsersButton />
       </div>
 
       {/* ── Stats ─────────────────────────────────────────── */}

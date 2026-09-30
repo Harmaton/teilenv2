@@ -46,6 +46,10 @@ export type ReportDetail = {
   };
 };
 
+type EmbeddedProfile = { id?: string; full_name?: string | null; email?: string | null; avatar_url?: string | null };
+type EmbeddedTest = { title?: string | null; description?: string | null };
+type EmbeddedAttempt = { score?: number | null; completed_at?: string | null };
+
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
 /* ────────────────────────────────────────────────────────────────────── */
@@ -83,10 +87,10 @@ export async function getReportsGroupedByUser(): Promise<ActionResult<UserReport
  const { data, error } = await supabase
   .from("reports")
   .select(
-    `id, status, ai_model, created_at,
+    `id, status, ai_model, created_at, profile_id, test_id, attempt_id,
      profiles!reports_profile_id_fkey ( id, full_name, email ),
-     tests ( title ),
-     test_attempts ( score )`
+     tests!reports_test_id_fkey ( title ),
+     test_attempts!reports_attempt_id_fkey ( score )`
   )
   .order("created_at", { ascending: false });
 
@@ -95,8 +99,10 @@ export async function getReportsGroupedByUser(): Promise<ActionResult<UserReport
   const groups = new Map<string, UserReportGroup>();
 
   for (const r of data ?? []) {
-    const profile = r.profiles as any;
-    const key = profile?.id ?? "unknown";
+    // reports.profile_id is the owner — the grouping key. The profiles embed
+    // is only for display, so never depend on it being non-null.
+    const profile = (r.profiles ?? null) as EmbeddedProfile | null;
+    const key = r.profile_id ?? profile?.id ?? "unknown";
 
     if (!groups.has(key)) {
       groups.set(key, {
@@ -109,11 +115,11 @@ export async function getReportsGroupedByUser(): Promise<ActionResult<UserReport
 
     groups.get(key)!.reports.push({
       id: r.id,
-      testTitle: (r.tests as any)?.title ?? "—",
+      testTitle: (r.tests as EmbeddedTest | null)?.title ?? "—",
       status: r.status,
       aiModel: r.ai_model,
       createdAt: r.created_at,
-      score: (r.test_attempts as any)?.score ?? null,
+      score: (r.test_attempts as EmbeddedAttempt | null)?.score ?? null,
     });
   }
 
@@ -138,23 +144,23 @@ export async function getReportDetailAdmin(id: string): Promise<ActionResult<Rep
   const { data, error } = await supabase
     .from("reports")
     .select(
-      `id, status, error, content, updated_at,
-       tests ( title, description ),
-      profiles ( id, full_name, email, avatar_url ),
-       test_attempts ( completed_at )`
+      `id, status, error, content, profile_id, test_id, attempt_id, updated_at,
+       tests!reports_test_id_fkey ( title, description ),
+       profiles!reports_profile_id_fkey ( id, full_name, email, avatar_url ),
+       test_attempts!reports_attempt_id_fkey ( completed_at )`
     )
     .eq("id", id)
     .single();
 
   if (error) return { success: false, error: error.message };
 
-  const test = data.tests as any;
-  const profile = data.profiles as any;
-  const attempt = data.test_attempts as any;
+  const test = data.tests as EmbeddedTest | null;
+  const profile = data.profiles as EmbeddedProfile | null;
+  const attempt = data.test_attempts as EmbeddedAttempt | null;
   const { data: details } = await supabase
     .from("profile_details")
     .select("age, city, country")
-    .eq("profile_id", data.profiles ? (data.profiles as any).id : "")
+    .eq("profile_id", data.profile_id)
     .maybeSingle();
 
   return {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowLeft, Loader2, Sparkles, Compass, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -41,10 +41,43 @@ export function TestRunner({
   const [answers, setAnswers] = useState<Record<string, unknown>>(
     initialAttempt?.answers ?? {}
   );
-  const [isPending, startTransition] = useTransition();
+  const [isStarting, setIsStarting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
 
   const items: TestItem[] = attempt?.itemsSnapshot ?? test.items;
+
+  // Autosave used to fire a server action on every keystroke / tap. Debounce
+  // it so selecting an option costs one write, not one write per interaction.
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, []);
+
+  const handleStart = () => {
+    if (isStarting || attempt) return;
+    setIsStarting(true);
+    setStartError(null);
+
+    startAttempt(test.id)
+      .then((res) => {
+        if (res.success) {
+          setAttempt({
+            id: res.attemptId,
+            status: "in_progress",
+            answers: {},
+            itemsSnapshot: test.items,
+          });
+          router.refresh();
+        } else {
+          setStartError(res.error);
+        }
+      })
+      .catch(() => setStartError("No pudimos iniciar el test. Inténtalo de nuevo."))
+      .finally(() => setIsStarting(false));
+  };
 
   // ── Not started yet ─────────────────────────────────────
   if (!attempt) {
@@ -70,26 +103,12 @@ export function TestRunner({
         </div>
         {startError && <p className="relative mt-4 text-[12px] text-red-600">{startError}</p>}
         <button
-          disabled={isPending}
-          onClick={() =>
-            startTransition(async () => {
-              const res = await startAttempt(test.id);
-              if (res.success) {
-                setAttempt({
-                  id: res.attemptId,
-                  status: "in_progress",
-                  answers: {},
-                  itemsSnapshot: test.items,
-                });
-              } else {
-                setStartError(res.error);
-              }
-            })
-          }
+          disabled={isStarting}
+          onClick={handleStart}
           className="relative mt-6 inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-[13px] font-semibold text-white transition-transform hover:-translate-y-0.5 hover:bg-orange-500 disabled:opacity-60"
         >
-          {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-          Comenzar test
+          {isStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          {isStarting ? "Preparando…" : "Comenzar test"}
         </button>
       </div>
     );
@@ -98,26 +117,36 @@ export function TestRunner({
   const item = items[step];
   const isLast = step === items.length - 1;
   const answered = answers[item.id] !== undefined;
+  const busy = isStarting || submitting;
 
   const setAnswer = (value: unknown) => {
     const next = { ...answers, [item.id]: value };
     setAnswers(next);
-    saveAttemptProgress(attempt.id, next); // fire-and-forget autosave
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      void saveAttemptProgress(attempt.id, next);
+    }, 600);
   };
 
   const handleNext = () => {
     if (isLast) {
-      startTransition(async () => {
-        const res = await submitAttempt(attempt.id, test.id, answers);
-        if (res.success) {
-              fetch("/api/reports/openai/generate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ reportId: res.reportId }),
-  });
+      setSubmitting(true);
+      submitAttempt(attempt.id, test.id, answers)
+        .then((res) => {
+          if (!res.success) {
+            setStartError(res.error);
+            return;
+          }
+          // Kick generation off without blocking the navigation.
+          void fetch("/api/reports/openai/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reportId: res.reportId }),
+          });
           router.push(`/reports/${res.reportId}`);
-        }
-      });
+        })
+        .catch(() => setStartError("No pudimos enviar tus respuestas. Inténtalo de nuevo."))
+        .finally(() => setSubmitting(false));
     } else {
       setStep((s) => s + 1);
     }
@@ -164,10 +193,10 @@ export function TestRunner({
         </button>
         <button
           onClick={handleNext}
-          disabled={!answered || isPending}
+          disabled={!answered || busy}
           className="flex items-center gap-2 rounded-full bg-slate-950 px-5 py-2.5 text-[13px] font-semibold text-white transition-transform hover:-translate-y-0.5 hover:bg-orange-500 disabled:opacity-40"
         >
-          {isPending ? (
+          {busy ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : isLast ? (
             "Finalizar"

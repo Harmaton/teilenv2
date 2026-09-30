@@ -16,13 +16,12 @@ export interface AppNotification {
 }
 
 async function getProfileId() {
+  // The auth user id IS the profiles.id (profiles.id references auth.users.id),
+  // so this extra query was a pure round-trip on every notification read.
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) throw new Error('Unauthenticated');
-  const { data: profile } = await supabase
-    .from('profiles').select('id').eq('id', user.id).single();
-  if (!profile) throw new Error('Profile not found');
-  return profile.id as string;
+  return user.id as string;
 }
 
 export async function getNotifications(): Promise<AppNotification[]> {

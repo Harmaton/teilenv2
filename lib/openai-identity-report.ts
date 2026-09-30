@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { emailReportPdf } from "@/lib/report-email";
+import { emailReportReady } from "@/lib/report-email";
 
 export const OPENAI_REPORT_MODEL = "gpt-5.6-terra";
 
@@ -252,30 +252,34 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
     });
 
     if (profile.email) {
-      try {
-        // await emailReportPdf({
-        //   recipient: profile.email,
-        //   studentName: profile.full_name,
-        //   reportHtml: html,
-        //   reportId,
-        // });
-        await supabase.from("notifications").insert({
-          profile_id: report.profile_id,
-          title: "Informe enviado por correo",
-          body: "Revisa tu bandeja de entrada para descargar el PDF.",
-          type: "info",
-          href: `/reports/${reportId}`,
-        });
-      } catch (emailError) {
-        console.error("[report-email] failed", emailError);
-        await supabase.from("notifications").insert({
-          profile_id: report.profile_id,
-          title: "No pudimos enviar el PDF por correo",
-          body: "Puedes descargarlo desde tu cuenta de Teilen Teens.",
-          type: "warning",
-          href: `/reports/${reportId}`,
-        });
-      }
+      // Plain HTML + link, sent out-of-band so the browser never waits on
+      // Resend and the serverless function does no heavy rendering.
+      void (async () => {
+        try {
+          await emailReportReady({
+            recipient: profile.email!,
+            studentName: profile.full_name,
+            reportId,
+            testTitle: test.title,
+          });
+          await supabase.from("notifications").insert({
+            profile_id: report.profile_id,
+            title: "Tu informe está listo",
+            body: "Te enviamos un correo con el acceso para verlo completo.",
+            type: "success",
+            href: `/reports/${reportId}`,
+          });
+        } catch (error) {
+          console.error("[report-email] failed", error);
+          await supabase.from("notifications").insert({
+            profile_id: report.profile_id,
+            title: "No pudimos enviar el aviso por correo",
+            body: "Puedes ver tu informe directamente desde tu cuenta.",
+            type: "warning",
+            href: `/reports/${reportId}`,
+          });
+        }
+      })();
     }
 
     await supabase.from("ai_credits_usage").insert({

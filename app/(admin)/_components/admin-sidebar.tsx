@@ -58,13 +58,7 @@ const NAV: NavGroup[] = [
       { label: "Gestionar Tests", href: "/admin/manage-tests", icon: ClipboardList },
       { label: "Ver Informes", href: "/admin/manage-reports", icon: FileBarChart2 },
     ],
-  },
-  {
-    label: "Cuenta",
-    items: [
-      { label: "Configuración", href: "/admin/settings", icon: Settings },
-    ],
-  },
+  }
 ]
 
 type AppSidebarProps = {

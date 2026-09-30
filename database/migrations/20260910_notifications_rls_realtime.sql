@@ -28,11 +28,18 @@ with check (profile_id = (select auth.uid()));
 
 alter table public.notifications replica identity full;
 
+-- The reports table has TWO foreign keys to profiles (owner and the admin who
+-- granted access), so PostgREST cannot resolve a bare `profiles` embed:
+--   "Could not embed because more than one relationship was found for
+--    'reports' and 'profiles'".
+-- Always select them with an explicit FK hint, e.g.
+--   profiles!reports_profile_id_fkey ( ... )
+-- Same applies to `tests` and `test_attempts`.
+
 do $$
 begin
   if not exists (
-    select 1
-    from pg_publication_tables
+    select 1 from pg_publication_tables
     where pubname = 'supabase_realtime'
       and schemaname = 'public'
       and tablename = 'notifications'

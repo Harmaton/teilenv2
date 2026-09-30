@@ -7,10 +7,12 @@ import {
   retryReportGeneration,
   type ReportDetail,
 } from "@/_actions/reports";
+import { getReportStatus } from "@/_actions/report-status";
 import { getSalomonConversation, type SalomonMessage } from "@/_actions/salomon";
 import { buildReportHtml } from "@/lib/report-html";
 import { cn } from "@/lib/utils";
 import SalomonCheckout from "../payments/SalomonCheckout";
+import { ReportGenerating } from "./report-generating";
 
 const ACCENT = "#FF5A1F";
 
@@ -32,12 +34,36 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
   useEffect(() => {
     if (report.status !== "pending" && report.status !== "generating") return;
 
-    const interval = setInterval(async () => {
-      const res = await getReportDetail(report.id);
-      if (res.success) setReport(res.data);
-    }, 3000);
+    // Light status-only check (see _actions/report-status) with backoff,
+    // then one full fetch once it is actually done.
+    let cancelled = false;
+    let delay = 1500;
+    let timer: ReturnType<typeof setTimeout>;
 
-    return () => clearInterval(interval);
+    const check = async () => {
+      try {
+        const status = await getReportStatus(report.id);
+        if (cancelled) return;
+
+        if (status.success && status.status !== "pending" && status.status !== "generating") {
+          const res = await getReportDetail(report.id);
+          if (!cancelled && res.success) setReport(res.data);
+          return;
+        }
+      } catch {
+        // Keep polling on transient failures.
+      }
+
+      if (cancelled) return;
+      delay = Math.min(delay * 1.4, 8000);
+      timer = setTimeout(check, delay);
+    };
+
+    timer = setTimeout(check, delay);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [report.status, report.id]);
 
   // ── Hydrate chat history + cap status from the DB so it survives reloads ──
@@ -67,7 +93,8 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
     const res = await retryReportGeneration(report.id);
     if (res.success) {
       setReport({ ...report, status: "pending", error: null });
-      fetch("/api/reports/openai/generate", {
+      // Fire-and-forget: the waiting screen below takes over.
+      void fetch("/api/reports/openai/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reportId: report.id }),
@@ -121,15 +148,7 @@ export function ReportView({ initial }: { initial: ReportDetail }) {
 
   // ── Generating / pending ─────────────────────────────────
   if (report.status === "pending" || report.status === "generating") {
-    return (
-      <div className="flex flex-col items-center rounded-2xl border border-black/[0.06] bg-white px-8 py-16 text-center">
-        <Loader2 className="h-6 w-6 animate-spin" style={{ color: ACCENT }} />
-        <h1 className="mt-4 text-[16px] font-semibold text-black">Generando tu informe</h1>
-        <p className="mt-1 text-[13px] text-black/45">
-          {report.testTitle} — esto puede tardar un momento.
-        </p>
-      </div>
-    );
+    return <ReportGenerating reportId={report.id} />;
   }
 
   // ── Failed ────────────────────────────────────────────────

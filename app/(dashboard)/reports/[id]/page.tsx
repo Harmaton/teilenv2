@@ -1,6 +1,7 @@
 import { getReportDetail } from "@/_actions/reports";
 import Checkout from "@/app/components/payments/checkout";
 import { ReportView } from "@/app/components/reports/report-view";
+import { ReportGenerating } from "@/app/components/reports/report-generating";
 
 export default async function ReportDetailPage({
   params,
@@ -20,6 +21,17 @@ export default async function ReportDetailPage({
   }
 
   const report = result.data;
+
+  // Case 1.5: still being generated. Show the waiting screen regardless of
+  // access — previously an un-unlocked user landed on the paywall copy
+  // ("tu informe está listo") while nothing had actually been generated.
+  if (report.status === "pending" || report.status === "generating") {
+    return (
+      <div className="mx-auto w-full max-w-2xl px-6 py-10">
+        <ReportGenerating reportId={report.id} />
+      </div>
+    );
+  }
 
   // Case 2: user does NOT have access → show checkout + code dialog
   if (!report.hasAccess) {

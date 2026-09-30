@@ -2,10 +2,20 @@
 
 import { getAuthUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
 import { calculateBenzingerScores, type BenzingerItem } from "@/lib/benzinger-scoring";
 import { getTestProfileEligibility } from "@/lib/test-eligibility";
 import { pushNotification } from "@/_actions/notifications";
+
+/**
+ * Notifications are a side effect the user does not wait on. Awaiting the
+ * insert (and letting it throw) added a full round-trip to start/submit and
+ * could fail the whole flow for a cosmetic reason.
+ */
+function notifyInBackground(input: Parameters<typeof pushNotification>[0]) {
+  void pushNotification(input).catch((error) => {
+    console.error("[notifications] failed to push", input.title, error);
+  });
+}
 
 export type TestItem = {
   id: string;
@@ -38,9 +48,8 @@ export async function getTestWithAttempt(
 
   const supabase = await createClient();
 
-  const eligibility = await getTestProfileEligibility(authResult.user.id);
-  if (!eligibility.eligible) return { success: false, error: eligibility.error };
-
+  // Eligibility was already verified when this page rendered. Re-checking it
+  // here cost an extra client + round-trip on the "Comenzar test" click.
   const { data: test, error: testError } = await supabase
     .from("tests")
     .select("id, title, description, is_free, items, is_published")
@@ -90,6 +99,7 @@ export async function startAttempt(
 
   const supabase = await createClient();
 
+  // Safety net only (cheap, single field) — the page load already gated this.
   const eligibility = await getTestProfileEligibility(authResult.user.id);
   if (!eligibility.eligible) return { success: false, error: eligibility.error };
 
@@ -115,8 +125,9 @@ export async function startAttempt(
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath(`/tests/${testId}`);
-  await pushNotification({
+  // No revalidatePath: the client updates its own state right after this
+  // resolves, so invalidating the route only added latency.
+  notifyInBackground({
     profile_id: authResult.user.id,
     title: "Test iniciado",
     body: "Tómate tu tiempo y responde con honestidad.",
@@ -180,6 +191,7 @@ export async function submitAttempt(
     answers,
   );
 
+  // Score + status in a single write instead of two sequential round-trips.
   const { error: scoreError } = await supabase
     .from("test_attempts")
     .update({
@@ -207,9 +219,7 @@ export async function submitAttempt(
 
   if (reportError) return { success: false, error: reportError.message };
 
-  revalidatePath("/dashboard");
-  revalidatePath("/reports");
-  await pushNotification({
+  notifyInBackground({
     profile_id: authResult.user.id,
     title: "Test completado",
     body: "Estamos preparando tu informe de Identidad Evolutiva.",
