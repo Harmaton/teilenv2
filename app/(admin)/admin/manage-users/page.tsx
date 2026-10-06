@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { getUsersOverview, listUsers, listInvites } from "@/_actions/admin-users";
 import { InviteForm } from "../../_components/invite-form";
 import { ExportUsersButton } from "../../_components/export-users-button";
+import { AdminUsersTable } from "../../_components/admin-users-table";
 
 
 const ACCENT = "#FF5A1F";
@@ -110,38 +111,7 @@ export default async function AdminUsersPage() {
       {/* ── All users ─────────────────────────────────────── */}
       <div>
         <h2 className="mb-3 text-[15px] font-semibold text-black">Todos los usuarios</h2>
-        <div className="overflow-hidden rounded-2xl border border-black/[0.06]">
-          <table className="w-full border-collapse text-[13px]">
-            <thead>
-              <tr className="border-b border-black/[0.06] bg-black/[0.02] text-left">
-                <Th>Nombre</Th>
-                <Th>Correo</Th>
-                <Th>Rol</Th>
-                <Th>Estado</Th>
-                <Th>Registrado</Th>
-                <Th align="right">Última actividad</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id} className="border-b border-black/[0.04] last:border-0 hover:bg-black/[0.015]">
-                  <Td className="font-medium text-black">{u.fullName ?? "—"}</Td>
-                  <Td className="text-black/60">{u.email}</Td>
-                  <Td className="text-black/60">{u.role}</Td>
-                  <Td>
-                    <span className={cn("text-[12px]", u.isActive ? "text-emerald-700" : "text-black/35")}>
-                      {u.isActive ? "Activo" : "Inactivo"}
-                    </span>
-                  </Td>
-                  <Td className="text-black/45">{formatDate(u.createdAt)}</Td>
-                  <Td align="right" className="text-black/45">
-                    {u.lastAttemptAt ? formatDate(u.lastAttemptAt) : "—"}
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <AdminUsersTable users={users} />
       </div>
     </div>
   );

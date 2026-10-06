@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
   const { data: report, error: reportError } = await supabase
     .from("reports")
-    .select("id, content, status, profile_id, profiles ( avatar_url )")
+    .select("id, content, status, profile_id, profiles ( full_name, avatar_url )")
     .eq("id", reportId)
     .eq("profile_id", user.id)
     .single();
@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     const reportHtml = (report.content as { html?: string } | null)?.html ?? "";
+    const reportScores = (report.content as { scores?: { label: string; value: number }[] } | null)?.scores ?? [];
     const currentPages = extractIdentityReportPages(reportHtml);
     if (currentPages.length !== 5) throw new Error("Stored report does not contain five pages");
     const { data: profileDetails } = await supabase
@@ -128,8 +129,9 @@ try {
         age: profileDetails?.age ?? null,
         city: profileDetails?.city ?? null,
         country: profileDetails?.country ?? null,
+        scores: reportScores,
       }),
-      scores: [],
+      scores: reportScores,
     };
 
     const { error: updateError } = await supabase.from("reports").update({

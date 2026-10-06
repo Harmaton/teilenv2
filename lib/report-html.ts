@@ -16,7 +16,7 @@ export function extractIdentityReportPages(document: string): IdentityReportPage
   return pages;
 }
 
-export function renderIdentityReportHtml(pages: IdentityReportPage[], options: { avatarUrl?: string | null; studentName?: string | null; age?: number | null; city?: string | null; country?: string | null } = {}) {
+export function renderIdentityReportHtml(pages: IdentityReportPage[], options: { avatarUrl?: string | null; studentName?: string | null; age?: number | null; city?: string | null; country?: string | null; scores?: ReportScore[] } = {}) {
   const pageMarkup = pages.slice(0, 5).map((page, index) => {
     let html = cleanGeneratedHtml(page.html);
 
@@ -31,7 +31,7 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
     }
 
     return `
-    <section class="report-page report-page-${index}" aria-labelledby="report-page-title-${index}">
+    <section class="report-page report-page-${index}${index === 0 && options.scores?.length ? " report-has-scores" : ""}" aria-labelledby="report-page-title-${index}">
       <div class="page-kicker">TEILEN TEENS <span>${index === 0 ? "MAPA DE IDENTIDAD" : `PÁGINA ${index}`}</span></div>
       <header class="page-header">
         <div class="brand-mark"><span class="brand-spark">✦</span> TEILEN TEENS</div>
@@ -39,7 +39,7 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
         <div class="title-rule"><i></i></div>
       </header>
       ${buildStudentContext(options)}
-      ${index === 0 ? buildIdentityFrameworkVisual() : ""}
+      ${index === 0 ? `${buildQuadrantScoreVisual(options.scores)}${buildIdentityFrameworkVisual()}` : ""}
       <div class="page-content">${decorateGeneratedHtml(html, index)}</div>
       ${needsBar}
       ${index === 4 ? buildSalomonCallout() : ""}
@@ -102,6 +102,20 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
   .report-callout { position: relative; padding-left: 12mm; }
   .report-callout::before { content: "✦"; position: absolute; left: 3mm; top: 3mm; color: var(--orange); font-size: 14px; }
   .report-page-0 .page-content { font-size: 8.8pt; }
+  .quadrant-score-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2mm; width: 174mm; max-width: 100%; margin: 0 auto 3mm; flex-shrink: 0; }
+  .quadrant-score { display: grid; grid-template-columns: 8mm minmax(0, 1fr); align-items: center; gap: 1.5mm; border: .7pt solid var(--line); border-radius: 9px; padding: 2mm; background: var(--warm); }
+  .quadrant-score-ring { display: grid; place-items: center; width: 8mm; height: 8mm; border-radius: 50%; background: conic-gradient(var(--quadrant-color) calc(var(--score) * 1%), #eadfd4 0); }
+  .quadrant-score-ring::before { content: ""; width: 5.5mm; height: 5.5mm; border-radius: 50%; background: var(--warm); }
+  .quadrant-score-copy { min-width: 0; }
+  .quadrant-score-label { color: var(--muted); font-size: 7px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+  .quadrant-score-value { display: flex; align-items: baseline; justify-content: space-between; margin-top: 1mm; color: var(--ink); font-family: Georgia, serif; font-size: 15px; }
+  .quadrant-score-value small { color: var(--muted); font-family: Montserrat, Arial, sans-serif; font-size: 6.5px; }
+  .quadrant-score-track { height: 2mm; margin-top: 1.5mm; overflow: hidden; border-radius: 99px; background: #eadfd4; }
+  .quadrant-score-fill { height: 100%; border-radius: inherit; background: var(--orange); }
+  .report-has-scores .framework-visual { height: 30mm; margin-bottom: 2mm; }
+  .report-has-scores .framework-core { width: 25mm; height: 25mm; }
+  .report-has-scores .framework-node { width: 25mm; height: 9mm; padding: 1mm; font-size: 6px; }
+  .report-has-scores .framework-node strong { font-size: 6.5px; }
   .framework-visual { position: relative; width: 174mm; max-width: 100%; height: 57mm; margin: 0 auto 3mm; flex-shrink: 0; }
   .framework-visual svg { display: block; width: 100%; height: 100%; }
   .framework-core { position: absolute; left: 50%; top: 50%; width: 43mm; height: 43mm; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1.5px solid var(--orange); border-radius: 50%; background: #fff; text-align: center; }
@@ -364,7 +378,7 @@ export function buildReportHtml({
 }) {
   if (fragment.trimStart().startsWith("<!DOCTYPE html>")) {
     const pages = extractIdentityReportPages(fragment);
-    return pages.length === 5 ? renderIdentityReportHtml(pages, { avatarUrl, studentName: userName, age, city, country }) : fragment;
+    return pages.length === 5 ? renderIdentityReportHtml(pages, { avatarUrl, studentName: userName, age, city, country, scores }) : fragment;
   }
   const ACCENT = "#FF5A1F";
   const formattedDate = new Date(updatedAt).toLocaleDateString("es", {
@@ -467,6 +481,32 @@ export function buildReportHtml({
 </html>`;
 
 
+}
+
+function buildQuadrantScoreVisual(scores?: ReportScore[]) {
+  if (!scores?.length) return "";
+  const quadrants = [
+    { code: "RB", label: "Basal derecho", color: "#D97B1A" },
+    { code: "LB", label: "Basal izquierdo", color: "#527C8B" },
+    { code: "RF", label: "Frontal derecho", color: "#7B6A9D" },
+    { code: "LF", label: "Frontal izquierdo", color: "#68835D" },
+  ];
+  const scoreByCode = new Map(scores.map((score) => [score.label.slice(0, 2).toUpperCase(), score.value]));
+  if (quadrants.some(({ code }) => !scoreByCode.has(code))) return "";
+
+  return `<div class="quadrant-score-grid" aria-label="Puntuaciones de los cuatro cuadrantes">
+    ${quadrants.map(({ code, label, color }) => {
+      const value = Math.max(0, Math.min(100, Math.round(scoreByCode.get(code) ?? 0)));
+      return `<div class="quadrant-score">
+        <div class="quadrant-score-ring" style="--score:${value};--quadrant-color:${color}" role="img" aria-label="${value} por ciento"></div>
+        <div class="quadrant-score-copy">
+          <div class="quadrant-score-label">${code} · ${label}</div>
+          <div class="quadrant-score-value">${value}<small>/ 100</small></div>
+          <div class="quadrant-score-track" role="img" aria-label="${value} de 100"><div class="quadrant-score-fill" style="width:${value}%;background:${color}"></div></div>
+        </div>
+      </div>`;
+    }).join("")}
+  </div>`;
 }
 
 function escapeHtml(str: string) {

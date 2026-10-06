@@ -16,6 +16,13 @@ export type TestQuestion = {
   options: TestOption[];
 };
 
+type ScoredTestQuestion = TestQuestion & {
+  scoring?: {
+    quadrant?: string;
+    pointsByOption?: Record<string, number>;
+  };
+};
+
 export type TestRow = {
   id: string;
   title: string;
@@ -204,7 +211,7 @@ export async function publishTest(testId: string): Promise<{ success: true; mess
   // Verify ownership and get test details
   const { data: test, error: testError } = await supabase
     .from("tests")
-    .select("created_by, items")
+    .select("created_by, items, slug")
     .eq("id", testId)
     .single();
 
@@ -225,7 +232,7 @@ export async function publishTest(testId: string): Promise<{ success: true; mess
   }
 
   // Verify test has questions
-  const items = Array.isArray(test.items) ? test.items : [];
+  const items: ScoredTestQuestion[] = Array.isArray(test.items) ? (test.items as ScoredTestQuestion[]) : [];
   if (items.length === 0) {
     return { success: false, error: "El test debe tener al menos una pregunta." };
   }
@@ -234,6 +241,30 @@ export async function publishTest(testId: string): Promise<{ success: true; mess
   for (const q of items) {
     if (!Array.isArray(q.options) || q.options.length < 2) {
       return { success: false, error: "Todas las preguntas deben tener al menos 2 opciones." };
+    }
+  }
+
+  if (test.slug?.includes("benzinger")) {
+    const quadrants = new Set(["RB", "LB", "RF", "LF"]);
+    const configured = new Set<string>();
+    for (const question of items) {
+      const scoring = question.scoring;
+      if (!scoring?.quadrant || !quadrants.has(scoring.quadrant)) {
+        return { success: false, error: `Asigna un cuadrante a cada pregunta Benzinger antes de publicar. Falta: ${question.question}` };
+      }
+      if (!scoring.pointsByOption || question.options.some((option) =>
+        typeof scoring.pointsByOption?.[option.id] !== "number" || !Number.isFinite(scoring.pointsByOption[option.id]),
+      )) {
+        return { success: false, error: `Configura los puntos de respuesta para: ${question.question}` };
+      }
+      if (Math.max(...Object.values(scoring.pointsByOption)) <= 0) {
+        return { success: false, error: `Al menos una respuesta debe puntuar para: ${question.question}` };
+      }
+      configured.add(scoring.quadrant);
+    }
+    const missingQuadrants = [...quadrants].filter((quadrant) => !configured.has(quadrant));
+    if (missingQuadrants.length) {
+      return { success: false, error: `Asigna preguntas puntuables a los cuatro cuadrantes. Faltan: ${missingQuadrants.join(", ")}.` };
     }
   }
 

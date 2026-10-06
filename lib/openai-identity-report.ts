@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { emailReportReady } from "@/lib/report-email";
+import { BENZINGER_QUADRANT_LABELS, calculateBenzingerScores, type BenzingerItem, type BenzingerQuadrant } from "@/lib/benzinger-scoring";
 
 export const OPENAI_REPORT_MODEL = "gpt-5.6-terra";
 
@@ -63,7 +64,7 @@ function buildPrompt(input: {
   strengths: string[];
   testTitle: string;
   qaPairs: string;
-  quadrantScores: unknown;
+  quadrantScores: Record<BenzingerQuadrant, number | null>;
 }) {
   const stage = developmentStage(input.details.age);
 
@@ -79,8 +80,10 @@ Valores elegidos: ${input.values.join(", ") || "no especificados"}
 Fortalezas elegidas: ${input.strengths.join(", ") || "no especificadas"}
 Test: ${input.testTitle}
 
-DATOS INTERNOS DEL MOTOR DE SCORING (NO MOSTRAR NI NOMBRAR EN EL INFORME)
-${JSON.stringify(input.quadrantScores)}
+PUNTUACIONES DE LAS CUATRO PREFERENCIAS (0–100; describen tendencias relativas, no capacidades ni diagnósticos)
+${Object.entries(input.quadrantScores)
+  .map(([code, value]) => `${BENZINGER_QUADRANT_LABELS[code as BenzingerQuadrant]}: ${value === null ? "no disponible" : `${value}/100`}`)
+  .join("\n")}
 
 RESPUESTAS DEL TEST
 ${input.qaPairs}
@@ -88,8 +91,12 @@ ${input.qaPairs}
 REGLAS DE CONTENIDO
 - Escribe en español claro, serio, cálido y apropiado para la edad.
 - Usa segunda persona y lenguaje evolutivo: hoy, tiendes a, a menudo, puedes, cuando.
-- No inventes hechos, porcentajes, nombres de modelos, diagnósticos ni mecanismos internos del test.
-- No muestres puntuaciones, abreviaturas, cuadrantes, porcentajes ni nombres técnicos del sistema.
+- No inventes hechos, porcentajes, diagnósticos ni mecanismos internos del test.
+- Las cuatro puntuaciones se muestran por separado en el mapa visual del informe; no inventes otras cifras ni las presentes como capacidades, límites o diagnósticos.
+- Personaliza cada página con las respuestas concretas y el perfil relativo de las cuatro puntuaciones. Destaca el patrón que más diferencia a esta persona: qué preferencias aparecen con más fuerza, cuáles son menos marcadas y qué tensión o combinación surge entre ellas.
+- Vincula cada inferencia a respuestas observables: cita o parafrasea señales distintas de las respuestas en cada página, sin inventar experiencias, emociones ni conductas no mencionadas.
+- No reutilices una descripción genérica de personalidad. Cada interpretación debe poder vincularse a una respuesta del test o a una puntuación concreta; cuando la evidencia no alcance, exprésalo como hipótesis prudente.
+- Trata diferencias pequeñas entre puntuaciones como matices, no como una jerarquía concluyente. No infieras carreras, talento fijo ni resultados futuros únicamente a partir de una puntuación.
 - No uses “eres único”, “genio”, “dotado”, “puedes lograr cualquier cosa” ni promesas deterministas.
 - Integra valores y fortalezas en conductas observables; incluye tensiones y condiciones que pueden frenar el desempeño.
 - No repitas una idea entre páginas. Cada página tiene un trabajo distinto.
@@ -202,7 +209,7 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
     stage = "fetch_dependencies";
     const [{ data: attempt }, { data: test }, { data: profile }, { data: details }] = await Promise.all([
       supabase.from("test_attempts").select("answers, items_snapshot, quadrant_scores").eq("id", report.attempt_id).single(),
-      supabase.from("tests").select("title").eq("id", report.test_id).single(),
+      supabase.from("tests").select("title, slug").eq("id", report.test_id).single(),
       supabase.from("profiles").select("email, full_name, avatar_url, values, strengths").eq("id", report.profile_id).single(),
       supabase.from("profile_details").select("age, sex, country, city").eq("profile_id", report.profile_id).maybeSingle(),
     ]);
@@ -210,13 +217,23 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
 
     stage = "call_openai_responses";
     const profileDetails: ProfileDetails = details ?? { age: null, sex: null, country: null, city: null };
+    const benzingerScores = calculateBenzingerScores(
+      (attempt.items_snapshot as BenzingerItem[]) ?? [],
+      (attempt.answers as Record<string, unknown>) ?? {},
+    );
+    const completeQuadrantScores = hasCompleteQuadrantScores(benzingerScores.max);
+    if (test.slug?.includes("benzinger") && !completeQuadrantScores) {
+      throw new Error("El test Benzinger todavía no tiene una clave de puntuación completa para los cuatro cuadrantes. No se generó un informe para evitar mostrar un perfil incorrecto.");
+    }
     const prompt = buildPrompt({
       name: profile.full_name ?? "Usuario",
       details: profileDetails,
       values: (profile.values as string[] | null) ?? [],
       strengths: (profile.strengths as string[] | null) ?? [],
       testTitle: test.title,
-      quadrantScores: attempt.quadrant_scores ?? {},
+      quadrantScores: completeQuadrantScores
+        ? benzingerScores.percentages
+        : { RB: null, LB: null, RF: null, LF: null },
       qaPairs: qaPairsFromSnapshot(
         (attempt.items_snapshot as { id: string; question: string; options: { id: string; text: string }[] }[]) ?? [],
         (attempt.answers as Record<string, string>) ?? {},
@@ -226,14 +243,21 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
 
     stage = "render_report";
     const { renderIdentityReportHtml } = await import("@/lib/report-html");
+    const scores = completeQuadrantScores
+      ? (Object.keys(BENZINGER_QUADRANT_LABELS) as BenzingerQuadrant[]).map((quadrant) => ({
+          label: BENZINGER_QUADRANT_LABELS[quadrant],
+          value: benzingerScores.percentages[quadrant],
+        }))
+      : [];
     const html = renderIdentityReportHtml(generated.pages, {
       avatarUrl: profile.avatar_url,
       studentName: profile.full_name,
       age: profileDetails.age,
       city: profileDetails.city,
       country: profileDetails.country,
+      scores,
     });
-    const content = { html, scores: [] };
+    const content = { html, scores };
 
     const { error: updateError } = await supabase.from("reports").update({
       status: "completed",
@@ -310,4 +334,9 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
     }
     return NextResponse.json({ error: message, stage }, { status: 500 });
   }
+}
+
+function hasCompleteQuadrantScores(scores: Record<BenzingerQuadrant, number>) {
+  return (Object.keys(BENZINGER_QUADRANT_LABELS) as BenzingerQuadrant[])
+    .every((quadrant) => scores[quadrant] > 0);
 }

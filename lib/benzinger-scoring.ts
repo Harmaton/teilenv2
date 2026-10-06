@@ -2,6 +2,7 @@ export type BenzingerQuadrant = "RB" | "LB" | "RF" | "LF";
 
 export type BenzingerItem = {
   id: string;
+  options?: { id: string; text?: string }[];
   scoring?: {
     quadrant: BenzingerQuadrant;
     pointsByOption?: Record<string, number>;
@@ -11,10 +12,18 @@ export type BenzingerItem = {
 
 export type BenzingerScores = {
   raw: Record<BenzingerQuadrant, number>;
+  max: Record<BenzingerQuadrant, number>;
   percentages: Record<BenzingerQuadrant, number>;
 };
 
 const QUADRANTS: BenzingerQuadrant[] = ["RB", "LB", "RF", "LF"];
+
+export const BENZINGER_QUADRANT_LABELS: Record<BenzingerQuadrant, string> = {
+  RB: "RB — Basal derecho",
+  LB: "LB — Basal izquierdo",
+  RF: "RF — Frontal derecho",
+  LF: "LF — Frontal izquierdo",
+};
 
 /**
  * Scores one completed attempt from the approved question-level key.
@@ -25,6 +34,7 @@ export function calculateBenzingerScores(
   answers: Record<string, unknown>
 ): BenzingerScores {
   const raw = emptyScores();
+  const possible = emptyScores();
 
   for (const item of items) {
     const scoring = item.scoring;
@@ -34,14 +44,20 @@ export function calculateBenzingerScores(
     const answerKey = typeof answer === "string" ? answer : String(answer ?? "");
     const points = scoring.pointsByOption?.[answerKey] ?? 0;
     raw[scoring.quadrant] += Math.max(0, points);
+    possible[scoring.quadrant] += Math.max(
+      0,
+      scoring.maxPoints ?? Math.max(0, ...Object.values(scoring.pointsByOption ?? {})),
+    );
   }
 
   const percentages = emptyScores();
   for (const quadrant of QUADRANTS) {
-    percentages[quadrant] = Math.min(100, Math.round(raw[quadrant] * 5));
+    percentages[quadrant] = possible[quadrant]
+      ? Math.min(100, Math.round((raw[quadrant] / possible[quadrant]) * 100))
+      : 0;
   }
 
-  return { raw, percentages };
+  return { raw, max: possible, percentages };
 }
 
 function emptyScores(): Record<BenzingerQuadrant, number> {
