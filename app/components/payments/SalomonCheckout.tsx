@@ -1,5 +1,5 @@
 import { RotateCcw } from "lucide-react";
-import EmbeddedHotmartCheckout from "./embedded-hotmart";
+import PaddleCheckoutButton from "./paddle-checkout-button";
 import { CodeDialog } from "./free/code-dialog";
 
 const SalomonCheckout = ({ reportId }: { reportId?: string }) => {
@@ -12,7 +12,7 @@ const SalomonCheckout = ({ reportId }: { reportId?: string }) => {
         </p>
       </div>
 
-      <EmbeddedHotmartCheckout />
+      <PaddleCheckoutButton reportId={reportId} purchaseType="salomon" />
 
       <div className="flex items-center justify-center gap-1.5 text-[10.5px] text-black/40">
         <RotateCcw className="h-3 w-3" />

@@ -1,6 +1,5 @@
-import Image from "next/image";
 import { Lock, ShieldCheck, BadgeCheck, CreditCard, RotateCcw } from "lucide-react";
-import EmbeddedHotmartCheckout from "./embedded-hotmart";
+import PaddleCheckoutButton from "./paddle-checkout-button";
 import { CodeDialog } from "./free/code-dialog";
 
 const Checkout = ({ reportId }: { reportId?: string }) => {
@@ -37,7 +36,7 @@ const Checkout = ({ reportId }: { reportId?: string }) => {
 
         {/* Checkout button */}
         <div className="mb-3">
-          <EmbeddedHotmartCheckout />
+          <PaddleCheckoutButton reportId={reportId} />
         </div>
 
         {/* Money-back guarantee */}
@@ -80,7 +79,7 @@ const Checkout = ({ reportId }: { reportId?: string }) => {
             </div>
           </div>
           <p className="mt-3 text-center text-[11px] text-gray-400">
-            Visa · Mastercard · PayPal · Procesado de forma segura por Hotmart
+            Visa · Mastercard · PayPal · Pago seguro con Paddle
           </p>
         </div>
       </div>
