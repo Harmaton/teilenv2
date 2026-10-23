@@ -3,6 +3,18 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const PUBLIC_PATHS = [
   "/",
+  "/familias",
+  "/colegios",
+  "/nosotros",
+  "/jovenes",
+  "/salomon-ia",
+  "/experiencias",
+  "/comunidad",
+  "/vision",
+  "/metodologia",
+  "/mecenas",
+  "/contacto",
+  "/el-valor-humano",
   "/login",
   "/signup",
   "/verify-otp",

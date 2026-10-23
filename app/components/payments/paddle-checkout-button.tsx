@@ -148,12 +148,12 @@ export default function PaddleCheckoutButton({
         type="button"
         onClick={startCheckout}
         disabled={!isReady || isLoading || !reportId}
-        className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#f27a1a] px-5 py-3 text-sm font-bold text-[#141b3c] shadow-[4px_4px_0_#141b3c] transition hover:-translate-y-0.5 hover:bg-[#ff8a2b] hover:shadow-[5px_5px_0_#141b3c] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isLoading ? 'Preparando pago…' : isReady ? 'Desbloquear mi reporte' : 'Cargando pago seguro…'}
       </button>
       {message ? (
-        <p className="mt-2 text-center text-sm text-red-600" role="alert">
+        <p className="mt-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-700" role="alert">
           {message}
         </p>
       ) : null}

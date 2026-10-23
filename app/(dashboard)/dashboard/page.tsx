@@ -62,9 +62,10 @@ export default async function DashboardPage() {
 <TestReadinessTab requirements={requirements} />
 
   return (
-    <div className="mx-auto w-full px-6 py-8">
+    <div className="mx-auto w-full max-w-[1500px] px-5 py-7 sm:px-8 sm:py-9">
       <div className="mb-8">
-        <h1 className="text-[22px] font-semibold text-black">Panel</h1>
+        <p className="mb-1 text-[11px] font-bold uppercase tracking-[.18em] text-[#e46a12]">Tu espacio personal</p>
+        <h1 className="text-3xl font-bold tracking-tight text-[#141b3c]">Panel</h1>
         {/* <p className="mt-1 text-[13px] text-black/45">
           Una vista general de tus pruebas, informes y uso de créditos de IA.
         </p> */}
@@ -97,10 +98,10 @@ export default async function DashboardPage() {
 
       {/* ── Quick actions ─────────────────────────────────── */}
      <div className="mb-10">
-  <h2 className="text-[15px] font-bold text-black/85">
+  <h2 className="text-lg font-bold text-[#141b3c]">
     Acciones rápidas
   </h2>
-  <p className="mt-1 text-[13px] text-black/45">
+  <p className="mt-1 text-sm text-[#545c7e]">
     Lo que harás con más frecuencia, a un toque de distancia.
   </p>
 
@@ -114,12 +115,12 @@ export default async function DashboardPage() {
       
 
 
-       <div className="mt-4 rounded-3xl border border-black/[0.08] bg-white p-6">
+      <div className="mt-6 rounded-[26px] border border-[#141b3c]/10 bg-white p-5 shadow-[0_16px_45px_-36px_rgba(20,27,60,.5)] sm:p-7">
   <div className="mb-6">
-    <h2 className="text-[15px] font-bold text-black/85">
+    <h2 className="text-lg font-bold text-[#141b3c]">
       Valores y fortalezas
     </h2>
-    <p className="mt-1 text-[13px] text-black/45">
+    <p className="mt-1 text-sm text-[#545c7e]">
       Complétalos antes de poder realizar una prueba.
     </p>
   </div>
@@ -131,27 +132,27 @@ export default async function DashboardPage() {
 </div>
 
               {/* ── Attempts table ────────────────────────────────── */}
-      <div className="mt-4">
-        <h2 className="mb-3 text-[15px] font-semibold text-black">Tus intentos de prueba</h2>
+      <div className="mt-7">
+        <h2 className="mb-3 text-lg font-bold text-[#141b3c]">Tus intentos de prueba</h2>
 
         {attempts.length === 0 ? (
-          <div className="rounded-2xl border border-black/[0.06] bg-black/[0.02] px-6 py-10 text-center">
-            <p className="text-[13px] text-black/45">
+          <div className="rounded-[26px] border border-[#141b3c]/10 bg-white px-6 py-12 text-center shadow-sm">
+            <p className="text-sm text-[#545c7e]">
               Aún no has empezado una prueba.
             </p>
             <Link
               href="/tests"
-              className="mt-3 inline-flex items-center gap-1 text-[13px] font-medium"
+              className="mt-4 inline-flex items-center gap-1 rounded-full bg-[#f27a1a] px-4 py-2.5 text-sm font-semibold text-[#141b3c] shadow-[3px_3px_0_#141b3c]"
               style={{ color: ACCENT }}
             >
               Explorar pruebas <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-black/[0.06]">
+          <div className="overflow-hidden rounded-[26px] border border-[#141b3c]/10 bg-white shadow-sm">
             <table className="w-full border-collapse text-[13px]">
               <thead>
-                <tr className="border-b border-black/[0.06] bg-black/[0.02] text-left">
+                <tr className="border-b border-[#141b3c]/10 bg-[#fff8f2] text-left">
                   <Th>Prueba</Th>
                   <Th>Estado</Th>
                   <Th>Puntuación</Th>
@@ -166,7 +167,7 @@ export default async function DashboardPage() {
                   return (
                     <tr
                       key={a.id}
-                      className="border-b border-black/[0.04] last:border-0 hover:bg-black/[0.015]"
+                      className="border-b border-[#141b3c]/5 last:border-0 hover:bg-[#fffaf5]"
                     >
                       <Td className="font-medium text-black">{a.testTitle}</Td>
                       <Td>

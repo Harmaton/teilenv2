@@ -6,6 +6,7 @@ export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
   try {
+    
     const body = (await request.json()) as { reportId?: unknown; purchaseType?: unknown };
     if (typeof body.reportId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.reportId)) {
       return NextResponse.json({ error: 'El informe no es válido.' }, { status: 400 });

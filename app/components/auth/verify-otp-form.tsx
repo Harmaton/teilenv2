@@ -100,19 +100,20 @@ function VerifyOtpForm() {
       <div className="flex flex-col gap-1">
         <Link
           href="/signup"
-          className="text-[10px] font-mono tracking-[0.3em] uppercase text-zinc-400 dark:text-zinc-600 mb-4 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors"
+          className="mb-4 inline-flex items-center gap-2 text-xs font-semibold text-[#e46a12] transition-colors hover:text-[#141b3c]"
         >
-          ← Back
+          ← Volver al registro
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-white">
-          Check your email
+        <p className="text-xs font-bold uppercase tracking-[.2em] text-[#e46a12]">Verificación segura</p>
+        <h1 className="text-3xl font-bold tracking-tight text-[#141b3c]">
+          Revisa tu correo
         </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-          We sent a 6-digit code to{" "}
-          <span className="font-medium text-zinc-700 dark:text-zinc-300">
-            {email || "your email"}
+        <p className="text-sm leading-relaxed text-[#545c7e]">
+          Enviamos un código de 6 dígitos a{" "}
+          <span className="font-semibold text-[#141b3c]">
+            {email || "tu correo"}
           </span>
-          . Enter it below.
+          . Escríbelo aquí para continuar.
         </p>
       </div>
 
@@ -129,40 +130,40 @@ function VerifyOtpForm() {
             onChange={(e) => handleDigitChange(i, e.target.value)}
             onKeyDown={(e) => handleKeyDown(i, e)}
             disabled={isSubmitting}
-            className="w-12 h-14 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent text-center text-xl font-semibold text-zinc-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition disabled:opacity-40"
+            className="h-14 w-12 rounded-xl border border-[#141b3c]/15 bg-white text-center text-xl font-bold text-[#141b3c] outline-none transition focus:border-[#f27a1a] focus:ring-2 focus:ring-[#f27a1a]/20 disabled:opacity-40"
           />
         ))}
       </div>
 
       {error && (
-        <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg px-3 py-2">
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </p>
       )}
 
       {isSubmitting && (
-        <div className="flex items-center justify-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+        <div className="flex items-center justify-center gap-2 text-sm text-[#545c7e]">
           <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
           </svg>
-          Verifying…
+          Verificando…
         </div>
       )}
 
       {/* Resend */}
-      <div className="text-center text-xs text-zinc-500 dark:text-zinc-400">
-        Didn&apos;t receive a code?{" "}
+      <div className="text-center text-sm text-[#545c7e]">
+        ¿No recibiste el código?{" "}
         {resendCountdown > 0 ? (
-          <span className="text-zinc-400 dark:text-zinc-600">
-            Resend in {resendCountdown}s
+          <span className="text-[#545c7e]/70">
+            Puedes reenviar en {resendCountdown}s
           </span>
         ) : (
           <button
             onClick={() => setResendCountdown(60)}
-            className="font-medium text-zinc-900 dark:text-white hover:underline"
+            className="font-semibold text-[#e46a12] hover:underline"
           >
-            Resend
+            Reenviar código
           </button>
         )}
       </div>

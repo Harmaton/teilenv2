@@ -68,17 +68,17 @@ export default function ResetPasswordPage() {
 
   if (done) {
     return (
-      <div className="mx-auto w-full max-w-md rounded-[2rem] border border-orange-200/20 bg-zinc-950/95 p-8 shadow-[0_35px_80px_-40px_rgba(249,115,22,0.45)] text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-500/15 text-orange-400 shadow-inner">
+      <div className="mx-auto w-full max-w-md rounded-[28px] border border-[#141b3c]/10 bg-white p-8 text-center shadow-[0_24px_70px_-35px_rgba(20,27,60,.28)] sm:p-10">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#fff3cf] text-[#e46a12] shadow-inner">
           <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-[#141b3c]">
             Contraseña actualizada
           </h1>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-[#545c7e]">
             Te redirigimos para iniciar sesión…
           </p>
         </div>
@@ -87,25 +87,25 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-[2rem] border border-orange-200/20 bg-zinc-950/95 p-8 shadow-[0_35px_80px_-40px_rgba(249,115,22,0.45)]">
+    <div className="mx-auto w-full max-w-md rounded-[28px] border border-[#141b3c]/10 bg-white p-8 shadow-[0_24px_70px_-35px_rgba(20,27,60,.28)] sm:p-10">
       <div className="flex flex-col gap-1">
         <Link
           href="/login"
-          className="text-[10px] font-mono tracking-[0.3em] uppercase text-orange-200/80 mb-4 inline-flex items-center gap-2 hover:text-orange-100 transition-colors"
+          className="mb-4 inline-flex items-center gap-2 text-xs font-semibold text-[#e46a12] transition-colors hover:text-[#141b3c]"
         >
           ← Iniciar sesión
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">
+        <h1 className="text-2xl font-bold tracking-tight text-[#141b3c]">
           Restablecer contraseña
         </h1>
-        <p className="text-sm text-zinc-400">
+        <p className="text-sm text-[#545c7e]">
           Elige una nueva contraseña para tu cuenta.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-400 tracking-wide">
+          <label className="text-sm font-semibold text-[#141b3c]">
             Nueva contraseña
           </label>
           <input
@@ -115,12 +115,12 @@ export default function ResetPasswordPage() {
             placeholder="Min. 8 caracteres"
             required
             autoComplete="new-password"
-            className="h-12 rounded-2xl border border-zinc-800 bg-zinc-950/90 px-4 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition"
+            className="h-12 rounded-xl border border-[#141b3c]/15 bg-[#f6f5fb] px-4 text-sm text-[#141b3c] placeholder:text-[#545c7e]/55 outline-none transition focus:border-[#f27a1a] focus:ring-2 focus:ring-[#f27a1a]/20"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-400 tracking-wide">
+          <label className="text-sm font-semibold text-[#141b3c]">
             Confirmar contraseña
           </label>
           <input
@@ -130,15 +130,15 @@ export default function ResetPasswordPage() {
             placeholder="••••••••"
             required
             autoComplete="new-password"
-            className="h-12 rounded-2xl border border-zinc-800 bg-zinc-950/90 px-4 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition"
+            className="h-12 rounded-xl border border-[#141b3c]/15 bg-[#f6f5fb] px-4 text-sm text-[#141b3c] placeholder:text-[#545c7e]/55 outline-none transition focus:border-[#f27a1a] focus:ring-2 focus:ring-[#f27a1a]/20"
           />
         </div>
 
         {password.length > 0 && (
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between text-xs text-zinc-400">
+            <div className="flex items-center justify-between text-xs text-[#545c7e]">
               <span>Fortaleza</span>
-              <span className="font-semibold text-white">
+              <span className="font-semibold text-[#141b3c]">
                 {getPasswordStrengthLabel(passwordStrength)}
               </span>
             </div>
@@ -149,23 +149,23 @@ export default function ResetPasswordPage() {
                   className={`h-1 flex-1 rounded-full transition-colors ${
                     level <= passwordStrength
                       ? level === 4
-                        ? "bg-emerald-500"
+                        ? "bg-[#f27a1a]"
                         : level === 3
-                        ? "bg-yellow-400"
-                        : "bg-red-400"
-                      : "bg-zinc-800"
+                        ? "bg-[#ffc94d]"
+                        : "bg-[#e46a12]"
+                      : "bg-[#141b3c]/10"
                   }`}
                 />
               ))}
             </div>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-[#545c7e]">
               Usa mayúsculas, minúsculas, números y símbolos.
             </p>
           </div>
         )}
 
         {error && (
-          <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg px-3 py-2">
+          <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </p>
         )}
@@ -173,7 +173,7 @@ export default function ResetPasswordPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-1 h-12 rounded-2xl bg-orange-500 text-white text-sm font-semibold transition hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-1 h-12 rounded-2xl bg-[#f27a1a] text-sm font-semibold text-[#141b3c] shadow-[4px_4px_0_#141b3c] transition hover:bg-[#ff8a2b] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? (
             <span className="flex items-center gap-2">

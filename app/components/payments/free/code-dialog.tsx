@@ -67,33 +67,32 @@ export function CodeDialog({ reportId, onSuccess }: Props) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger
-        className="flex w-full items-center justify-center rounded-md border border-dashed border-gray-300 bg-white py-3 text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:shadow"
+        className="flex w-full items-center justify-center rounded-xl border border-dashed border-[#f27a1a]/40 bg-[#fff8f2] py-3 text-sm font-semibold text-[#141b3c] shadow-sm transition-all hover:bg-[#fff3cf] hover:shadow"
       >
-          <KeyRound className="h-4 w-4 mr-2 text-indigo-600" />
-          <span>Utilice el código de descarga gratuito</span>
+          <KeyRound className="mr-2 h-4 w-4 text-[#e46a12]" />
+          <span>¿Tienes un código de acceso?</span>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="rounded-[26px] border-[#141b3c]/10 bg-white sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-xl text-center font-bold text-gray-800">
-            Ingrese su código de acceso
+          <DialogTitle className="text-center text-xl font-bold text-[#141b3c]">
+            Ingresa tu código de acceso
           </DialogTitle>
-          <DialogDescription className="text-center text-gray-600 mt-2">
-            Proporcione el código promocional o código de administrador para
-            desbloquear su informe completo de forma gratuita.
+          <DialogDescription className="mt-2 text-center text-[#545c7e]">
+            Escribe el código que recibiste para desbloquear el informe.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="bg-gray-50 p-4 rounded-lg my-4">
+        <div className="my-4 rounded-2xl bg-[#f6f5fb] p-4">
           <div className="flex flex-col space-y-4">
-            <Label htmlFor="code" className="text-sm font-medium text-gray-700">
-              Código de acceso
+            <Label htmlFor="code" className="text-sm font-semibold text-[#141b3c]">
+              Código
             </Label>
             <Input
               id="code"
               value={code}
               onChange={handleInputChange}
               placeholder="INGRESE SU CÓDIGO"
-              className="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 uppercase tracking-wider"
+              className="rounded-xl border-[#141b3c]/15 bg-white p-3 uppercase tracking-wider focus:border-[#f27a1a] focus:ring-[#f27a1a]/20"
               autoComplete="off"
             />
           </div>
@@ -101,7 +100,7 @@ export function CodeDialog({ reportId, onSuccess }: Props) {
 
         {message && (
           <div
-            className={`text-center p-3 rounded-md ${
+            className={`rounded-xl p-3 text-center ${
               isError
                 ? "bg-red-50 text-red-700 border border-red-200"
                 : "bg-green-50 text-green-700 border border-green-200"
@@ -134,7 +133,7 @@ export function CodeDialog({ reportId, onSuccess }: Props) {
           <Button
             onClick={handleUnlock}
             disabled={!code || loading}
-            className={`w-full py-3 bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white font-medium rounded-md transition-all ${
+            className={`w-full rounded-xl bg-[#f27a1a] py-3 font-semibold text-[#141b3c] shadow-[3px_3px_0_#141b3c] transition-all hover:bg-[#ff8a2b] ${
               loading ? "opacity-80" : ""
             }`}
           >

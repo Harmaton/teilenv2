@@ -75,25 +75,26 @@ export default function SignupForm() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-7">
       <div className="flex flex-col gap-1">
         <Link
           href="/"
-          className="text-[10px] font-mono tracking-[0.3em] uppercase text-zinc-400 dark:text-zinc-600 mb-4 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors"
+          className="mb-3 inline-flex items-center gap-2 text-xs font-semibold text-[#e46a12] transition-colors hover:text-[#141b3c]"
         >
           ← Teilen Teens
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-white">
+        <p className="text-xs font-bold uppercase tracking-[.2em] text-[#e46a12]">Tu recorrido empieza aquí</p>
+        <h1 className="text-3xl font-bold tracking-tight text-[#141b3c]">
           Crear cuenta
         </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="text-sm leading-relaxed text-[#545c7e]">
           Recibirás un correo de verificación después de registrarte.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400 tracking-wide">
+          <label className="text-sm font-semibold text-[#141b3c]">
             Nombre completo
           </label>
           <input
@@ -102,12 +103,12 @@ export default function SignupForm() {
             onChange={(e) => setFullName(e.target.value)}
             placeholder="Nombre Apellido"
             autoComplete="name"
-            className="h-10 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition"
+            className="h-12 rounded-xl border border-[#141b3c]/15 bg-white px-4 text-sm text-[#141b3c] placeholder:text-[#545c7e]/55 outline-none transition focus:border-[#f27a1a] focus:ring-2 focus:ring-[#f27a1a]/20"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400 tracking-wide">
+          <label className="text-sm font-semibold text-[#141b3c]">
             Correo electrónico
           </label>
           <input
@@ -117,12 +118,12 @@ export default function SignupForm() {
             placeholder="correo@ejemplo.com"
             required
             autoComplete="email"
-            className="h-10 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition"
+            className="h-12 rounded-xl border border-[#141b3c]/15 bg-white px-4 text-sm text-[#141b3c] placeholder:text-[#545c7e]/55 outline-none transition focus:border-[#f27a1a] focus:ring-2 focus:ring-[#f27a1a]/20"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400 tracking-wide">
+          <label className="text-sm font-semibold text-[#141b3c]">
             Contraseña
           </label>
           <div className="relative">
@@ -133,12 +134,12 @@ export default function SignupForm() {
               placeholder="Min. 8 caracteres"
               required
               autoComplete="new-password"
-              className="h-10 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 pr-10 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition"
+              className="h-12 w-full rounded-xl border border-[#141b3c]/15 bg-white px-4 pr-11 text-sm text-[#141b3c] placeholder:text-[#545c7e]/55 outline-none transition focus:border-[#f27a1a] focus:ring-2 focus:ring-[#f27a1a]/20"
             />
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-2 text-[#545c7e] hover:bg-[#f6f5fb] hover:text-[#141b3c]"
               aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
             >
               {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -148,9 +149,9 @@ export default function SignupForm() {
 
         {password.length > 0 && (
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+            <div className="flex items-center justify-between text-xs text-[#545c7e]">
               <span>Fortaleza de la contraseña</span>
-              <span className="font-medium text-zinc-900 dark:text-zinc-100">
+              <span className="font-semibold text-[#141b3c]">
                 {getPasswordStrengthLabel(passwordStrength)}
               </span>
             </div>
@@ -165,19 +166,19 @@ export default function SignupForm() {
                         : level === 3
                         ? "bg-amber-400"
                         : "bg-red-400"
-                      : "bg-zinc-200 dark:bg-zinc-800"
+                      : "bg-[#141b3c]/10"
                   }`}
                 />
               ))}
             </div>
-            <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+            <p className="text-[11px] text-[#545c7e]">
               Usa mayúsculas, minúsculas, números y símbolos.
             </p>
           </div>
         )}
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400 tracking-wide">
+          <label className="text-sm font-semibold text-[#141b3c]">
             Confirmar contraseña
           </label>
           <div className="relative">
@@ -188,12 +189,12 @@ export default function SignupForm() {
               placeholder="••••••••"
               required
               autoComplete="new-password"
-              className="h-10 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 pr-10 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition"
+              className="h-12 w-full rounded-xl border border-[#141b3c]/15 bg-white px-4 pr-11 text-sm text-[#141b3c] placeholder:text-[#545c7e]/55 outline-none transition focus:border-[#f27a1a] focus:ring-2 focus:ring-[#f27a1a]/20"
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-2 text-[#545c7e] hover:bg-[#f6f5fb] hover:text-[#141b3c]"
               aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
             >
               {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -202,7 +203,7 @@ export default function SignupForm() {
         </div>
 
         {error && (
-          <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg px-3 py-2">
+          <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </p>
         )}
@@ -210,7 +211,7 @@ export default function SignupForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-1 h-11 flex items-center justify-center rounded-lg bg-orange-500 text-white text-sm font-medium tracking-tight transition hover:bg-orange-600 focus-visible:ring-4 focus-visible:ring-orange-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-1 flex h-12 items-center justify-center rounded-2xl bg-[#f27a1a] text-sm font-semibold tracking-tight text-[#141b3c] shadow-[4px_4px_0_#141b3c] transition hover:bg-[#ff8a2b] focus-visible:ring-4 focus-visible:ring-[#ffc94d] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? (
             <span className="flex items-center gap-2">
@@ -226,11 +227,11 @@ export default function SignupForm() {
         </button>
       </form>
 
-      <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
+      <p className="text-center text-sm text-[#545c7e]">
         ¿Ya tienes una cuenta?{" "}
         <Link
           href="/login"
-          className="font-medium text-zinc-900 dark:text-white hover:underline"
+          className="font-semibold text-[#e46a12] hover:underline"
         >
           Inicia sesión
         </Link>

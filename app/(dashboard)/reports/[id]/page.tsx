@@ -1,7 +1,8 @@
 import { getReportDetail } from "@/_actions/reports";
-import Checkout from "@/app/components/payments/checkout";
+
 import { ReportView } from "@/app/components/reports/report-view";
 import { ReportGenerating } from "@/app/components/reports/report-generating";
+import Checkout from "@/app/components/payments/checkout";
 
 export default async function ReportDetailPage({
   params,
@@ -14,8 +15,13 @@ export default async function ReportDetailPage({
   // Case 1: not found / not owned
   if (!result.success) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-16 text-center">
-        <p className="text-[14px] text-black/50">{result.error}</p>
+      <div className="mx-auto w-full max-w-2xl px-6 py-16">
+        <div className="callout">
+          <span className="ic" aria-hidden="true">
+            !
+          </span>
+          <p>{result.error}</p>
+        </div>
       </div>
     );
   }
@@ -33,23 +39,10 @@ export default async function ReportDetailPage({
     );
   }
 
-  // Case 2: user does NOT have access → show checkout + code dialog
+  // Case 2: user does NOT have access → full-page checkout + code dialog.
+  // The heading lives inside <Checkout/> so the two panels run edge to edge.
   if (!report.hasAccess) {
-    return (
-      <div className="mx-auto w-full max-w-xl px-6 py-10">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Tu informe está listo 🎉
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Desbloquea tu informe completo para ver los resultados.
-          </p>
-        </div>
-
-        {/* Paid option + free code option, both rendered inside Checkout */}
-        <Checkout reportId={report.id} />
-      </div>
-    );
+    return <Checkout reportId={report.id} />;
   }
 
   // Case 3: user HAS access → render report

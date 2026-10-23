@@ -9,10 +9,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <SidebarProvider>
       <AppSidebar user={user} />
-      <SidebarInset className="flex flex-col min-h-screen min-w-0 overflow-hidden">
+      <SidebarInset className="flex min-h-screen min-w-0 flex-col overflow-hidden bg-[#f6f5fb]">
         {/* Mobile sidebar trigger — shown only when sidebar is collapsed */}
         <Navbar />
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 overflow-auto bg-[#f6f5fb]">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );
