@@ -47,6 +47,7 @@ function AuthReportShowcase({ imageSrc, imageAlt, context }: { imageSrc: string;
 
   useEffect(() => {
     const current = reportSteps[activeIndex];
+    let active = true;
     let titleIndex = 0;
     let detailIndex = 0;
     let detailTimer: ReturnType<typeof setTimeout> | undefined;
@@ -55,40 +56,57 @@ function AuthReportShowcase({ imageSrc, imageAlt, context }: { imageSrc: string;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reducedMotion) {
       const revealTimer = setTimeout(() => {
+        if (!active) return;
         setTypedTitle(current.title);
         setTypedDetail(current.detail);
       }, 0);
-      const nextTimer = setTimeout(() => setActiveIndex((index) => (index + 1) % reportSteps.length), 3200);
+      const nextTimer = setTimeout(() => {
+        if (active) setActiveIndex((index) => (index + 1) % reportSteps.length);
+      }, 3200);
       return () => {
+        active = false;
         clearTimeout(revealTimer);
         clearTimeout(nextTimer);
       };
     }
 
-    let titleTimer: number;
+    let titleTimer: number | undefined;
     const startTimer = setTimeout(() => {
+      if (!active) return;
       setTypedTitle("");
       setTypedDetail("");
       titleTimer = window.setInterval(() => {
+        if (!active) {
+          if (titleTimer !== undefined) window.clearInterval(titleTimer);
+          return;
+        }
         titleIndex += 1;
         setTypedTitle(current.title.slice(0, titleIndex));
         if (titleIndex >= current.title.length) {
-          window.clearInterval(titleTimer);
+          if (titleTimer !== undefined) window.clearInterval(titleTimer);
           detailTimer = setTimeout(() => {
+            if (!active) return;
             textTimer = window.setInterval(() => {
-            detailIndex += 2;
-            setTypedDetail(current.detail.slice(0, detailIndex));
-            if (detailIndex >= current.detail.length) {
-              if (textTimer !== undefined) window.clearInterval(textTimer);
-              detailTimer = setTimeout(() => setActiveIndex((index) => (index + 1) % reportSteps.length), 2300);
-            }
-          }, 22);
+              if (!active) {
+                if (textTimer !== undefined) window.clearInterval(textTimer);
+                return;
+              }
+              detailIndex += 2;
+              setTypedDetail(current.detail.slice(0, detailIndex));
+              if (detailIndex >= current.detail.length) {
+                if (textTimer !== undefined) window.clearInterval(textTimer);
+                detailTimer = setTimeout(() => {
+                  if (active) setActiveIndex((index) => (index + 1) % reportSteps.length);
+                }, 2300);
+              }
+            }, 22);
           }, 250);
         }
       }, 38);
     }, 0);
 
     return () => {
+      active = false;
       clearTimeout(startTimer);
       if (titleTimer !== undefined) window.clearInterval(titleTimer);
       if (textTimer !== undefined) window.clearInterval(textTimer);

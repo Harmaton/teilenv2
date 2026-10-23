@@ -13,12 +13,35 @@ type PaddleClient = {
     token: string;
     eventCallback?: (event: { name?: string }) => void;
   }) => void;
-  Checkout: { open: (options: { transactionId: string }) => void };
+  Checkout: {
+    open: (options: {
+      transactionId: string;
+      settings: {
+        displayMode: 'overlay';
+        theme: 'light';
+        locale: 'es';
+      };
+    }) => void;
+  };
 };
 
 declare global {
   interface Window {
     Paddle?: PaddleClient;
+  }
+}
+
+let checkoutCompleted = false;
+
+function handlePaddleEvent(event: { name?: string }) {
+  if (event.name === 'checkout.completed') {
+    checkoutCompleted = true;
+    return;
+  }
+
+  if (event.name === 'checkout.closed' && checkoutCompleted) {
+    checkoutCompleted = false;
+    window.dispatchEvent(new Event('paddle:checkout-completed'));
   }
 }
 
@@ -35,11 +58,7 @@ function initializePaddle(): Promise<void> {
       }
       window.Paddle.Initialize({
         token,
-        eventCallback: (event) => {
-          if (event.name === 'checkout.completed') {
-            window.dispatchEvent(new Event('paddle:checkout-completed'));
-          }
-        },
+        eventCallback: handlePaddleEvent,
       });
       paddleInitialized = true;
     }
@@ -59,11 +78,7 @@ function initializePaddle(): Promise<void> {
         }
         window.Paddle.Initialize({
           token,
-          eventCallback: (event) => {
-            if (event.name === 'checkout.completed') {
-              window.dispatchEvent(new Event('paddle:checkout-completed'));
-            }
-          },
+          eventCallback: handlePaddleEvent,
         });
         paddleInitialized = true;
         resolve();
@@ -100,7 +115,9 @@ export default function PaddleCheckoutButton({
 
   useEffect(() => {
     let active = true;
-    const refreshAfterCheckout = () => router.refresh();
+    const refreshAfterCheckout = () => {
+      window.requestAnimationFrame(() => router.refresh());
+    };
     window.addEventListener('paddle:checkout-completed', refreshAfterCheckout);
     initializePaddle()
       .then(() => {
@@ -134,7 +151,19 @@ export default function PaddleCheckoutButton({
         throw new Error(result.error ?? 'No se pudo iniciar el pago. Inténtalo de nuevo.');
       }
 
-      window.Paddle?.Checkout.open({ transactionId: result.transactionId });
+      const paddle = window.Paddle;
+      if (!paddle) {
+        throw new Error('El checkout seguro no está disponible. Recarga la página e inténtalo de nuevo.');
+      }
+
+      paddle.Checkout.open({
+        transactionId: result.transactionId,
+        settings: {
+          displayMode: 'overlay',
+          theme: 'light',
+          locale: 'es',
+        },
+      });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'No se pudo iniciar el pago. Inténtalo de nuevo.');
     } finally {
