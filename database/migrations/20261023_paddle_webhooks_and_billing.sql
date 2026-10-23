@@ -103,6 +103,29 @@ create table if not exists public.paddle_adjustments (
   updated_at timestamptz not null default now()
 );
 
+-- Keep this migration usable even if the original Paddle purchases migration
+-- has not yet been applied to the target Supabase project.
+create table if not exists public.paddle_purchases (
+  id uuid primary key default gen_random_uuid(),
+  transaction_id text not null unique,
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  report_id uuid not null references public.reports(id) on delete cascade,
+  purchase_type text not null check (purchase_type in ('report', 'salomon')),
+  buyer_email text,
+  status text not null check (status in ('completed', 'refunded')),
+  amount numeric,
+  currency_code text,
+  raw_payload jsonb not null default '{}'::jsonb,
+  paddle_customer_id text,
+  payment_method_type text,
+  card_last4 text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists paddle_purchases_profile_created_idx
+  on public.paddle_purchases (profile_id, created_at desc);
+
 -- Billing data and webhook payloads are server-owned; no client API policies are added.
 alter table public.paddle_webhook_events enable row level security;
 alter table public.paddle_customers enable row level security;
@@ -111,6 +134,7 @@ alter table public.paddle_transactions enable row level security;
 alter table public.paddle_products enable row level security;
 alter table public.paddle_prices enable row level security;
 alter table public.paddle_adjustments enable row level security;
+alter table public.paddle_purchases enable row level security;
 
 alter table public.paddle_purchases
   add column if not exists paddle_customer_id text,

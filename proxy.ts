@@ -14,6 +14,10 @@ const PUBLIC_PATHS = [
   "/verify-otp",
   '/auth/complete-signup',
   '/auth/accept-invite',
+  '/legal',
+  '/refund-policy',
+  '/privacy-notice',
+  '/terms-of-service',
 ];
 
 export async function proxy(request: NextRequest) {
