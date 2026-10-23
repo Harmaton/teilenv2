@@ -12,7 +12,6 @@ export function extractIdentityReportPages(document: string): IdentityReportPage
     const content = match[1].match(/<div class=["']page-content["'][^>]*>([\s\S]*?)<\/div>\s*<footer/i)?.[1] ?? match[1];
     pages.push({ title: stripTags(title).trim(), html: cleanGeneratedHtml(content) });
   }
-
   return pages;
 }
 

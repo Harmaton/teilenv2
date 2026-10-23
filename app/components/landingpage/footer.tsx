@@ -4,6 +4,7 @@
 
 import React from "react";
 import { MessageCircle } from "lucide-react";
+import Link from "next/link";
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -155,8 +156,19 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-white/10 pt-7 text-center">
+          <nav aria-label="Políticas legales" className="mb-5 flex flex-wrap justify-center gap-x-6 gap-y-3">
+            <Link href="/terms-of-service" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
+              Términos del servicio
+            </Link>
+            <Link href="/privacy-notice" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
+              Aviso de privacidad
+            </Link>
+            <Link href="/refund-policy" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
+              Política de reembolso
+            </Link>
+          </nav>
           <p className="text-sm text-white/35">
-            Copyright 2025 Teilen Teens. Todos los derechos reservados.
+            Copyright 2026 Teilen Teens. Todos los derechos reservados.
           </p>
         </div>
 

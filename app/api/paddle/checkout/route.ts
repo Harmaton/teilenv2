@@ -83,6 +83,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ transactionId: transaction.id });
   } catch (error) {
     console.error('[paddle] Could not create checkout transaction:', error);
+    const paddleErrorCode =
+      typeof error === 'object' && error !== null && 'code' in error
+        ? error.code
+        : undefined;
+    if (paddleErrorCode === 'transaction_default_checkout_url_not_set') {
+      return NextResponse.json(
+        {
+          error:
+            'La cuenta de Paddle no tiene configurado un enlace de pago predeterminado. Configúralo para el entorno (Sandbox o Live) de esta app e inténtalo de nuevo.',
+        },
+        { status: 503 },
+      );
+    }
     return NextResponse.json({ error: 'No se pudo iniciar el pago. Inténtalo de nuevo.' }, { status: 500 });
   }
 }

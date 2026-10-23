@@ -56,7 +56,7 @@ export function CodeDialog({ reportId, onSuccess }: Props) {
         setMessage(result.error);
         setIsError(true);
       }
-    } catch (error) {
+    } catch {
       setMessage("Error al procesar el código");
       setIsError(true);
     } finally {
@@ -66,14 +66,11 @@ export function CodeDialog({ reportId, onSuccess }: Props) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger >
-        <Button
-          variant="outline"
-          className="flex items-center justify-center w-full py-3 bg-white hover:bg-gray-50 border border-dashed border-gray-300 text-gray-700 transition-all rounded-md shadow-sm hover:shadow"
-        >
+      <DialogTrigger
+        className="flex w-full items-center justify-center rounded-md border border-dashed border-gray-300 bg-white py-3 text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:shadow"
+      >
           <KeyRound className="h-4 w-4 mr-2 text-indigo-600" />
           <span>Utilice el código de descarga gratuito</span>
-        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

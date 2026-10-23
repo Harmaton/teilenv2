@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const PADDLE_SCRIPT_URL = 'https://cdn.paddle.com/paddle/v2/paddle.js';
 let paddleReady: Promise<void> | null = null;
@@ -8,7 +9,10 @@ let paddleInitialized = false;
 
 type PaddleClient = {
   Environment: { set: (environment: 'sandbox') => void };
-  Initialize: (options: { token: string }) => void;
+  Initialize: (options: {
+    token: string;
+    eventCallback?: (event: { name?: string }) => void;
+  }) => void;
   Checkout: { open: (options: { transactionId: string }) => void };
 };
 
@@ -29,7 +33,14 @@ function initializePaddle(): Promise<void> {
       if (process.env.NEXT_PUBLIC_PADDLE_ENV !== 'production') {
         window.Paddle.Environment.set('sandbox');
       }
-      window.Paddle.Initialize({ token });
+      window.Paddle.Initialize({
+        token,
+        eventCallback: (event) => {
+          if (event.name === 'checkout.completed') {
+            window.dispatchEvent(new Event('paddle:checkout-completed'));
+          }
+        },
+      });
       paddleInitialized = true;
     }
     return Promise.resolve();
@@ -46,7 +57,14 @@ function initializePaddle(): Promise<void> {
         if (process.env.NEXT_PUBLIC_PADDLE_ENV !== 'production') {
           window.Paddle.Environment.set('sandbox');
         }
-        window.Paddle.Initialize({ token });
+        window.Paddle.Initialize({
+          token,
+          eventCallback: (event) => {
+            if (event.name === 'checkout.completed') {
+              window.dispatchEvent(new Event('paddle:checkout-completed'));
+            }
+          },
+        });
         paddleInitialized = true;
         resolve();
       };
@@ -75,12 +93,15 @@ export default function PaddleCheckoutButton({
   reportId?: string;
   purchaseType?: 'report' | 'salomon';
 }) {
+  const router = useRouter();
   const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     let active = true;
+    const refreshAfterCheckout = () => router.refresh();
+    window.addEventListener('paddle:checkout-completed', refreshAfterCheckout);
     initializePaddle()
       .then(() => {
         if (active) setIsReady(true);
@@ -92,8 +113,9 @@ export default function PaddleCheckoutButton({
       });
     return () => {
       active = false;
+      window.removeEventListener('paddle:checkout-completed', refreshAfterCheckout);
     };
-  }, []);
+  }, [router]);
 
   async function startCheckout() {
     if (!reportId || isLoading) return;
