@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 const policies = [
+  { href: "/precio", label: "Precio" },
   { href: "/terms-of-service", label: "Términos del servicio" },
   { href: "/privacy-notice", label: "Aviso de privacidad" },
   { href: "/refund-policy", label: "Política de reembolso" },

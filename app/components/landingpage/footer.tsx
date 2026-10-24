@@ -157,6 +157,9 @@ const Footer = () => {
 
         <div className="border-t border-white/10 pt-7 text-center">
           <nav aria-label="Políticas legales" className="mb-5 flex flex-wrap justify-center gap-x-6 gap-y-3">
+            <Link href="/precio" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
+              Precio
+            </Link>
             <Link href="/terms-of-service" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
               Términos del servicio
             </Link>

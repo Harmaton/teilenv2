@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import LandingNav from "./nav";
 import EcosystemSection from "./ecosystem-section";
 import LandingFooter, { WhatsAppFloat } from "./footer";
+import { PriceSection } from "./steps-section";
 
 type PolicySection = { id: string; title: string; content: ReactNode };
 
@@ -34,6 +36,115 @@ export function PrivacyPolicyPage() {
 
 export function TermsPage() {
   return <PolicyDocument activePage="/terms-of-service" title="Condiciones claras antes de comprar." eyebrow="Centro de confianza" status="Borrador en revisión" intro="Qué compras, cómo se paga y qué puedes esperar. La versión contractual definitiva incorporará los datos legales del operador y la política de garantía y reembolsos." sections={termsSections} />;
+}
+
+const refundSections: PolicySection[] = [
+  {
+    id: "garantia",
+    title: "1. Garantía voluntaria de 7 días",
+    content: (
+      <>
+        <p>
+          Ofrecemos una garantía de devolución de 7 días para las compras digitales pagadas directamente en Teilen Teens, incluidos los reportes premium y el acceso de pago a Teilen AI/Salomon. Podés pedir un reembolso completo dentro de los 7 días calendario posteriores a la fecha de compra, sin necesidad de justificar el motivo.
+        </p>
+        <p>
+          Esta garantía voluntaria no limita los derechos de reembolso, desistimiento o protección al consumidor que te reconozca la legislación aplicable; esos derechos pueden tener plazos o condiciones distintos.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: "solicitud",
+    title: "2. Cómo solicitarlo",
+    content: (
+      <>
+        <p>
+          Enviá tu solicitud a <a className="text-link" href="mailto:hola@simplelifemindset.com">hola@simplelifemindset.com</a> indicando el correo electrónico asociado a tu cuenta, la fecha aproximada de compra y, si está disponible, el identificador de transacción de Paddle. No envíes números completos de tarjeta ni datos financieros sensibles.
+        </p>
+        <p>
+          Revisaremos la solicitud y te confirmaremos el estado por correo. Si la compra fue procesada por Paddle, el reembolso se enviará al método de pago original a través de Paddle. El tiempo para que aparezca en tu cuenta depende del proveedor de pago y de tu entidad financiera.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: "acceso",
+    title: "3. Acceso después del reembolso",
+    content: (
+      <p>
+        Cuando se aprueba un reembolso, podemos deshabilitar el acceso al reporte, chat u otro contenido digital asociado con esa compra. Si el pago está pendiente, fue rechazado o no se completó, no se considera una compra confirmada y no se requiere una devolución.
+      </p>
+    ),
+  },
+  {
+    id: "terceros",
+    title: "4. Compras y cargos de terceros",
+    content: (
+      <p>
+        Esta política se aplica a productos comprados mediante el checkout de Teilen Teens. Para una compra realizada en otra plataforma o por un tercero, consultá las condiciones del vendedor correspondiente. Paddle puede mostrar términos adicionales durante el pago; nada de lo indicado aquí reduce derechos obligatorios que te correspondan.
+      </p>
+    ),
+  },
+  {
+    id: "contacto",
+    title: "5. Contacto",
+    content: (
+      <p>
+        Si tenés preguntas o no recibiste confirmación, escribinos a <a className="text-link" href="mailto:hola@simplelifemindset.com">hola@simplelifemindset.com</a> o contactanos por WhatsApp al <a className="text-link" href="https://wa.me/5435175680433">+54 3517 56-8043</a>. Incluí únicamente los datos necesarios para localizar la compra.
+      </p>
+    ),
+  },
+];
+
+export function RefundPolicyPage() {
+  return (
+    <PolicyDocument
+      activePage="/refund-policy"
+      title="Tu compra, con condiciones claras."
+      eyebrow="Compras y devoluciones"
+      status="Garantía voluntaria de 7 días"
+      intro="Conoce cómo solicitar un reembolso por una compra digital y qué ocurre con el acceso al contenido."
+      sections={refundSections}
+    />
+  );
+}
+
+export function PricingPage() {
+  return (
+    <>
+      <LandingNav activePage="/precio" />
+      <main id="contenido">
+        <section className="phero bg-paper dots-ink">
+          <div className="wrap">
+            <p className="kicker">Precio y contenido</p>
+            <h1>Un precio claro, antes de decidir.</h1>
+            <p className="lead">
+              La evaluación inicial es gratuita. Solo pagas si eliges desbloquear el informe completo.
+            </p>
+          </div>
+        </section>
+        <PriceSection />
+        <section className="sec bg-white">
+          <div className="wrap">
+            <div className="head">
+              <h2>Información antes de comprar</h2>
+              <p className="lead">
+                Revisa las condiciones, la privacidad y las opciones de reembolso antes de realizar tu compra.
+              </p>
+            </div>
+            <nav className="btn-row" aria-label="Información de compra">
+              <Link className="btn btn-line" href="/terms-of-service">Términos de servicio</Link>
+              <Link className="btn btn-line" href="/privacy-notice">Política de privacidad</Link>
+              <Link className="btn btn-line" href="/refund-policy">Política de reembolso</Link>
+            </nav>
+          </div>
+        </section>
+        <EcosystemSection />
+      </main>
+      <LandingFooter />
+      <WhatsAppFloat />
+    </>
+  );
 }
 
 function PolicyDocument({ activePage, title, eyebrow, status, intro, sections }: { activePage: string; title: string; eyebrow: string; status: string; intro: string; sections: PolicySection[] }) {

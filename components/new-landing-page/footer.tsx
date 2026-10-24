@@ -22,7 +22,7 @@ export default function LandingFooter() {
           </div>
 
           <div><h4>Teilen Teens</h4><nav aria-label="Producto">
-            <Link href="/#pasos">Cómo funciona</Link><Link href="/jovenes">Para jóvenes</Link><Link href="/familias">Para familias</Link>
+            <Link href="/#pasos">Cómo funciona</Link><Link href="/precio">Precio</Link><Link href="/jovenes">Para jóvenes</Link><Link href="/familias">Para familias</Link>
             <Link href="/colegios">Para colegios</Link><Link href="/docentes">Para docentes</Link><Link href="/salomon-ia">Salomón IA</Link><Link href="/experiencias">Experiencias</Link>
           </nav></div>
 
@@ -32,7 +32,7 @@ export default function LandingFooter() {
           </nav></div>
 
           <div><h4>Confianza y contacto</h4><nav aria-label="Legal y contacto">
-            <Link href="/privacy-notice">Privacidad</Link><Link href="/menores">Participación de menores</Link><Link href="/terms-of-service">Condiciones y compras</Link>
+            <Link href="/privacy-notice">Política de privacidad</Link><Link href="/menores">Participación de menores</Link><Link href="/terms-of-service">Términos de servicio</Link><Link href="/refund-policy">Política de reembolso</Link>
             <Link href="/aviso-ia">Uso responsable de la IA</Link><Link href="/contacto">Contacto</Link>
             <a href="mailto:talento@teilenteens.com">talento@teilenteens.com</a>
           </nav></div>
