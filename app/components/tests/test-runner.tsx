@@ -12,6 +12,7 @@ import {
   type AttemptState,
   type TestItem,
 } from "@/_actions/test-attempts";
+import type { MinorProfile } from "@/_actions/minor-profiles";
 
 const ENCOURAGEMENTS = [
   "Empieza por lo primero que te venga a la mente.",
@@ -31,9 +32,11 @@ function getEncouragement(step: number, total: number) {
 export function TestRunner({
   test,
   attempt: initialAttempt,
+  minorProfiles,
 }: {
   test: TestDetail;
   attempt: AttemptState | null;
+  minorProfiles: MinorProfile[];
 }) {
   const router = useRouter();
   const [attempt, setAttempt] = useState(initialAttempt);
@@ -44,6 +47,9 @@ export function TestRunner({
   const [isStarting, setIsStarting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
+  const [selectedMinorId, setSelectedMinorId] = useState<string | null | undefined>(
+    initialAttempt ? initialAttempt.minorProfileId : minorProfiles.length > 0 ? undefined : null
+  );
 
   const items: TestItem[] = attempt?.itemsSnapshot ?? test.items;
 
@@ -57,11 +63,12 @@ export function TestRunner({
   }, []);
 
   const handleStart = () => {
-    if (isStarting || attempt) return;
+    if (isStarting || attempt || selectedMinorId === undefined) return;
     setIsStarting(true);
     setStartError(null);
+    const selectedMinor = minorProfiles.find((profile) => profile.id === selectedMinorId);
 
-    startAttempt(test.id)
+    startAttempt(test.id, selectedMinorId)
       .then((res) => {
         if (res.success) {
           setAttempt({
@@ -69,6 +76,16 @@ export function TestRunner({
             status: "in_progress",
             answers: {},
             itemsSnapshot: test.items,
+            minorProfileId: selectedMinorId,
+            subjectSnapshot: selectedMinor
+              ? {
+                  fullName: selectedMinor.fullName,
+                  birthYear: selectedMinor.birthYear,
+                  schoolName: selectedMinor.schoolName,
+                  relationship: selectedMinor.relationship,
+                  avatarPath: null,
+                }
+              : null,
           });
           router.refresh();
         } else {
@@ -95,6 +112,35 @@ export function TestRunner({
             {test.description}
           </p>
         )}
+        {minorProfiles.length > 0 && (
+          <fieldset className="relative mx-auto mt-6 max-w-lg text-left">
+            <legend className="mb-2 text-[13px] font-semibold text-slate-900">¿Para quién es esta evaluación?</legend>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <label className={`flex cursor-pointer items-center gap-3 rounded-2xl border p-3 text-sm ${selectedMinorId === null ? "border-orange-400 bg-orange-50" : "border-slate-200 bg-white"}`}>
+                <input
+                  type="radio"
+                  name="test-subject"
+                  checked={selectedMinorId === null}
+                  onChange={() => setSelectedMinorId(null)}
+                  className="accent-orange-500"
+                />
+                <span className="font-medium text-slate-800">Yo, titular de la cuenta</span>
+              </label>
+              {minorProfiles.map((profile) => (
+                <label key={profile.id} className={`flex cursor-pointer items-center gap-3 rounded-2xl border p-3 text-sm ${selectedMinorId === profile.id ? "border-orange-400 bg-orange-50" : "border-slate-200 bg-white"}`}>
+                  <input
+                    type="radio"
+                    name="test-subject"
+                    checked={selectedMinorId === profile.id}
+                    onChange={() => setSelectedMinorId(profile.id)}
+                    className="accent-orange-500"
+                  />
+                  <span className="font-medium text-slate-800">{profile.fullName}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
         <div className="relative mx-auto mt-6 max-w-sm rounded-2xl border border-orange-100 bg-white/80 px-4 py-3 text-left">
           <div className="flex items-start gap-3">
             <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
@@ -103,7 +149,7 @@ export function TestRunner({
         </div>
         {startError && <p className="relative mt-4 text-[12px] text-red-600">{startError}</p>}
         <button
-          disabled={isStarting}
+          disabled={isStarting || selectedMinorId === undefined}
           onClick={handleStart}
           className="relative mt-6 inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-[13px] font-semibold text-white transition-transform hover:-translate-y-0.5 hover:bg-orange-500 disabled:opacity-60"
         >
@@ -155,6 +201,9 @@ export function TestRunner({
   return (
     <div className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_18px_60px_-42px_rgba(15,23,42,0.5)]">
       <div className="border-b border-slate-100 bg-[#fffaf5] px-5 pb-5 pt-6 sm:px-8">
+        <p className="mb-3 text-xs font-medium text-slate-500">
+          Evaluación para: {attempt.subjectSnapshot?.fullName ?? "titular de la cuenta"}
+        </p>
         <div className="mb-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-orange-600">
             <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-orange-500 text-white">

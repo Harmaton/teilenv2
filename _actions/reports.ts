@@ -3,12 +3,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import type { MinorProfileSnapshot } from "@/_actions/minor-profiles";
 
 export type ReportStatus = "pending" | "generating" | "completed" | "failed";
 
 export type ReportSummary = {
   id: string;
   testTitle: string;
+  subjectName: string | null;
   status: ReportStatus;
   createdAt: string;
 };
@@ -29,7 +31,17 @@ export type ReportDetail = {
   content: ReportContent | null;
   createdAt: string;
   updatedAt: string;
-  user: { fullName: string | null; email: string | null; avatarUrl: string | null; age: number | null; city: string | null; country: string | null };
+  user: {
+    fullName: string | null;
+    email: string | null;
+    avatarUrl: string | null;
+    age: number | null;
+    birthYear: number | null;
+    schoolName: string | null;
+    relationship: string | null;
+    city: string | null;
+    country: string | null;
+  };
   attemptCompletedAt: string | null;
   accessType: "locked" | "paid" | "free_code" | "admin_granted";
   hasAccess: boolean;
@@ -42,7 +54,7 @@ export async function getUserReports(): Promise<{ success: true; data: ReportSum
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("reports")
-    .select("id, status, created_at, tests ( title )")
+    .select("id, status, created_at, subject_snapshot, tests ( title )")
     .eq("profile_id", authResult.user.id)
     .order("created_at", { ascending: false });
 
@@ -53,6 +65,7 @@ export async function getUserReports(): Promise<{ success: true; data: ReportSum
     data: data.map((r: any) => ({
       id: r.id,
       testTitle: r.tests?.title ?? "Untitled test",
+      subjectName: (r.subject_snapshot as MinorProfileSnapshot | null)?.fullName ?? null,
       status: r.status,
       createdAt: r.created_at,
     })),
@@ -70,7 +83,7 @@ export async function getReportDetail(
   const { data, error } = await supabase
     .from("reports")
     .select(
-      `id, status, error, content, access_type, created_at, updated_at,
+      `id, status, error, content, access_type, created_at, updated_at, subject_snapshot,
        tests ( title, description ),
        profiles!reports_profile_id_fkey ( full_name, avatar_url, email ),
        test_attempts ( created_at )`
@@ -91,11 +104,27 @@ export async function getReportDetail(
 
   if (!data) return { success: false, error: "Report not found." };
 
-  const { data: details } = await supabase
-    .from("profile_details")
-    .select("age, city, country")
-    .eq("profile_id", authResult.user.id)
-    .maybeSingle();
+  const subject = data.subject_snapshot as MinorProfileSnapshot | null;
+  const { data: details, error: detailsError } = subject
+    ? { data: null, error: null }
+    : await supabase
+        .from("profile_details")
+        .select("age, city, country")
+        .eq("profile_id", authResult.user.id)
+        .maybeSingle();
+  if (detailsError) return { success: false, error: detailsError.message };
+
+  let avatarUrl = (data as any).profiles?.avatar_url ?? null;
+  if (subject) {
+    avatarUrl = null;
+    if (subject.avatarPath) {
+      const { data: image, error: imageError } = await supabase.storage
+        .from("minor_images")
+        .createSignedUrl(subject.avatarPath, 60 * 60);
+      if (imageError) return { success: false, error: imageError.message };
+      avatarUrl = image.signedUrl;
+    }
+  }
 
   const accessType = (data.access_type ?? "locked") as
     | "locked"
@@ -124,12 +153,15 @@ export async function getReportDetail(
       accessType,
       hasAccess,
       user: {
-        fullName: (data as any).profiles?.full_name ?? null,
+        fullName: subject?.fullName ?? (data as any).profiles?.full_name ?? null,
         email: (data as any).profiles?.email ?? null,
-        avatarUrl: (data as any).profiles?.avatar_url ?? null,
-        age: details?.age ?? null,
-        city: details?.city ?? null,
-        country: details?.country ?? null,
+        avatarUrl,
+        age: subject ? null : details?.age ?? null,
+        birthYear: subject?.birthYear ?? null,
+        schoolName: subject?.schoolName ?? null,
+        relationship: subject?.relationship ?? null,
+        city: subject ? null : details?.city ?? null,
+        country: subject ? null : details?.country ?? null,
       },
       attemptCompletedAt: (data as any).test_attempts?.created_at ?? null,
     },

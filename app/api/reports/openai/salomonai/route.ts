@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { extractIdentityReportPages } from "@/lib/report-html";
+import type { MinorProfileSnapshot } from "@/_actions/minor-profiles";
 
 const OPENAI_MODEL = "gpt-5.6-terra";
 const FREE_REPLY_CAP = 3;
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
 
   const { data: report, error: reportError } = await supabase
     .from("reports")
-    .select("id, content, status, profile_id, profiles!reports_profile_id_fkey ( full_name )")
+    .select("id, content, status, profile_id, subject_snapshot, profiles!reports_profile_id_fkey ( full_name )")
     .eq("id", reportId)
     .eq("profile_id", user.id)
     .single();
@@ -107,17 +108,23 @@ export async function POST(request: NextRequest) {
     const reportHtml = (report.content as { html?: string } | null)?.html ?? "";
     const pages = extractIdentityReportPages(reportHtml);
 
-    const { data: profileDetails } = await supabase
-      .from("profile_details")
-      .select("age, city, country")
-      .eq("profile_id", report.profile_id)
-      .maybeSingle();
+    const subject = report.subject_snapshot as MinorProfileSnapshot | null;
+    const { data: profileDetails } = subject
+      ? { data: null }
+      : await supabase
+          .from("profile_details")
+          .select("age, city, country")
+          .eq("profile_id", report.profile_id)
+          .maybeSingle();
 
     const studentName =
-      (report.profiles as { full_name?: string | null } | null)?.full_name ?? null;
+      subject?.fullName ?? (report.profiles as { full_name?: string | null } | null)?.full_name ?? null;
 
     const identityLines = [
       studentName ? `Nombre: ${studentName}` : null,
+      subject?.birthYear ? `Año de nacimiento: ${subject.birthYear}` : null,
+      subject?.schoolName ? `Colegio: ${subject.schoolName}` : null,
+      subject?.relationship ? `Vínculo con la persona adulta: ${subject.relationship}` : null,
       profileDetails?.age ? `Edad: ${profileDetails.age}` : null,
       profileDetails?.city ? `Ciudad: ${profileDetails.city}` : null,
       profileDetails?.country ? `País: ${profileDetails.country}` : null,

@@ -47,7 +47,7 @@ export async function resendVerification(email: string) {
       type: "signup",
       email,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/dashboard`,
       },
     });
     if (error) throw error;
@@ -60,15 +60,25 @@ export async function resendVerification(email: string) {
   }
 }
 
-export async function signup(email: string, password: string, fullName?: string) {
+export async function signup(email: string, password: string, fullName: string | undefined, adultConfirmed: boolean) {
   try {
+    if (!adultConfirmed) {
+      return {
+        success: false,
+        error: { message: "Debes confirmar que eres una persona adulta para crear una cuenta." },
+      };
+    }
     const supabase = await createClient();
      const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName },
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        data: {
+          full_name: fullName,
+          account_type: "adult_guardian",
+          adult_confirmed_at: new Date().toISOString(),
+        },
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/dashboard`,
       },
     });
     if (error) throw error;

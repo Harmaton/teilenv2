@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { extractIdentityReportPages, renderIdentityReportHtml } from "@/lib/report-html";
+import type { MinorProfileSnapshot } from "@/_actions/minor-profiles";
 
 const OPENAI_MODEL = "gpt-5.6-terra";
 
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
 
   const { data: report, error: reportError } = await supabase
     .from("reports")
-    .select("id, content, status, profile_id, profiles ( full_name, avatar_url )")
+    .select("id, content, status, profile_id, subject_snapshot, profiles ( full_name, avatar_url )")
     .eq("id", reportId)
     .eq("profile_id", user.id)
     .single();
@@ -54,11 +55,14 @@ export async function POST(request: NextRequest) {
     const reportScores = (report.content as { scores?: { label: string; value: number }[] } | null)?.scores ?? [];
     const currentPages = extractIdentityReportPages(reportHtml);
     if (currentPages.length !== 5) throw new Error("Stored report does not contain five pages");
-    const { data: profileDetails } = await supabase
-      .from("profile_details")
-      .select("age, city, country")
-      .eq("profile_id", report.profile_id)
-      .maybeSingle();
+    const subject = report.subject_snapshot as MinorProfileSnapshot | null;
+    const { data: profileDetails } = subject
+      ? { data: null }
+      : await supabase
+          .from("profile_details")
+          .select("age, city, country")
+          .eq("profile_id", report.profile_id)
+          .maybeSingle();
     const aiResponse = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
@@ -121,14 +125,27 @@ try {
       throw new Error("Edited report must contain exactly five report pages");
     }
 
-    const avatarUrl = (report.profiles as { avatar_url?: string | null } | null)?.avatar_url ?? null;
+    let avatarUrl = (report.profiles as { avatar_url?: string | null } | null)?.avatar_url ?? null;
+    if (subject) {
+      avatarUrl = null;
+      if (subject.avatarPath) {
+        const { data: image, error: imageError } = await supabase.storage
+          .from("minor_images")
+          .createSignedUrl(subject.avatarPath, 60 * 60);
+        if (imageError) throw new Error(imageError.message);
+        avatarUrl = image.signedUrl;
+      }
+    }
     const reportContent = {
       html: renderIdentityReportHtml(parsed.pages, {
         avatarUrl,
-        studentName: (report.profiles as { full_name?: string | null } | null)?.full_name,
-        age: profileDetails?.age ?? null,
-        city: profileDetails?.city ?? null,
-        country: profileDetails?.country ?? null,
+        studentName: subject?.fullName ?? (report.profiles as { full_name?: string | null } | null)?.full_name,
+        age: subject ? null : profileDetails?.age ?? null,
+        birthYear: subject?.birthYear ?? null,
+        schoolName: subject?.schoolName ?? null,
+        relationship: subject?.relationship ?? null,
+        city: subject ? null : profileDetails?.city ?? null,
+        country: subject ? null : profileDetails?.country ?? null,
         scores: reportScores,
       }),
       scores: reportScores,

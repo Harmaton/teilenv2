@@ -15,7 +15,7 @@ export function extractIdentityReportPages(document: string): IdentityReportPage
   return pages;
 }
 
-export function renderIdentityReportHtml(pages: IdentityReportPage[], options: { avatarUrl?: string | null; studentName?: string | null; age?: number | null; city?: string | null; country?: string | null; scores?: ReportScore[] } = {}) {
+export function renderIdentityReportHtml(pages: IdentityReportPage[], options: { avatarUrl?: string | null; studentName?: string | null; age?: number | null; birthYear?: number | null; schoolName?: string | null; relationship?: string | null; city?: string | null; country?: string | null; scores?: ReportScore[] } = {}) {
   const pageMarkup = pages.slice(0, 5).map((page, index) => {
     let html = cleanGeneratedHtml(page.html);
 
@@ -77,7 +77,7 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
   .masthead-avatar { width: 18mm; height: 18mm; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--orange); flex-shrink: 0; }
   .masthead-avatar-fallback { display: flex; align-items: center; justify-content: center; background: var(--warm); color: var(--orange); font-family: Georgia, serif; font-size: 15px; font-weight: 600; }
   .masthead-name { font-family: Georgia, serif; color: var(--ink); font-size: 19px; font-weight: 400; line-height: 1.1; }
-  .masthead-meta { display: flex; flex-wrap: wrap; gap: 4mm; margin-top: 1.5mm; color: var(--muted); font-size: 9px; }
+  .masthead-meta { display: flex; flex-wrap: wrap; gap: 2mm 4mm; margin-top: 1.5mm; color: var(--muted); font-size: 9px; }
   .meta-item { display: inline-flex; align-items: center; gap: 1.3mm; }
   .meta-item svg { width: 3.4mm; height: 3.4mm; fill: none; stroke: var(--orange); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
@@ -273,7 +273,7 @@ function buildSalomonCallout() {
  * now a proper masthead — bigger avatar, the name as a real heading,
  * and icon-labeled meta underneath.
  */
-function buildStudentContext(options: { avatarUrl?: string | null; studentName?: string | null; age?: number | null; city?: string | null; country?: string | null }) {
+function buildStudentContext(options: { avatarUrl?: string | null; studentName?: string | null; age?: number | null; birthYear?: number | null; schoolName?: string | null; relationship?: string | null; city?: string | null; country?: string | null }) {
   const name = options.studentName?.trim();
   const location = [options.city, options.country].filter(Boolean).join(", ");
   if (!name && !options.avatarUrl && !options.age && !location) return "";
@@ -292,6 +292,15 @@ function buildStudentContext(options: { avatarUrl?: string | null; studentName?:
   const ageItem = options.age
     ? `<span class="meta-item"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2" /><path d="M5 20c0-4.5 3-7 7-7s7 2.5 7 7" /></svg>${options.age} años</span>`
     : "";
+  const birthYearItem = options.birthYear
+    ? `<span class="meta-item">Año de nacimiento: ${options.birthYear}</span>`
+    : "";
+  const schoolItem = options.schoolName
+    ? `<span class="meta-item">Colegio: ${escapeHtml(options.schoolName)}</span>`
+    : "";
+  const relationshipItem = options.relationship
+    ? `<span class="meta-item">Vínculo: ${escapeHtml(options.relationship)}</span>`
+    : "";
   const locationItem = location
     ? `<span class="meta-item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-7.5 7-12a7 7 0 1 0-14 0c0 4.5 7 12 7 12Z" /><circle cx="12" cy="9" r="2.3" /></svg>${escapeHtml(location)}</span>`
     : "";
@@ -300,7 +309,7 @@ function buildStudentContext(options: { avatarUrl?: string | null; studentName?:
     ${avatar}
     <div class="masthead-info">
       <div class="masthead-name">${escapeHtml(name ?? "Estudiante")}</div>
-      <div class="masthead-meta">${ageItem}${locationItem}</div>
+      <div class="masthead-meta">${birthYearItem}${ageItem}${schoolItem}${relationshipItem}${locationItem}</div>
     </div>
   </div>`;
 }
@@ -363,6 +372,9 @@ export function buildReportHtml({
   age,
   city,
   country,
+  birthYear,
+  schoolName,
+  relationship,
 }: {
   fragment: string;
   scores?: ReportScore[];
@@ -374,10 +386,13 @@ export function buildReportHtml({
   age?: number | null;
   city?: string | null;
   country?: string | null;
+  birthYear?: number | null;
+  schoolName?: string | null;
+  relationship?: string | null;
 }) {
   if (fragment.trimStart().startsWith("<!DOCTYPE html>")) {
     const pages = extractIdentityReportPages(fragment);
-    return pages.length === 5 ? renderIdentityReportHtml(pages, { avatarUrl, studentName: userName, age, city, country, scores }) : fragment;
+    return pages.length === 5 ? renderIdentityReportHtml(pages, { avatarUrl, studentName: userName, age, birthYear, schoolName, relationship, city, country, scores }) : fragment;
   }
   const ACCENT = "#FF5A1F";
   const formattedDate = new Date(updatedAt).toLocaleDateString("es", {

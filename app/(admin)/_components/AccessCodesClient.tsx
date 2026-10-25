@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import {
+  createBulkAccessCodes,
   createAccessCode,
   deleteAccessCode,
   listAccessCodes,
@@ -55,8 +56,11 @@ export default function AccessCodesClient() {
   const [isPending, startTransition] = useTransition();
 
   // Form state
+  const [creationMode, setCreationMode] = useState<"single" | "bulk">("single");
   const [codeType, setCodeType] = useState<"general" | "user_specific">("general");
   const [code, setCode] = useState("");
+  const [bulkCount, setBulkCount] = useState("25");
+  const [codePrefix, setCodePrefix] = useState("");
   const [description, setDescription] = useState("");
   const [maxUses, setMaxUses] = useState<string>("");
   const [expiresAt, setExpiresAt] = useState<string>("");
@@ -75,6 +79,8 @@ export default function AccessCodesClient() {
 
   // Copy state
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [generatedCodes, setGeneratedCodes] = useState<Array<{ id: string; code: string }>>([]);
+  const [batchCopied, setBatchCopied] = useState(false);
 
   async function refresh() {
     setLoading(true);
@@ -107,6 +113,7 @@ export default function AccessCodesClient() {
 
   function handleCreate() {
     setFormMessage(null);
+    setGeneratedCodes([]);
     startTransition(async () => {
       const res = await createAccessCode({
         code,
@@ -133,6 +140,28 @@ export default function AccessCodesClient() {
     });
   }
 
+  function handleBulkCreate() {
+    setFormMessage(null);
+    setGeneratedCodes([]);
+    startTransition(async () => {
+      const res = await createBulkAccessCodes({
+        count: Number(bulkCount),
+        prefix: codePrefix,
+        description: description || undefined,
+        expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
+      });
+
+      if (res.success) {
+        setGeneratedCodes(res.data ?? []);
+        setFormMessage({ type: "success", text: res.message ?? "Códigos creados" });
+        setDescription("");
+        setExpiresAt("");
+      } else {
+        setFormMessage({ type: "error", text: res.error });
+      }
+    });
+  }
+
   function handleToggle(row: AccessCodeRow) {
     startTransition(async () => {
       const res = await toggleAccessCode(row.id, !row.is_active);
@@ -149,10 +178,24 @@ export default function AccessCodesClient() {
     });
   }
 
-  function handleCopy(id: string, value: string) {
-    navigator.clipboard.writeText(value);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 1500);
+  async function handleCopy(id: string, value: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 1500);
+    } catch {
+      setFormMessage({ type: "error", text: "No se pudo copiar el código. Selecciónalo y cópialo manualmente." });
+    }
+  }
+
+  async function handleCopyBatch() {
+    try {
+      await navigator.clipboard.writeText(generatedCodes.map(({ code }) => code).join("\n"));
+      setBatchCopied(true);
+      setTimeout(() => setBatchCopied(false), 1500);
+    } catch {
+      setFormMessage({ type: "error", text: "No se pudieron copiar los códigos. Selecciónalos y cópialos manualmente." });
+    }
   }
 
   return (
@@ -194,12 +237,35 @@ export default function AccessCodesClient() {
             <div className="mb-5 flex items-center gap-2">
               <Plus className="h-4 w-4 text-indigo-600" />
               <h2 className="text-lg font-semibold text-gray-900">
-                Crear nuevo código
+                Crear códigos para desbloquear informes
               </h2>
             </div>
 
+            <div className="mb-5 inline-flex rounded-lg bg-gray-100 p-1">
+              <button
+                type="button"
+                onClick={() => setCreationMode("single")}
+                className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  creationMode === "single" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                Código individual
+              </button>
+              <button
+                type="button"
+                onClick={() => setCreationMode("bulk")}
+                className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  creationMode === "bulk" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                Generar lote
+              </button>
+            </div>
+
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <div>
+              {creationMode === "single" ? (
+                <>
+                  <div>
                 <Label className="mb-1.5 block text-xs font-medium text-gray-600">
                   Tipo de código
                 </Label>
@@ -221,9 +287,9 @@ export default function AccessCodesClient() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+                  </div>
 
-              <div>
+                  <div>
                 <Label className="mb-1.5 block text-xs font-medium text-gray-600">
                   Código
                 </Label>
@@ -233,7 +299,37 @@ export default function AccessCodesClient() {
                   placeholder="EJ: WELCOME2025"
                   className="font-mono uppercase tracking-wide"
                 />
-              </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <Label className="mb-1.5 block text-xs font-medium text-gray-600">
+                      Cantidad de claves <span className="font-normal text-gray-400">(1–500)</span>
+                    </Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={500}
+                      step={1}
+                      value={bulkCount}
+                      onChange={(event) => setBulkCount(event.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label className="mb-1.5 block text-xs font-medium text-gray-600">
+                      Prefijo <span className="font-normal text-gray-400">(opcional)</span>
+                    </Label>
+                    <Input
+                      value={codePrefix}
+                      maxLength={12}
+                      onChange={(event) => setCodePrefix(event.target.value.toUpperCase())}
+                      placeholder="EJ: EVENTO"
+                      className="font-mono uppercase tracking-wide"
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="md:col-span-2">
                 <Label className="mb-1.5 block text-xs font-medium text-gray-600">
@@ -246,18 +342,20 @@ export default function AccessCodesClient() {
                 />
               </div>
 
-              <div>
-                <Label className="mb-1.5 block text-xs font-medium text-gray-600">
-                  Máximo de usos <span className="font-normal text-gray-400">(vacío = ilimitado)</span>
-                </Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={maxUses}
-                  onChange={(e) => setMaxUses(e.target.value)}
-                  placeholder="Ilimitado"
-                />
-              </div>
+              {creationMode === "single" && (
+                <div>
+                  <Label className="mb-1.5 block text-xs font-medium text-gray-600">
+                    Máximo de usos <span className="font-normal text-gray-400">(vacío = ilimitado)</span>
+                  </Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={maxUses}
+                    onChange={(e) => setMaxUses(e.target.value)}
+                    placeholder="Ilimitado"
+                  />
+                </div>
+              )}
 
               <div>
                 <Label className="mb-1.5 block text-xs font-medium text-gray-600">
@@ -270,7 +368,7 @@ export default function AccessCodesClient() {
                 />
               </div>
 
-              {codeType === "user_specific" && (
+              {creationMode === "single" && codeType === "user_specific" && (
                 <div className="md:col-span-2">
                   <Label className="mb-1.5 block text-xs font-medium text-gray-600">
                     Buscar usuario
@@ -349,16 +447,38 @@ export default function AccessCodesClient() {
 
             <Button
               className="mt-5"
-              onClick={handleCreate}
-              disabled={isPending || !code}
+              onClick={creationMode === "single" ? handleCreate : handleBulkCreate}
+              disabled={isPending || (creationMode === "single" ? !code : !bulkCount)}
             >
               {isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Plus className="mr-2 h-4 w-4" />
               )}
-              Crear código
+              {creationMode === "single" ? "Crear código" : "Generar claves"}
             </Button>
+
+            {generatedCodes.length > 0 && (
+              <div className="mt-5 rounded-xl border border-green-200 bg-green-50 p-4">
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h3 className="text-sm font-semibold text-green-900">Claves generadas</h3>
+                    <p className="text-xs text-green-800">Guárdalas ahora: cada clave se puede usar una sola vez.</p>
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={handleCopyBatch}>
+                    {batchCopied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+                    {batchCopied ? "Copiadas" : "Copiar todas"}
+                  </Button>
+                </div>
+                <textarea
+                  readOnly
+                  aria-label="Claves individuales generadas"
+                  value={generatedCodes.map(({ code }) => code).join("\n")}
+                  rows={Math.min(generatedCodes.length, 8)}
+                  className="w-full rounded-lg border border-green-200 bg-white p-3 font-mono text-xs text-gray-800"
+                />
+              </div>
+            )}
           </div>
 
           {/* LIST */}
@@ -538,7 +658,7 @@ export default function AccessCodesClient() {
                         <td className="p-3">
                           {r.report_id ? (
                             <a
-                              href={`/reports/${r.report_id}`}
+                              href={`/admin/manage-reports/${r.report_id}`}
                               className="text-indigo-600 hover:underline"
                             >
                               Ver informe

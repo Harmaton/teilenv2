@@ -4,6 +4,7 @@
 import { getAuthUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { ReportScore } from "./reports";
+import type { MinorProfileSnapshot } from "./minor-profiles";
 
 /* ────────────────────────────────────────────────────────────────────── */
 /* Types                                                                  */
@@ -41,6 +42,9 @@ export type ReportDetail = {
     email: string | null;
     avatarUrl: string | null;
     age: number | null;
+    birthYear: number | null;
+    schoolName: string | null;
+    relationship: string | null;
     city: string | null;
     country: string | null;
   };
@@ -144,7 +148,7 @@ export async function getReportDetailAdmin(id: string): Promise<ActionResult<Rep
   const { data, error } = await supabase
     .from("reports")
     .select(
-      `id, status, error, content, profile_id, test_id, attempt_id, updated_at,
+      `id, status, error, content, profile_id, test_id, attempt_id, updated_at, subject_snapshot,
        tests!reports_test_id_fkey ( title, description ),
        profiles!reports_profile_id_fkey ( id, full_name, email, avatar_url ),
        test_attempts!reports_attempt_id_fkey ( completed_at )`
@@ -157,11 +161,14 @@ export async function getReportDetailAdmin(id: string): Promise<ActionResult<Rep
   const test = data.tests as EmbeddedTest | null;
   const profile = data.profiles as EmbeddedProfile | null;
   const attempt = data.test_attempts as EmbeddedAttempt | null;
-  const { data: details } = await supabase
-    .from("profile_details")
-    .select("age, city, country")
-    .eq("profile_id", data.profile_id)
-    .maybeSingle();
+  const subject = data.subject_snapshot as MinorProfileSnapshot | null;
+  const { data: details } = subject
+    ? { data: null }
+    : await supabase
+        .from("profile_details")
+        .select("age, city, country")
+        .eq("profile_id", data.profile_id)
+        .maybeSingle();
 
   return {
     success: true,
@@ -175,12 +182,15 @@ export async function getReportDetailAdmin(id: string): Promise<ActionResult<Rep
       updatedAt: data.updated_at,
       attemptCompletedAt: attempt?.completed_at ?? null,
       user: {
-        fullName: profile?.full_name ?? null,
+        fullName: subject?.fullName ?? profile?.full_name ?? null,
         email: profile?.email ?? null,
-        avatarUrl: profile?.avatar_url ?? null,
-        age: details?.age ?? null,
-        city: details?.city ?? null,
-        country: details?.country ?? null,
+        avatarUrl: subject ? null : profile?.avatar_url ?? null,
+        age: subject ? null : details?.age ?? null,
+        birthYear: subject?.birthYear ?? null,
+        schoolName: subject?.schoolName ?? null,
+        relationship: subject?.relationship ?? null,
+        city: subject ? null : details?.city ?? null,
+        country: subject ? null : details?.country ?? null,
       },
     },
   };

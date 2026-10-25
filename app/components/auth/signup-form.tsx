@@ -33,6 +33,7 @@ export default function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [adultConfirmed, setAdultConfirmed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
@@ -59,7 +60,7 @@ export default function SignupForm() {
     }
 
     setIsSubmitting(true);
-    const result = await signup(email, password, fullName);
+    const result = await signup(email, password, fullName, adultConfirmed);
     setIsSubmitting(false);
 
     if (!result.success) {
@@ -88,7 +89,7 @@ export default function SignupForm() {
           Crear cuenta
         </h1>
         <p className="text-sm leading-relaxed text-[#545c7e]">
-          Recibirás un correo de verificación después de registrarte.
+          La cuenta es para una persona adulta. Después de verificar tu correo, podrás añadir los perfiles de los menores a tu cargo.
         </p>
       </div>
 
@@ -121,6 +122,17 @@ export default function SignupForm() {
             className="h-12 rounded-xl border border-[#141b3c]/15 bg-white px-4 text-sm text-[#141b3c] placeholder:text-[#545c7e]/55 outline-none transition focus:border-[#f27a1a] focus:ring-2 focus:ring-[#f27a1a]/20"
           />
         </div>
+
+        <label className="flex items-start gap-2.5 text-xs leading-relaxed text-[#545c7e]">
+          <input
+            type="checkbox"
+            checked={adultConfirmed}
+            onChange={(event) => setAdultConfirmed(event.target.checked)}
+            required
+            className="mt-0.5 accent-[#f27a1a]"
+          />
+          <span>Confirmo que tengo 18 años o más y que esta cuenta será gestionada por mí como persona adulta.</span>
+        </label>
 
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-semibold text-[#141b3c]">

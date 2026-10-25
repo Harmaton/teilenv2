@@ -1,5 +1,6 @@
 import { getTestWithAttempt } from "@/_actions/test-attempts";
 import { TestRunner } from "@/app/components/tests/test-runner";
+import { getMinorProfiles } from "@/_actions/minor-profiles";
 import Link from "next/link";
 
 export default async function TestDetailPage({
@@ -8,7 +9,10 @@ export default async function TestDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const result = await getTestWithAttempt(id);
+  const [result, minorsResult] = await Promise.all([
+    getTestWithAttempt(id),
+    getMinorProfiles(),
+  ]);
 
   if (!result.success) {
     return (
@@ -28,7 +32,16 @@ export default async function TestDetailPage({
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
-      <TestRunner test={result.test} attempt={result.attempt} />
+      {!minorsResult.success && (
+        <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          No se pudieron cargar los perfiles de menores: {minorsResult.error}
+        </p>
+      )}
+      <TestRunner
+        test={result.test}
+        attempt={result.attempt}
+        minorProfiles={minorsResult.success ? minorsResult.data : []}
+      />
     </div>
   );
 }

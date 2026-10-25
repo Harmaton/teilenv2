@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { emailReportReady } from "@/lib/report-email";
 import { BENZINGER_QUADRANT_LABELS, calculateBenzingerScores, type BenzingerItem, type BenzingerQuadrant } from "@/lib/benzinger-scoring";
+import type { MinorProfileSnapshot } from "@/_actions/minor-profiles";
 
 export const OPENAI_REPORT_MODEL = "gpt-5.6-terra";
 
@@ -27,6 +28,7 @@ type ReportRow = {
   attempt_id: string | null;
   profile_id: string;
   status: string;
+  subject_snapshot: MinorProfileSnapshot | null;
 };
 
 const REPORT_SCHEMA = {
@@ -197,7 +199,7 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
     stage = "fetch_report";
     const { data: report, error: reportError } = await supabase
       .from("reports")
-      .select("id, test_id, attempt_id, profile_id, status")
+      .select("id, test_id, attempt_id, profile_id, status, subject_snapshot")
       .eq("id", reportId)
       .eq("profile_id", user.id)
       .single<ReportRow>();
@@ -207,16 +209,55 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
     await supabase.from("reports").update({ status: "generating", error: null }).eq("id", reportId);
 
     stage = "fetch_dependencies";
-    const [{ data: attempt }, { data: test }, { data: profile }, { data: details }] = await Promise.all([
+    const subject = report.subject_snapshot;
+    const [{ data: attempt }, { data: test }, { data: profile }] = await Promise.all([
       supabase.from("test_attempts").select("answers, items_snapshot, quadrant_scores").eq("id", report.attempt_id).single(),
       supabase.from("tests").select("title, slug").eq("id", report.test_id).single(),
-      supabase.from("profiles").select("email, full_name, avatar_url, values, strengths").eq("id", report.profile_id).single(),
-      supabase.from("profile_details").select("age, sex, country, city").eq("profile_id", report.profile_id).maybeSingle(),
+      supabase.from("profiles").select("email").eq("id", report.profile_id).single(),
     ]);
     if (!attempt || !test || !profile) throw new Error("Missing report dependencies");
 
     stage = "call_openai_responses";
-    const profileDetails: ProfileDetails = details ?? { age: null, sex: null, country: null, city: null };
+    let details: ProfileDetails | null = null;
+    let adultProfile: {
+      full_name: string | null;
+      avatar_url: string | null;
+      values: string[] | null;
+      strengths: string[] | null;
+    } | null = null;
+    if (!subject) {
+      const [{ data: adultData, error: adultError }, { data, error: detailsError }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("full_name, avatar_url, values, strengths")
+          .eq("id", report.profile_id)
+          .single(),
+        supabase
+          .from("profile_details")
+          .select("age, sex, country, city")
+          .eq("profile_id", report.profile_id)
+          .maybeSingle(),
+      ]);
+      if (adultError || !adultData) throw new Error(`Could not load report profile: ${adultError?.message ?? "Profile not found"}`);
+      if (detailsError) throw new Error(`Could not load report profile details: ${detailsError.message}`);
+      adultProfile = {
+        ...adultData,
+        values: adultData.values as string[] | null,
+        strengths: adultData.strengths as string[] | null,
+      };
+      details = data;
+    }
+    const profileDetails: ProfileDetails = subject
+      ? {
+          age: new Date().getFullYear() - subject.birthYear,
+          sex: null,
+          country: null,
+          city: null,
+        }
+      : details ?? { age: null, sex: null, country: null, city: null };
+    const studentName = subject?.fullName ?? adultProfile?.full_name;
+    const studentValues = adultProfile?.values ?? [];
+    const studentStrengths = adultProfile?.strengths ?? [];
     const benzingerScores = calculateBenzingerScores(
       (attempt.items_snapshot as BenzingerItem[]) ?? [],
       (attempt.answers as Record<string, unknown>) ?? {},
@@ -226,10 +267,10 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
       throw new Error("El test Benzinger todavía no tiene una clave de puntuación completa para los cuatro cuadrantes. No se generó un informe para evitar mostrar un perfil incorrecto.");
     }
     const prompt = buildPrompt({
-      name: profile.full_name ?? "Usuario",
+      name: studentName ?? "Usuario",
       details: profileDetails,
-      values: (profile.values as string[] | null) ?? [],
-      strengths: (profile.strengths as string[] | null) ?? [],
+      values: studentValues,
+      strengths: studentStrengths,
       testTitle: test.title,
       quadrantScores: completeQuadrantScores
         ? benzingerScores.percentages
@@ -249,10 +290,24 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
           value: benzingerScores.percentages[quadrant],
         }))
       : [];
+    let avatarUrl = adultProfile?.avatar_url ?? null;
+    if (subject) {
+      avatarUrl = null;
+      if (subject.avatarPath) {
+        const { data: image, error: imageError } = await supabase.storage
+          .from("minor_images")
+          .createSignedUrl(subject.avatarPath, 60 * 60);
+        if (imageError) throw new Error(`Could not access the minor profile image: ${imageError.message}`);
+        avatarUrl = image.signedUrl;
+      }
+    }
     const html = renderIdentityReportHtml(generated.pages, {
-      avatarUrl: profile.avatar_url,
-      studentName: profile.full_name,
+      avatarUrl,
+      studentName,
       age: profileDetails.age,
+      birthYear: subject?.birthYear ?? null,
+      schoolName: subject?.schoolName ?? null,
+      relationship: subject?.relationship ?? null,
       city: profileDetails.city,
       country: profileDetails.country,
       scores,
@@ -282,7 +337,7 @@ export async function handleOpenAIReportGeneration(request: NextRequest) {
         try {
           await emailReportReady({
             recipient: profile.email!,
-            studentName: profile.full_name,
+            studentName,
             reportId,
             testTitle: test.title,
           });

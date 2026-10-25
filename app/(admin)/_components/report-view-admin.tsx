@@ -125,6 +125,9 @@ export function AdminReportView({ initial }: { initial: ReportDetail }) {
     updatedAt: report.updatedAt,
     avatarUrl: report.user.avatarUrl,
     age: report.user.age,
+    birthYear: report.user.birthYear,
+    schoolName: report.user.schoolName,
+    relationship: report.user.relationship,
     city: report.user.city,
     country: report.user.country,
   });
@@ -222,7 +225,7 @@ export function AdminReportView({ initial }: { initial: ReportDetail }) {
       {/* ── Snapshot sidebar ─────────────────────────────── */}
       <div className="flex flex-col gap-4">
         <div className="rounded-2xl border border-black/[0.06] bg-white p-5">
-          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-black/35">Usuario</p>
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-black/35">Persona evaluada</p>
           <div className="flex items-center gap-3">
             {report.user.avatarUrl ? (
               <img src={report.user.avatarUrl} alt="Avatar" className="h-10 w-10 shrink-0 rounded-full object-cover" />
@@ -238,7 +241,10 @@ export function AdminReportView({ initial }: { initial: ReportDetail }) {
               <p className="truncate text-[13px] font-medium text-black">
                 {report.user.fullName ?? "Sin nombre"}
               </p>
-              <p className="truncate text-[12px] text-black/40">{report.user.email}</p>
+              {report.user.birthYear && <p className="text-[12px] text-black/40">Año de nacimiento: {report.user.birthYear}</p>}
+              {report.user.schoolName && <p className="mt-1 text-[12px] text-black/40">Colegio: {report.user.schoolName}</p>}
+              {report.user.relationship && <p className="mt-1 text-[12px] text-black/40">Vínculo: {report.user.relationship}</p>}
+              {report.user.email && <p className="mt-1 truncate text-[12px] text-black/40">Cuenta adulta: {report.user.email}</p>}
             </div>
           </div>
         </div>

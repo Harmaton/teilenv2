@@ -1,5 +1,6 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -39,6 +40,33 @@ export type RedemptionRow = {
 export type ActionResult<T = void> =
   | { success: true; data?: T; message?: string }
   | { success: false; error: string };
+
+type AccessCodeQueryRow = {
+  id: string;
+  code: string;
+  description: string | null;
+  code_type: AccessCodeRow["code_type"];
+  assigned_profile_id: string | null;
+  max_uses: number | null;
+  current_uses: number;
+  expires_at: string | null;
+  is_active: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  assigned_profile: Array<{ full_name: string | null; email: string | null }>;
+};
+
+type RedemptionQueryRow = {
+  id: string;
+  access_code_id: string;
+  code_snapshot: string;
+  profile_id: string;
+  report_id: string | null;
+  test_id: string | null;
+  redeemed_at: string;
+  profile: Array<{ full_name: string | null; email: string | null }>;
+};
 
 // =====================================================
 // USER: Redeem a code
@@ -156,11 +184,79 @@ export async function createAccessCode(input: {
     return { success: false, error: error.message };
   }
 
-  revalidatePath("/admin/access-codes");
+  revalidatePath("/admin/manage-access");
   return {
     success: true,
     data: { id: data.id, code: data.code },
     message: "Código creado correctamente",
+  };
+}
+
+export async function createBulkAccessCodes(input: {
+  count: number;
+  prefix?: string;
+  description?: string;
+  expiresAt?: string | null;
+}): Promise<ActionResult<Array<{ id: string; code: string }>>> {
+  const authResult = await getAuthUser();
+  if (!authResult.success) return { success: false, error: authResult.error };
+
+  const supabase = await createClient();
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", authResult.user.id)
+    .single();
+
+  if (profileError) return { success: false, error: profileError.message };
+  if (!profile || !["super_admin", "admin"].includes(profile.role)) {
+    return { success: false, error: "No tienes permisos para crear códigos" };
+  }
+
+  if (!Number.isInteger(input.count) || input.count < 1 || input.count > 500) {
+    return { success: false, error: "La cantidad debe estar entre 1 y 500 códigos." };
+  }
+
+  const prefix = input.prefix?.trim().toUpperCase() ?? "";
+  if (prefix && !/^[A-Z0-9]{1,12}$/.test(prefix)) {
+    return { success: false, error: "El prefijo debe tener de 1 a 12 letras o números." };
+  }
+
+  const expiresAt = input.expiresAt ?? null;
+  if (expiresAt && Number.isNaN(Date.parse(expiresAt))) {
+    return { success: false, error: "La fecha de expiración no es válida." };
+  }
+
+  const codes = Array.from({ length: input.count }, () => {
+    const uniquePart = randomBytes(8).toString("hex").toUpperCase();
+    return `${prefix ? `${prefix}-` : ""}${uniquePart}`;
+  });
+  const { data, error } = await supabase
+    .from("access_codes")
+    .insert(
+      codes.map((code) => ({
+        code,
+        description: input.description?.trim() || null,
+        code_type: "general" as const,
+        max_uses: 1,
+        expires_at: expiresAt,
+        created_by: authResult.user.id,
+      })),
+    )
+    .select("id, code");
+
+  if (error) {
+    if (error.code === "23505") {
+      return { success: false, error: "Hubo una colisión al generar códigos. Inténtalo de nuevo." };
+    }
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/admin/manage-access");
+  return {
+    success: true,
+    data: data ?? [],
+    message: `${data?.length ?? 0} códigos individuales creados. Cada uno permite desbloquear un informe.`,
   };
 }
 
@@ -192,7 +288,7 @@ export async function toggleAccessCode(
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath("/admin/access-codes");
+  revalidatePath("/admin/manage-access");
   return { success: true, message: isActive ? "Código activado" : "Código desactivado" };
 }
 
@@ -217,7 +313,7 @@ export async function deleteAccessCode(codeId: string): Promise<ActionResult> {
   const { error } = await supabase.from("access_codes").delete().eq("id", codeId);
   if (error) return { success: false, error: error.message };
 
-  revalidatePath("/admin/access-codes");
+  revalidatePath("/admin/manage-access");
   return { success: true, message: "Código eliminado" };
 }
 
@@ -255,14 +351,14 @@ export async function listAccessCodes(): Promise<ActionResult<AccessCodeRow[]>> 
 
   return {
     success: true,
-    data: (data ?? []).map((r: any) => ({
+    data: (data ?? []).map((r: AccessCodeQueryRow) => ({
       id: r.id,
       code: r.code,
       description: r.description,
       code_type: r.code_type,
       assigned_profile_id: r.assigned_profile_id,
-      assigned_profile_name: r.assigned_profile?.full_name ?? null,
-      assigned_profile_email: r.assigned_profile?.email ?? null,
+      assigned_profile_name: r.assigned_profile[0]?.full_name ?? null,
+      assigned_profile_email: r.assigned_profile[0]?.email ?? null,
       max_uses: r.max_uses,
       current_uses: r.current_uses,
       expires_at: r.expires_at,
@@ -314,13 +410,13 @@ export async function listCodeRedemptions(filters?: {
 
   return {
     success: true,
-    data: (data ?? []).map((r: any) => ({
+    data: (data ?? []).map((r: RedemptionQueryRow) => ({
       id: r.id,
       access_code_id: r.access_code_id,
       code_snapshot: r.code_snapshot,
       profile_id: r.profile_id,
-      profile_name: r.profile?.full_name ?? null,
-      profile_email: r.profile?.email ?? null,
+      profile_name: r.profile[0]?.full_name ?? null,
+      profile_email: r.profile[0]?.email ?? null,
       report_id: r.report_id,
       test_id: r.test_id,
       redeemed_at: r.redeemed_at,

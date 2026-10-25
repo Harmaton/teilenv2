@@ -15,7 +15,10 @@ import { getDashboardStats, getUserTestAttempts } from "@/_actions/dashbaord";
 import { QuickAction } from "../_componets/quick-actions";
 import { ProfileValuesStrengths } from "@/app/components/tests/profile-values-strengths";
 import { getProfileValuesStrengths } from "@/_actions/profile";
+import { getMinorProfiles } from "@/_actions/minor-profiles";
+import { MinorProfilesSection } from "../_componets/minor-profiles-section";
 import { ReadinessRequirement, TestReadinessTab } from "../_componets/TestReadinessFAB";
+import { DashboardProductTour } from "../_componets/dashboard-product-tour";
 
 const ACCENT = "#FF5A1F";
 
@@ -27,10 +30,11 @@ const STATUS_STYLES: Record<string, { label: string; dot: string; text: string }
 };
 
 export default async function DashboardPage() {
-  const [statsResult, attemptsResult, valuesResult] = await Promise.all([
+  const [statsResult, attemptsResult, valuesResult, minorsResult] = await Promise.all([
     getDashboardStats(),
     getUserTestAttempts(),
     getProfileValuesStrengths(),
+    getMinorProfiles(),
   ]);
 
     const values = valuesResult.success ? valuesResult.data.values : [];
@@ -63,9 +67,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-[1500px] px-5 py-7 sm:px-8 sm:py-9">
-      <div className="mb-8">
-        <p className="mb-1 text-[11px] font-bold uppercase tracking-[.18em] text-[#e46a12]">Tu espacio personal</p>
-        <h1 className="text-3xl font-bold tracking-tight text-[#141b3c]">Panel</h1>
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="mb-1 text-[11px] font-bold uppercase tracking-[.18em] text-[#e46a12]">Tu espacio personal</p>
+          <h1 className="text-3xl font-bold tracking-tight text-[#141b3c]">Panel</h1>
+        </div>
+        <DashboardProductTour />
         {/* <p className="mt-1 text-[13px] text-black/45">
           Una vista general de tus pruebas, informes y uso de créditos de IA.
         </p> */}
@@ -105,17 +112,22 @@ export default async function DashboardPage() {
     Lo que harás con más frecuencia, a un toque de distancia.
   </p>
 
-  <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+  <div id="dashboard-quick-actions" className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
     <QuickAction href="/tests" icon={ClipboardList} label="Realizar prueba" />
     <QuickAction href="/reports" icon={FileBarChart2} label="Ver informes" />
-    <QuickAction href="/profile" icon={UserCircle} label="Actualizar perfil" />
+    <QuickAction href="/settings" icon={UserCircle} label="Actualizar perfil" />
     <QuickAction href="/settings" icon={Settings} label="Configuración" />
   </div>
 </div>
+
+      <MinorProfilesSection
+        profiles={minorsResult.success ? minorsResult.data : []}
+        loadError={minorsResult.success ? null : minorsResult.error}
+      />
       
 
 
-      <div className="mt-6 rounded-[26px] border border-[#141b3c]/10 bg-white p-5 shadow-[0_16px_45px_-36px_rgba(20,27,60,.5)] sm:p-7">
+      <div id="dashboard-values" className="mt-6 rounded-[26px] border border-[#141b3c]/10 bg-white p-5 shadow-[0_16px_45px_-36px_rgba(20,27,60,.5)] sm:p-7">
   <div className="mb-6">
     <h2 className="text-lg font-bold text-[#141b3c]">
       Valores y fortalezas
@@ -132,7 +144,7 @@ export default async function DashboardPage() {
 </div>
 
               {/* ── Attempts table ────────────────────────────────── */}
-      <div className="mt-7">
+      <div id="dashboard-attempts" className="mt-7">
         <h2 className="mb-3 text-lg font-bold text-[#141b3c]">Tus intentos de prueba</h2>
 
         {attempts.length === 0 ? (

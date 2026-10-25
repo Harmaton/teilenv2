@@ -55,6 +55,7 @@ export default async function ReportsPage() {
                   </div>
                   <div>
                     <p className="text-[13.5px] font-medium text-black">{r.testTitle}</p>
+                    {r.subjectName && <p className="mt-0.5 text-[11.5px] text-black/45">Para: {r.subjectName}</p>}
                     <p className="text-[11.5px] text-black/40">
                       {new Date(r.createdAt).toLocaleDateString("es", {
                         month: "short",

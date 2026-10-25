@@ -81,7 +81,7 @@ function VerifyOtpForm() {
         return;
       }
 
-      router.push("/tests");
+      router.push("/dashboard");
       router.refresh();
     },
     [email, router]

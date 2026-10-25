@@ -56,6 +56,37 @@ export type RecentAttemptRow = {
   hasReport: boolean;
 };
 
+export type RecentRegistrationRow = {
+  id: string;
+  fullName: string | null;
+  email: string | null;
+  role: string;
+  createdAt: string;
+};
+
+export type ReportQueueRow = {
+  id: string;
+  testTitle: string;
+  ownerName: string | null;
+  ownerEmail: string | null;
+  subjectName: string | null;
+  status: "pending" | "generating" | "failed";
+  createdAt: string;
+};
+
+type EmbeddedReportProfile = { full_name: string | null; email: string | null };
+type EmbeddedReportTest = { title: string | null };
+type RecentAttemptQueryRow = {
+  id: string;
+  status: RecentAttemptRow["status"];
+  score: number | null;
+  started_at: string | null;
+  completed_at: string | null;
+  tests: Array<{ title: string | null }>;
+  profiles: Array<{ full_name: string | null; email: string | null }>;
+  reports: Array<{ id: string }> | null;
+};
+
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
 /* ────────────────────────────────────────────────────────────────────── */
@@ -286,11 +317,11 @@ export async function getRecentAttemptsAdmin(limit = 10): Promise<ActionResult<R
 
   if (error) return { success: false, error: error.message };
 
-  const rows: RecentAttemptRow[] = (data ?? []).map((a: any) => ({
+  const rows: RecentAttemptRow[] = (data ?? []).map((a: RecentAttemptQueryRow) => ({
     id: a.id,
-    testTitle: a.tests?.title ?? "—",
-    userName: a.profiles?.full_name ?? "—",
-    userEmail: a.profiles?.email ?? "—",
+    testTitle: a.tests[0]?.title ?? "—",
+    userName: a.profiles[0]?.full_name ?? "—",
+    userEmail: a.profiles[0]?.email ?? "—",
     status: a.status,
     score: a.score,
     startedAt: a.started_at,
@@ -299,4 +330,66 @@ export async function getRecentAttemptsAdmin(limit = 10): Promise<ActionResult<R
   }));
 
   return { success: true, data: rows };
+}
+
+export async function getRecentRegistrationsAdmin(limit = 6): Promise<ActionResult<RecentRegistrationRow[]>> {
+  const auth = await requireAdmin();
+  if (!auth.success) return auth;
+  const { supabase } = auth;
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, role, created_at")
+    .order("created_at", { ascending: false })
+    .limit(Math.min(Math.max(Math.floor(limit), 1), 50));
+
+  if (error) return { success: false, error: error.message };
+
+  return {
+    success: true,
+    data: (data ?? []).map((profile) => ({
+      id: profile.id,
+      fullName: profile.full_name,
+      email: profile.email,
+      role: profile.role,
+      createdAt: profile.created_at,
+    })),
+  };
+}
+
+export async function getReportQueueAdmin(limit = 8): Promise<ActionResult<ReportQueueRow[]>> {
+  const auth = await requireAdmin();
+  if (!auth.success) return auth;
+  const { supabase } = auth;
+
+  const { data, error } = await supabase
+    .from("reports")
+    .select(
+      `id, status, created_at, subject_snapshot,
+       profiles!reports_profile_id_fkey ( full_name, email ),
+       tests!reports_test_id_fkey ( title )`,
+    )
+    .in("status", ["pending", "generating", "failed"])
+    .order("created_at", { ascending: false })
+    .limit(Math.min(Math.max(Math.floor(limit), 1), 50));
+
+  if (error) return { success: false, error: error.message };
+
+  return {
+    success: true,
+    data: (data ?? []).map((report) => {
+      const owner = (report.profiles as EmbeddedReportProfile[] | null)?.[0];
+      const test = (report.tests as EmbeddedReportTest[] | null)?.[0];
+      const subject = report.subject_snapshot as { fullName?: string } | null;
+      return {
+        id: report.id,
+        testTitle: test?.title ?? "Evaluación",
+        ownerName: owner?.full_name ?? null,
+        ownerEmail: owner?.email ?? null,
+        subjectName: subject?.fullName ?? null,
+        status: report.status as ReportQueueRow["status"],
+        createdAt: report.created_at,
+      };
+    }),
+  };
 }

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { calculateBenzingerScores, type BenzingerItem } from "@/lib/benzinger-scoring";
 import { getTestProfileEligibility } from "@/lib/test-eligibility";
 import { pushNotification } from "@/_actions/notifications";
+import type { MinorProfileSnapshot } from "@/_actions/minor-profiles";
 
 /**
  * Notifications are a side effect the user does not wait on. Awaiting the
@@ -38,6 +39,8 @@ export type AttemptState = {
   status: "not_started" | "in_progress" | "completed" | "abandoned";
   answers: Record<string, unknown>;
   itemsSnapshot: TestItem[];
+  minorProfileId: string | null;
+  subjectSnapshot: MinorProfileSnapshot | null;
 };
 
 export async function getTestWithAttempt(
@@ -48,8 +51,6 @@ export async function getTestWithAttempt(
 
   const supabase = await createClient();
 
-  // Eligibility was already verified when this page rendered. Re-checking it
-  // here cost an extra client + round-trip on the "Comenzar test" click.
   const { data: test, error: testError } = await supabase
     .from("tests")
     .select("id, title, description, is_free, items, is_published")
@@ -61,7 +62,7 @@ export async function getTestWithAttempt(
 
   const { data: existing, error: attemptError } = await supabase
     .from("test_attempts")
-    .select("id, status, answers, items_snapshot")
+    .select("id, status, answers, items_snapshot, minor_profile_id, subject_snapshot")
     .eq("test_id", testId)
     .eq("profile_id", authResult.user.id)
     .in("status", ["not_started", "in_progress"])
@@ -86,22 +87,45 @@ export async function getTestWithAttempt(
           status: existing.status,
           answers: (existing.answers as Record<string, unknown>) ?? {},
           itemsSnapshot: existing.items_snapshot as TestItem[],
+          minorProfileId: existing.minor_profile_id,
+          subjectSnapshot: existing.subject_snapshot as MinorProfileSnapshot | null,
         }
       : null,
   };
 }
 
 export async function startAttempt(
-  testId: string
+  testId: string,
+  minorProfileId: string | null
 ): Promise<{ success: true; attemptId: string } | { success: false; error: string }> {
   const authResult = await getAuthUser();
   if (!authResult.success) return { success: false, error: authResult.error };
 
   const supabase = await createClient();
-
-  // Safety net only (cheap, single field) — the page load already gated this.
-  const eligibility = await getTestProfileEligibility(authResult.user.id);
-  if (!eligibility.eligible) return { success: false, error: eligibility.error };
+  let subjectSnapshot: MinorProfileSnapshot | null = null;
+  if (minorProfileId) {
+    const { data: minor, error: minorError } = await supabase
+      .from("minor_profiles")
+      .select("id, full_name, birth_year, school_name, relationship, avatar_path")
+      .eq("id", minorProfileId)
+      .eq("guardian_profile_id", authResult.user.id)
+      .single();
+    if (minorError || !minor) return { success: false, error: "No encontramos ese perfil de menor en tu cuenta." };
+    const estimatedAge = new Date().getFullYear() - minor.birth_year;
+    if (estimatedAge < 13 || estimatedAge > 17) {
+      return { success: false, error: "Las evaluaciones están disponibles para participantes de 13 a 17 años. Revisa el año de nacimiento del perfil." };
+    }
+    subjectSnapshot = {
+      fullName: minor.full_name,
+      birthYear: minor.birth_year,
+      schoolName: minor.school_name,
+      relationship: minor.relationship,
+      avatarPath: minor.avatar_path,
+    };
+  } else {
+    const eligibility = await getTestProfileEligibility(authResult.user.id);
+    if (!eligibility.eligible) return { success: false, error: eligibility.error };
+  }
 
   const { data: test, error: testError } = await supabase
     .from("tests")
@@ -116,6 +140,8 @@ export async function startAttempt(
     .insert({
       test_id: testId,
       profile_id: authResult.user.id,
+      minor_profile_id: minorProfileId,
+      subject_snapshot: subjectSnapshot,
       items_snapshot: test.items,
       status: "in_progress",
       started_at: new Date().toISOString(),
@@ -180,7 +206,7 @@ export async function submitAttempt(
 
   const { data: attempt, error: attemptError } = await supabase
     .from("test_attempts")
-    .select("items_snapshot")
+    .select("items_snapshot, minor_profile_id, subject_snapshot")
     .eq("id", attemptId)
     .eq("profile_id", authResult.user.id)
     .single();
@@ -212,6 +238,8 @@ export async function submitAttempt(
       test_id: testId,
       attempt_id: attemptId,
       profile_id: authResult.user.id,
+      minor_profile_id: attempt.minor_profile_id,
+      subject_snapshot: attempt.subject_snapshot,
       status: "pending",
     })
     .select("id")

@@ -15,6 +15,20 @@ CREATE TABLE public.profiles (
   CONSTRAINT profiles_pkey PRIMARY KEY (id),
   CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
+CREATE TABLE public.minor_profiles (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  guardian_profile_id uuid NOT NULL,
+  full_name text NOT NULL,
+  birth_year integer NOT NULL CHECK (birth_year >= 1900 AND birth_year <= 2100),
+  school_name text,
+  relationship text NOT NULL,
+  avatar_path text,
+  authorization_confirmed_at timestamp with time zone NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT minor_profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT minor_profiles_guardian_profile_id_fkey FOREIGN KEY (guardian_profile_id) REFERENCES public.profiles(id) ON DELETE CASCADE
+);
 CREATE TABLE public.roles (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   name text NOT NULL UNIQUE,
@@ -63,9 +77,12 @@ CREATE TABLE public.test_attempts (
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
   quadrant_scores jsonb NOT NULL DEFAULT '{}'::jsonb,
+  minor_profile_id uuid,
+  subject_snapshot jsonb,
   CONSTRAINT test_attempts_pkey PRIMARY KEY (id),
   CONSTRAINT test_attempts_test_id_fkey FOREIGN KEY (test_id) REFERENCES public.tests(id),
-  CONSTRAINT test_attempts_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id)
+  CONSTRAINT test_attempts_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id),
+  CONSTRAINT test_attempts_minor_profile_id_fkey FOREIGN KEY (minor_profile_id) REFERENCES public.minor_profiles(id) ON DELETE SET NULL
 );
 CREATE TABLE public.reports (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -81,12 +98,15 @@ CREATE TABLE public.reports (
   access_type text NOT NULL DEFAULT 'paid'::text CHECK (access_type = ANY (ARRAY['paid'::text, 'free_code'::text, 'admin_granted'::text])),
   access_code_id uuid,
   granted_by uuid,
+  minor_profile_id uuid,
+  subject_snapshot jsonb,
   CONSTRAINT reports_pkey PRIMARY KEY (id),
   CONSTRAINT reports_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profiles(id),
   CONSTRAINT reports_test_id_fkey FOREIGN KEY (test_id) REFERENCES public.tests(id),
   CONSTRAINT reports_attempt_id_fkey FOREIGN KEY (attempt_id) REFERENCES public.test_attempts(id),
   CONSTRAINT reports_access_code_id_fkey FOREIGN KEY (access_code_id) REFERENCES public.access_codes(id),
-  CONSTRAINT reports_granted_by_fkey FOREIGN KEY (granted_by) REFERENCES public.profiles(id)
+  CONSTRAINT reports_granted_by_fkey FOREIGN KEY (granted_by) REFERENCES public.profiles(id),
+  CONSTRAINT reports_minor_profile_id_fkey FOREIGN KEY (minor_profile_id) REFERENCES public.minor_profiles(id) ON DELETE SET NULL
 );
 CREATE TABLE public.ai_credits_usage (
   id uuid NOT NULL DEFAULT gen_random_uuid(),

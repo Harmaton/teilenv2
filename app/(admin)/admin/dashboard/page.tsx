@@ -1,17 +1,17 @@
 
 import Link from "next/link";
 import {
-  Users,
+  ArrowRight,
   UserPlus,
   Activity,
-  TrendingDown,
   ClipboardList,
   CalendarClock,
   CheckCircle2,
   FileBarChart2,
   Sparkles,
   Zap,
-  ArrowUpRight,
+  Clock3,
+  AlertTriangle,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -20,6 +20,8 @@ import {
   getDailyAttemptsTrend,
   getTopTests,
   getRecentAttemptsAdmin,
+  getRecentRegistrationsAdmin,
+  getReportQueueAdmin,
 } from "@/_actions/admin-dashboard";
 
 const ACCENT = "#FF5A1F";
@@ -32,11 +34,13 @@ const STATUS_STYLES: Record<string, { label: string; dot: string; text: string }
 };
 
 export default async function AdminDashboardPage() {
-  const [statsResult, trendResult, topTestsResult, attemptsResult] = await Promise.all([
+  const [statsResult, trendResult, topTestsResult, attemptsResult, registrationsResult, reportQueueResult] = await Promise.all([
     getAdminDashboardStats(),
     getDailyAttemptsTrend(14),
     getTopTests(5),
     getRecentAttemptsAdmin(10),
+    getRecentRegistrationsAdmin(6),
+    getReportQueueAdmin(8),
   ]);
 
   if (!statsResult.success) {
@@ -51,6 +55,8 @@ export default async function AdminDashboardPage() {
   const trend = trendResult.success ? trendResult.data : [];
   const topTests = topTestsResult.success ? topTestsResult.data : [];
   const attempts = attemptsResult.success ? attemptsResult.data : [];
+  const registrations = registrationsResult.success ? registrationsResult.data : [];
+  const reportQueue = reportQueueResult.success ? reportQueueResult.data : [];
   const maxTrend = Math.max(1, ...trend.map((p) => p.attempts));
 
   return (
@@ -58,8 +64,110 @@ export default async function AdminDashboardPage() {
       <div className="mb-8">
         <h1 className="text-[22px] font-semibold text-black">Panel de administración</h1>
         <p className="mt-1 text-[13px] text-black/45">
-          Usuarios, actividad de pruebas e informes de IA en toda la plataforma.
+          Una vista rápida de nuevos registros y del trabajo pendiente con informes.
         </p>
+      </div>
+
+      <div className="mb-10 grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <section className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+          <div className="flex items-center justify-between gap-3 border-b border-black/[0.06] px-5 py-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FF5A1F]/[0.08] text-[#FF5A1F]">
+                <UserPlus className="h-4 w-4" />
+              </span>
+              <div>
+                <h2 className="text-[14px] font-semibold text-black">Registros recientes</h2>
+                <p className="text-[11.5px] text-black/45">Últimas cuentas creadas</p>
+              </div>
+            </div>
+            <Link
+              href="/admin/manage-users"
+              className="inline-flex items-center gap-1 text-[12px] font-medium text-[#C94A1B] hover:underline"
+            >
+              Ver usuarios <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+          {registrationsResult.success ? (
+            registrations.length > 0 ? (
+              <ul className="divide-y divide-black/[0.05]">
+                {registrations.map((registration) => (
+                  <li key={registration.id} className="flex items-center justify-between gap-4 px-5 py-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-[12.5px] font-medium text-black">
+                        {registration.fullName ?? "Usuario sin nombre"}
+                      </p>
+                      <p className="truncate text-[11.5px] text-black/45">{registration.email ?? "Sin correo"}</p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="text-[11px] capitalize text-black/45">{registration.role.replaceAll("_", " ")}</p>
+                      <p className="mt-0.5 text-[10.5px] text-black/35">{formatDateTime(registration.createdAt)}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="px-5 py-8 text-center text-[12.5px] text-black/45">Todavía no hay registros.</p>
+            )
+          ) : (
+            <p className="px-5 py-6 text-[12px] text-red-600">{registrationsResult.error}</p>
+          )}
+        </section>
+
+        <section className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+          <div className="flex items-center justify-between gap-3 border-b border-black/[0.06] px-5 py-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-50 text-amber-700">
+                {stats.reportsFailed > 0 ? <AlertTriangle className="h-4 w-4" /> : <Clock3 className="h-4 w-4" />}
+              </span>
+              <div>
+                <h2 className="text-[14px] font-semibold text-black">Cola de informes</h2>
+                <p className="text-[11.5px] text-black/45">
+                  {stats.reportsPending} pendientes · {stats.reportsFailed} fallidos
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/admin/manage-reports"
+              className="inline-flex items-center gap-1 text-[12px] font-medium text-[#C94A1B] hover:underline"
+            >
+              Ver informes <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+          {reportQueueResult.success ? (
+            reportQueue.length > 0 ? (
+              <ul className="divide-y divide-black/[0.05]">
+                {reportQueue.map((report) => (
+                  <li key={report.id}>
+                    <Link
+                      href={`/admin/manage-reports/${report.id}`}
+                      className="flex items-center justify-between gap-4 px-5 py-3 transition-colors hover:bg-black/[0.02]"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-[12.5px] font-medium text-black">{report.subjectName ?? report.ownerName ?? "Informe"}</p>
+                        <p className="truncate text-[11.5px] text-black/45">
+                          {report.testTitle} · {report.ownerEmail ?? "Sin correo"}
+                        </p>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-[10.5px] font-medium ${
+                          report.status === "failed" ? "bg-red-50 text-red-700" :
+                          report.status === "generating" ? "bg-blue-50 text-blue-700" : "bg-amber-50 text-amber-700"
+                        }`}>
+                          {report.status === "failed" ? "Fallido" : report.status === "generating" ? "Generando" : "Pendiente"}
+                        </span>
+                        <p className="mt-1 text-[10.5px] text-black/35">{formatDateTime(report.createdAt)}</p>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="px-5 py-8 text-center text-[12.5px] text-black/45">No hay informes pendientes de atención.</p>
+            )
+          ) : (
+            <p className="px-5 py-6 text-[12px] text-red-600">{reportQueueResult.error}</p>
+          )}
+        </section>
       </div>
 
 
@@ -263,4 +371,8 @@ function Td({
 function formatDate(value: string | null) {
   if (!value) return "—";
   return new Date(value).toLocaleDateString("es", { month: "short", day: "numeric" });
+}
+
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString("es", { dateStyle: "medium", timeStyle: "short" });
 }

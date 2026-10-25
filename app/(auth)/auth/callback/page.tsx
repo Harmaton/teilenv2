@@ -7,7 +7,8 @@ export default async function CallbackPage({
 }: {
   searchParams: Promise<{ code?: string; next?: string }>;
 }) {
-  const { code, next = "/tests" } = await searchParams;
+  const { code, next: requestedNext } = await searchParams;
+  const next = requestedNext === "/dashboard" ? "/dashboard" : "/tests";
 
   if (code) {
     const supabase = await createClient();
