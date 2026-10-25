@@ -65,7 +65,7 @@ function MethodEvolution({ version, setVersion }: { version: "antes" | "hoy"; se
 }
 
 function MethodPrinciple() {
-  return <section className="sec bg-sun"><div className="wrap"><Reveal className="stack-lg"><p className="statement">Un resultado describe un momento. No determina una vida.</p><p className="lead" style={{ color: "var(--ink)", maxWidth: "40em" }}>La Identidad Evolutiva aporta información para construir hipótesis, contrastarlas y seguir aprendiendo. No debe usarse para excluir personas, etiquetar menores, diagnosticar trastornos ni decidir por otros qué pueden llegar a hacer.</p><div className="btn-row"><Link className="btn btn-ink" href="/privacy-notice"><span>Conocer nuestros principios de privacidad</span><span className="ico"><ArrowIcon /></span></Link></div></Reveal></div></section>;
+  return <section className="sec bg-sun"><div className="wrap"><Reveal className="stack-lg"><p className="statement">Un resultado describe un momento. No determina una vida.</p><p className="lead" style={{ color: "var(--ink)", maxWidth: "40em" }}>La Identidad Evolutiva aporta información para construir hipótesis, contrastarlas y seguir aprendiendo. No debe usarse para excluir personas, etiquetar menores, diagnosticar trastornos ni decidir por otros qué pueden llegar a hacer.</p><div className="btn-row"><Link className="btn btn-ink" href="/privacidad"><span>Conocer nuestros principios de privacidad</span><span className="ico"><ArrowIcon /></span></Link></div></Reveal></div></section>;
 }
 
 function MethodCta() {

@@ -87,7 +87,7 @@ export function PriceSection() {
               </div>
               <div className="callout violet mt-l">
                 <span className="ic"><Sparkles aria-hidden="true" /></span>
-                <div><p>Las ampliaciones futuras, si se ofrecen, se anunciarán con su alcance y sus condiciones antes de contratarlas. <a className="text-link" href="/terms-of-service">Leer condiciones y compras</a></p></div>
+                <div><p>Las ampliaciones futuras, si se ofrecen, se anunciarán con su alcance y sus condiciones antes de contratarlas. <a className="text-link" href="/terminos">Leer condiciones y compras</a></p></div>
               </div>
             </div>
           </Reveal>

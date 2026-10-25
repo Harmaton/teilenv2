@@ -160,13 +160,13 @@ const Footer = () => {
             <Link href="/precio" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
               Precio
             </Link>
-            <Link href="/terms-of-service" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
+            <Link href="/terminos" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
               Términos del servicio
             </Link>
-            <Link href="/privacy-notice" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
+            <Link href="/privacidad" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
               Aviso de privacidad
             </Link>
-            <Link href="/refund-policy" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
+            <Link href="/reembolsos" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
               Política de reembolso
             </Link>
           </nav>

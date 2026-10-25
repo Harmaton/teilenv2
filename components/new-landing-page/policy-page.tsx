@@ -8,7 +8,7 @@ import { PriceSection } from "./steps-section";
 type PolicySection = { id: string; title: string; content: ReactNode };
 
 const privacySections: PolicySection[] = [
-  { id: "responsable", title: "1. Responsable del tratamiento", content: <p>La identificación legal, fiscal y de contacto del responsable se publicará una vez verificada la titularidad formal de la operación de Teilen Teens. Para consultas de privacidad: <a className="text-link" href="mailto:talento@teilenteens.com">talento@teilenteens.com</a>.</p> },
+  { id: "responsable", title: "1. Responsable del tratamiento", content: <p>El responsable del tratamiento de tus datos personales es <strong>Justo Velásquez Vera</strong>, persona humana que opera la marca Teilen Teens, con domicilio en Marcelo T. de Alvear 628, piso 13, Córdoba, Argentina. Contacto de privacidad: <a className="text-link" href="mailto:talento@teilenteens.com">talento@teilenteens.com</a>.</p> },
   { id: "datos", title: "2. Qué información se recoge", content: <><p>La evaluación puede requerir datos mínimos de cuenta, edad o fecha de nacimiento, país y respuestas sobre capacidades, preferencias, valores, formas de aprendizaje y patrones personales. Si una persona adulta registra a un menor a su cargo, también puede guardar su nombre, año de nacimiento, vínculo, colegio y una foto opcional para identificar a la persona evaluada y mostrar esos datos en su informe. Las fotos se guardan en almacenamiento privado.</p><p>La compra puede implicar datos de la transacción. Las preguntas que haces a Salomón IA son una categoría distinta. Algunas respuestas podrían revelar convicciones u otros datos especialmente protegidos, por lo que reciben medidas reforzadas de necesidad, base legal y acceso.</p></> },
   { id: "finalidad", title: "3. Para qué se usa", content: <p>Para registrar tu cuenta, evaluar tus respuestas con el motor metodológico, elaborar tu informe, habilitar la compra que elijas, prestar las consultas con Salomón IA y darte soporte. Las investigaciones, el newsletter, la publicidad o los testimonios requieren autorizaciones específicas cuando corresponda, y nunca son condición para comprar.</p> },
   { id: "menores", title: "4. Participantes menores de edad", content: <p>Teilen está pensado para participantes desde los 13 años. Para todos los menores de 18 se exige la autorización verificable de un responsable, además de una explicación y la aceptación del adolescente, según los requisitos de cada país. Antes de recoger respuestas se informan la finalidad, los accesos, el uso de tecnología y cómo ejercer derechos. <a className="text-link" href="/menores">Ver el proceso para familias</a>.</p> },
@@ -26,16 +26,16 @@ const termsSections: PolicySection[] = [
   { id: "pago", title: "Pago y entrega", content: <p>El pago se procesa a través de Hotmart. Antes de confirmar verás el monto final, la moneda local cuando corresponda, los impuestos, los medios de pago y el plazo de garantía. Cada compra queda asociada a tu informe dentro de la plataforma.</p> },
   { id: "preguntas", title: "Alcance de las cinco preguntas", content: <p>La compra individual incluye cinco preguntas a Salomón IA. No incluye acceso ilimitado ni sustituye la atención humana especializada. Las reglas sobre cómo se cuentan los mensajes y qué ocurre ante una falla técnica se publicarán junto con las condiciones de compra.</p> },
   { id: "actualizaciones", title: "Actualizaciones posteriores", content: <p>Los módulos futuros no son una promesa indefinida de nuevas evaluaciones gratuitas. Cualquier ampliación incluida en una edición comprada se informará con su alcance, plazo y condiciones.</p> },
-  { id: "reembolsos", title: "Garantía y reembolsos", content: <p>El plazo y el procedimiento de garantía y reembolso se muestran antes del pago, conforme a la configuración del medio de pago y a la normativa de tu país. Consultas: <a className="text-link" href="mailto:talento@teilenteens.com">talento@teilenteens.com</a>.</p> },
+  { id: "reembolsos", title: "Garantía y reembolsos", content: <p>Puedes solicitar el reembolso total dentro de los 14 días corridos posteriores a la compra. Consulta el <a className="text-link" href="/reembolsos">procedimiento de reembolso</a> o escríbenos a <a className="text-link" href="mailto:talento@teilenteens.com">talento@teilenteens.com</a>.</p> },
   { id: "uso", title: "Uso responsable", content: <p>El informe es orientativo: no es clínico ni determinante. No debe usarse para decisiones discriminatorias, admisión académica, selección laboral automatizada, diagnósticos de salud ni perfiles comerciales de menores. Los derechos sobre el contenido, la marca y la infraestructura se detallarán en la versión contractual definitiva.</p> },
 ];
 
 export function PrivacyPolicyPage() {
-  return <PolicyDocument activePage="/privacy-notice" title="Tu identidad es tuya. Tu información merece cuidado." eyebrow="Centro de confianza" status="Documento en revisión" intro="Esta es la estructura de nuestra Política de Privacidad. La versión contractual completa, con la entidad responsable, los proveedores, el almacenamiento, la conservación y las transferencias, estará disponible antes de que te registres." sections={privacySections} />;
+  return <PolicyDocument activePage="/privacidad" title="Tu identidad es tuya. Tu información merece cuidado." eyebrow="Centro de confianza" status="Documento en revisión" intro="Esta es la estructura de nuestra Política de Privacidad. La versión contractual completa, con la entidad responsable, los proveedores, el almacenamiento, la conservación y las transferencias, estará disponible antes de que te registres." sections={privacySections} />;
 }
 
 export function TermsPage() {
-  return <PolicyDocument activePage="/terms-of-service" title="Condiciones claras antes de comprar." eyebrow="Centro de confianza" status="Borrador en revisión" intro="Qué compras, cómo se paga y qué puedes esperar. La versión contractual definitiva incorporará los datos legales del operador y la política de garantía y reembolsos." sections={termsSections} />;
+  return <PolicyDocument activePage="/terminos" title="Condiciones claras antes de comprar." eyebrow="Centro de confianza" status="Borrador en revisión" intro="Qué compras, cómo se paga y qué puedes esperar. La versión contractual definitiva incorporará los datos legales del operador y la política de garantía y reembolsos." sections={termsSections} />;
 }
 
 const refundSections: PolicySection[] = [
@@ -99,7 +99,7 @@ const refundSections: PolicySection[] = [
 export function RefundPolicyPage() {
   return (
     <PolicyDocument
-      activePage="/refund-policy"
+      activePage="/reembolsos"
       title="Tu compra, con condiciones claras."
       eyebrow="Compras y devoluciones"
       status="Garantía voluntaria de 7 días"
@@ -133,9 +133,9 @@ export function PricingPage() {
               </p>
             </div>
             <nav className="btn-row" aria-label="Información de compra">
-              <Link className="btn btn-line" href="/terms-of-service">Términos de servicio</Link>
-              <Link className="btn btn-line" href="/privacy-notice">Política de privacidad</Link>
-              <Link className="btn btn-line" href="/refund-policy">Política de reembolso</Link>
+              <Link className="btn btn-line" href="/terminos">Términos de servicio</Link>
+              <Link className="btn btn-line" href="/privacidad">Política de privacidad</Link>
+              <Link className="btn btn-line" href="/reembolsos">Política de reembolso</Link>
             </nav>
           </div>
         </section>
