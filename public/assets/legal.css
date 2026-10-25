@@ -74,6 +74,7 @@
 .hub-card .go .ico{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--white);transition:transform .2s}
 .hub-card:hover .go .ico{transform:rotate(-45deg);background:var(--orange);color:var(--ink)}
 .hub-card .go svg{width:16px;height:16px}
+.legal-download-actions{margin-top:18px}
 
 /* Pie: dirección */
 .ftr .addr{color:var(--muted-on-ink);font-size:.92rem;line-height:1.5;margin-top:8px}

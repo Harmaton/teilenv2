@@ -7,5 +7,11 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <LegalDocumentPage filename="index.html" activePage="/legal" />;
+  return (
+    <LegalDocumentPage
+      filename="index.html"
+      activePage="/legal"
+      includeDownloads
+    />
+  );
 }
