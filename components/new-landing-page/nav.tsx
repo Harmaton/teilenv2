@@ -16,6 +16,11 @@ const moreLinks = [
   ["Mecenas Teilen", "Sé Embajador de Talento", "/mecenas"],
   ["El Valor Humano", "Newsletter y artículos", "/el-valor-humano"],
   ["Nuestra visión", "Hacia dónde vamos", "/vision"],
+  ["Precio", "Qué incluye el informe y cuánto cuesta", "/precio"],
+  ["Términos del servicio", "Reglas de uso y condiciones de compra", "/terminos"],
+  ["Política de privacidad", "Cómo tratamos tus datos", "/privacidad"],
+  ["Política de reembolso", "Cómo solicitar un reembolso", "/reembolsos"],
+  ["Centro legal", "Precio y documentos legales", "/legal"],
 ];
 
 const primaryLinks = [

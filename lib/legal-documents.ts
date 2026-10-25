@@ -1,22 +1,16 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { NextResponse } from "next/server";
 
-const documents = new Set(["index.html", "precio.html", "terminos.html", "privacidad.html", "reembolsos.html"]);
+export type LegalDocument = "index.html" | "precio.html" | "terminos.html" | "privacidad.html" | "reembolsos.html";
 
-export async function serveLegalDocument(filename: string) {
-  if (!documents.has(filename)) {
-    return new NextResponse("Not found", { status: 404 });
-  }
-
+export async function getLegalDocumentContent(filename: LegalDocument) {
   const filePath = path.join(process.cwd(), "public", "legal-documents", filename);
   const html = await readFile(filePath, "utf8");
+  const match = html.match(/<main id="contenido">([\s\S]*?)<\/main>/i);
 
-  return new NextResponse(html, {
-    headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
-      "X-Content-Type-Options": "nosniff",
-    },
-  });
+  if (!match) {
+    throw new Error(`The legal document ${filename} is missing its main content.`);
+  }
+
+  return match[1];
 }

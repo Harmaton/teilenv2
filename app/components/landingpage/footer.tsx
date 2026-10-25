@@ -160,6 +160,9 @@ const Footer = () => {
             <Link href="/precio" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
               Precio
             </Link>
+            <Link href="/legal" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
+              Centro legal
+            </Link>
             <Link href="/terminos" className="text-xs text-white/45 transition-colors hover:text-[#FF9A5C]">
               Términos del servicio
             </Link>

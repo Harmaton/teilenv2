@@ -130,7 +130,7 @@ p{margin:0}
 .more{position:relative}
 .more>button svg{width:14px;height:14px;transition:transform .2s}
 .more.open>button svg{transform:rotate(180deg)}
-.mega{position:absolute;top:calc(100% + 12px);left:-120px;width:min(640px,80vw);display:none;grid-template-columns:1fr 1fr;gap:6px;padding:14px;background:var(--white);color:var(--ink);border:2px solid var(--ink);border-radius:var(--r-lg);box-shadow:var(--hard-lg)}
+.mega{position:absolute;top:calc(100% + 12px);left:-120px;width:min(640px,80vw);max-height:min(70vh,600px);overflow-y:auto;display:none;grid-template-columns:1fr 1fr;gap:6px;padding:14px;background:var(--white);color:var(--ink);border:2px solid var(--ink);border-radius:var(--r-lg);box-shadow:var(--hard-lg)}
 .more.open .mega{display:grid}
 .mega a{display:block;padding:12px 14px;border-radius:14px;text-decoration:none}
 .mega a:hover{background:var(--paper)}
