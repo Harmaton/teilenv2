@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PrivacyPolicyPage } from "@/components/new-landing-page/policy-page";
+import { LegalDocumentPage } from "@/components/new-landing-page/legal-document-page";
 
 export const metadata: Metadata = {
   title: "Privacidad | Teilen Teens",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <PrivacyPolicyPage />;
+  return <LegalDocumentPage filename="privacidad.html" activePage="/privacidad" />;
 }

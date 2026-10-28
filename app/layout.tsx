@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Teilen Teen",
-  description: "A platform for ai driven self improvement and personal growth.",
+  title: "Teilen Teens",
+  description: "Descubre tus habilidades, cómo aprendes, tus valores y dónde puedes generar valor.",
   icons: {
     icon: "/logo.png",
   },
@@ -30,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
    <html
-  lang="en"
+  lang="es"
   className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
 >
   <body className="min-h-full flex flex-col">

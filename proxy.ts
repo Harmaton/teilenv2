@@ -27,6 +27,7 @@ const PUBLIC_PATHS = [
   "/auth/complete-signup",
   "/auth/accept-invite",
   "/legal",
+  "/menores",
   "/legal-documents/teilenteens-documentos-legales.pdf",
   "/legal-documents/teilenteens-documentos-legales.docx",
   "/terminos",

@@ -3,9 +3,9 @@ import { LegalDocumentPage } from "@/components/new-landing-page/legal-document-
 
 export const metadata: Metadata = {
   title: "Precio: USD 50, pago único | Teilen Teens",
-  description: "Teilen Teens cuesta USD 50 en un pago único: informe de Identidad Evolutiva de 5 páginas en PDF y 5 preguntas a Salomón IA. La evaluación inicial es gratis.",
+  description: "La evaluación inicial es gratis. El informe cuesta USD 50 o USD 20 con código de lanzamiento hasta el 31 de diciembre de 2026.",
 };
 
 export default function Page() {
-  return <LegalDocumentPage filename="precio.html" activePage="/precio" />;
+  return <LegalDocumentPage filename="precio.html" activePage="/precio" includeLaunchOffer />;
 }

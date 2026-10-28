@@ -61,13 +61,13 @@ export default function ReportExample() {
 
   return (
     <>
-      <section className="sec bg-white" id="ejemplo">
+      <section className="sec bg-ink glow-host" id="ejemplo">
         <div className="wrap">
           <div className="split top">
             <Reveal className="sticky stack-lg">
               <div>
-                <h2>Así se ve lo que vas a recibir.</h2>
-                <p className="lead" style={{ marginTop: "1.1rem" }}>Abre las páginas del informe de Mateo, un caso ficticio. Muestra el diseño y la profundidad de los contenidos; no es la evaluación real de un estudiante.</p>
+                <h2>No es una etiqueta. Es un mapa para leerte mejor.</h2>
+                <p className="lead" style={{ marginTop: "1.1rem" }}>Abre las páginas del informe de Mateo, un caso ficticio. Muestra cómo tus talentos, valores, formas de aprender y posibilidades pueden ponerse en contexto; no es la evaluación real de un estudiante.</p>
                 <div className="btn-row" style={{ marginTop: "1.6rem" }}>
                   <button type="button" className="btn btn-ink" onClick={() => showPage(0)}>
                     <span>Abrir el informe de ejemplo</span><span className="ico"><Eye aria-hidden="true" /></span>

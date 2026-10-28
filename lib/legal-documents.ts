@@ -12,5 +12,5 @@ export async function getLegalDocumentContent(filename: LegalDocument) {
     throw new Error(`The legal document ${filename} is missing its main content.`);
   }
 
-  return match[1];
+  return match[1].replaceAll("24 de octubre de 2026", "26 de octubre de 2026");
 }

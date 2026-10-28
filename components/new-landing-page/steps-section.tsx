@@ -1,21 +1,22 @@
 import { Brain, Clock3, FileText, LockKeyhole, MessageSquareText, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Reveal from "./reveal";
+import LaunchOffer from "./launch-offer";
 
 const steps = [
   {
-    title: "Contesta la evaluación",
-    description: "En unos cinco minutos compartes respuestas sobre tus preferencias, situaciones y percepciones. Si tienes entre 13 y 17 años, primero un adulto responsable da su autorización verificable.",
+    title: "Responde en unos 5 minutos",
+    description: "Si tienes entre 13 y 17 años, primero una persona adulta responsable autoriza y tú aceptas participar. Después respondes a tu ritmo.",
     badges: [{ icon: Clock3, text: "≈ 5 min" }, { icon: LockKeyhole, text: "Sin tarjeta" }],
   },
   {
-    title: "Se procesan los resultados",
-    description: "El motor metodológico calcula una salida técnica con su propia lógica de evaluación. Después, la inteligencia artificial la expresa en un lenguaje claro y construye el informe. No asigna las puntuaciones.",
+    title: "La ciencia calcula, la IA traduce",
+    description: "El motor metodológico calcula tus resultados. La IA no inventa puntuaciones: las convierte en un informe claro y visual.",
     badges: [{ icon: Brain, text: "Motor metodológico" }, { icon: MessageSquareText, text: "IA que explica" }],
   },
   {
-    title: "Decides si lo desbloqueas",
-    description: "Ves cómo es el producto y, por USD 50, accedes al informe PDF de cinco páginas y a cinco preguntas con Salomón IA en tu espacio personal.",
+    title: "Desbloquea si quieres",
+    description: "Primero ves cómo es el producto. Por USD 50 recibes el informe PDF de cinco páginas y cinco preguntas a Salomón IA en la plataforma.",
     badges: [{ icon: FileText, text: "USD 50, pago único" }],
   },
 ];
@@ -25,7 +26,8 @@ export function StepsSection() {
     <section className="sec bg-paper" id="pasos">
       <div className="wrap">
         <Reveal className="head">
-          <h2>Un recorrido sencillo. Una interpretación con profundidad.</h2>
+          <h2>Respondes primero. Decides después.</h2>
+          <p className="lead">Empiezas sin pagar. Comprar es una decisión posterior, con el producto y las condiciones a la vista.</p>
         </Reveal>
         <div className="steps">
           {steps.map((step, index) => (
@@ -53,8 +55,8 @@ export function PriceSection() {
     <section className="sec bg-lilac" id="precio">
       <div className="wrap">
         <Reveal className="head">
-          <h2>Un precio claro. Un informe que puedes conservar.</h2>
-          <p className="lead">La evaluación inicial no requiere pago. El informe se desbloquea solo si eliges comprarlo después de completar la evaluación.</p>
+          <h2>Descúbrelo primero. Paga solo si quieres profundizar.</h2>
+          <p className="lead">No compras una interpretación a ciegas: empiezas sin tarjeta y ves el diseño del informe antes de desbloquear el tuyo.</p>
         </Reveal>
         <div className="price-grid">
           <Reveal>
@@ -63,7 +65,8 @@ export function PriceSection() {
                 <span className="sticker">Desbloqueo único</span>
                 <div className="ticket-price"><small>USD</small><b>50</b></div>
                 <h3>Identidad Evolutiva completa</h3>
-                <p className="small" style={{ color: "var(--muted)", marginTop: 8 }}>Sin suscripción. Antes de confirmar el pago ves las condiciones de compra.</p>
+                <p className="small" style={{ color: "var(--muted)", marginTop: 8 }}>La moneda local, los impuestos y las condiciones se muestran antes de pagar.</p>
+                <LaunchOffer />
               </div>
               <div className="ticket-cut" />
               <div className="ticket-bot">
@@ -98,26 +101,32 @@ export function PriceSection() {
 }
 
 export function ValuesSection() {
+  const scenarios = [
+    { title: "Formación", description: "Áreas de estudio que podrías explorar y contrastar con tus intereses y experiencias." },
+    { title: "Profesiones emergentes", description: "Nuevos campos de trabajo que conectan capacidades personales con necesidades del mundo." },
+    { title: "Emprendimiento", description: "Formas de convertir una idea, una habilidad o una inquietud en un proyecto." },
+    { title: "Entorno de trabajo", description: "Condiciones y contextos que pueden ayudarte a aprender, colaborar y aportar." },
+  ];
+
   return (
-    <section className="sec bg-paper">
+    <section className="sec bg-paper" id="escenarios">
       <div className="wrap">
-        <Reveal className="head"><h2>La identidad no se decide con una etiqueta.</h2></Reveal>
-        <div className="isnot">
-          <Reveal>
-            <article className="tile lift">
-              <span className="ic"><CheckIcon /></span>
-              <h3>Teilen es…</h3>
-              <p>Una herramienta para organizar información sobre capacidades, valores, formas de aprender, patrones y posibilidades de desarrollo. Un punto de partida para conversar, probar y seguir descubriendo.</p>
-            </article>
-          </Reveal>
-          <Reveal>
-            <article className="tile lift">
-              <span className="ic"><XIcon /></span>
-              <h3>Teilen no es…</h3>
-              <p>Una evaluación clínica, una decisión automática de carrera, una predicción sobre tu vida ni un sustituto de profesionales, tutores, experiencias académicas o del mundo del trabajo.</p>
-            </article>
-          </Reveal>
+        <Reveal className="head">
+          <h2>Una misma capacidad puede abrir distintos futuros.</h2>
+          <p className="lead">No es una etiqueta ni una respuesta cerrada: es un mapa para leerte mejor y explorar opciones.</p>
+        </Reveal>
+        <div className="grid-2">
+          {scenarios.map((scenario, index) => (
+            <Reveal key={scenario.title}>
+              <article className="tile lift">
+                <span className="kicker">Escenario 0{index + 1}</span>
+                <h3>{scenario.title}</h3>
+                <p>{scenario.description}</p>
+              </article>
+            </Reveal>
+          ))}
         </div>
+        <p className="tiny mt-l">Son posibilidades para explorar, no predicciones ni recomendaciones automáticas de carrera.</p>
       </div>
     </section>
   );
@@ -130,8 +139,8 @@ export function CtaSection() {
         <Reveal>
           <div className="cta-band">
             <span className="deco" aria-hidden="true" /><span className="deco two" aria-hidden="true" />
-            <h2>¿Listo para conocer tu Identidad Evolutiva?</h2>
-            <p>El ejemplo te muestra cómo se ve. Tu evaluación construye tu propio informe.</p>
+            <h2>¿Qué podrías descubrir sobre ti?</h2>
+            <p>Empieza a explorar tus talentos, cómo aprendes y dónde podrías generar valor.</p>
             <div className="btn-row">
               <Link className="btn btn-primary" href="/tests"><span>Empieza sin pagar</span><span className="ico"><ArrowIcon /></span></Link>
               <a className="btn btn-line" href="#ejemplo">Ver otra vez el ejemplo</a>
@@ -145,12 +154,4 @@ export function CtaSection() {
 
 function ArrowIcon() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M7 17 17 7" /><path d="M8 7h9v9" /></svg>;
-}
-
-function CheckIcon() {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>;
-}
-
-function XIcon() {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>;
 }

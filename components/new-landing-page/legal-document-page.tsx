@@ -1,15 +1,20 @@
 import { getLegalDocumentContent, type LegalDocument } from "@/lib/legal-documents";
 import LandingNav from "./nav";
 import LandingFooter, { WhatsAppFloat } from "./footer";
+import LaunchOffer from "./launch-offer";
 
 export async function LegalDocumentPage({
   filename,
   activePage,
   includeDownloads = false,
+  includeLaunchOffer = false,
+  includeTermsSupplement = false,
 }: {
   filename: LegalDocument;
   activePage: string;
   includeDownloads?: boolean;
+  includeLaunchOffer?: boolean;
+  includeTermsSupplement?: boolean;
 }) {
   const content = await getLegalDocumentContent(filename);
 
@@ -17,7 +22,31 @@ export async function LegalDocumentPage({
     <>
       <LandingNav activePage={activePage} />
       <main id="contenido">
+        {includeLaunchOffer && <div className="wrap launch-offer-wrap"><LaunchOffer /></div>}
         <div dangerouslySetInnerHTML={{ __html: content }} />
+        {includeTermsSupplement && (
+          <section className="sec bg-white">
+            <div className="wrap">
+              <div className="head">
+                <h2>Programas y ofertas vigentes</h2>
+                <p className="lead">Estas opciones son independientes y sus condiciones se muestran antes de confirmar una compra.</p>
+              </div>
+              <div className="isnot">
+                <article className="tile">
+                  <h3>Identidad Evolutiva completa</h3>
+                  <p>La evaluación inicial es gratuita. El informe de 5 páginas en PDF y 5 preguntas a Salomón IA cuestan USD 50 en un pago único.</p>
+                  <p>Con el código de lanzamiento, el precio es USD 20 hasta el 31 de diciembre de 2026.</p>
+                  <a className="text-link" href="/precio">Ver precio y solicitar el código</a>
+                </article>
+                <article className="tile">
+                  <h3>Werden</h3>
+                  <p>Es un programa separado de entrenamiento de seis meses, con un precio de USD 520. Incluye la evaluación Teilen, la Identidad Evolutiva, 5 preguntas a Salomón IA, mentoría y las fases formativas.</p>
+                  <p>Las fechas, los grupos y las condiciones de inscripción se informan antes de pagar.</p>
+                </article>
+              </div>
+            </div>
+          </section>
+        )}
         {includeDownloads && (
           <section className="sec-s bg-white">
             <div className="wrap">

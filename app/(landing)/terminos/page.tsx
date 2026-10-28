@@ -3,9 +3,9 @@ import { LegalDocumentPage } from "@/components/new-landing-page/legal-document-
 
 export const metadata: Metadata = {
   title: "Términos del servicio | Teilen Teens",
-  description: "Términos del servicio de Teilen Teens, pagos, reembolsos y uso responsable de la plataforma.",
+  description: "Términos de Teilen Teens, informe por USD 50 o USD 20 con código de lanzamiento y programa Werden por USD 520.",
 };
 
 export default function Page() {
-  return <LegalDocumentPage filename="terminos.html" activePage="/terminos" />;
+  return <LegalDocumentPage filename="terminos.html" activePage="/terminos" includeTermsSupplement />;
 }

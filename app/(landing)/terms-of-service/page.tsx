@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { TermsPage } from "@/components/new-landing-page/policy-page";
+import { LegalDocumentPage } from "@/components/new-landing-page/legal-document-page";
 
 export const metadata: Metadata = {
   title: "Condiciones y compras | Teilen Teens",
-  description: "Condiciones de compra de Teilen Teens: informe de Identidad Evolutiva por USD 50 con 5 preguntas a Salomón IA, pago, garantía y uso responsable.",
+  description: "Términos de Teilen Teens, informe por USD 50 o USD 20 con código de lanzamiento y programa Werden por USD 520.",
 };
 
 export default function Page() {
-  return <TermsPage />;
+  return <LegalDocumentPage filename="terminos.html" activePage="/terminos" includeTermsSupplement />;
 }

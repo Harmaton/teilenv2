@@ -1,9 +1,20 @@
 import LandingNav from "./nav";
 import LandingHero from "./hero";
-import { StepsSection, PriceSection, ValuesSection, CtaSection } from "./steps-section";
+import HomeAudienceSection, { HomeAiSection, HomeAudiencePaths, HomeKineticSections } from "./home-audience-section";
+import { StepsSection, ValuesSection, CtaSection } from "./steps-section";
 import ReportExample from "./report-example";
 import EcosystemSection from "./ecosystem-section";
 import LandingFooter, { WhatsAppFloat } from "./footer";
+import {
+  HomeComparisonSection,
+  HomeFaqSection,
+  HomeHistorySection,
+  HomeMentorSection,
+  HomePriceSection,
+  HomeTeamSection,
+  HomeTestimonialsSection,
+  HomeWerdenSection,
+} from "./home-detail-sections";
 
 export default function NewLandingPage() {
   return (
@@ -11,10 +22,21 @@ export default function NewLandingPage() {
       <LandingNav />
       <main id="contenido">
         <LandingHero />
+        <HomeKineticSections />
+        <HomeAudienceSection />
+        <HomeAudiencePaths />
         <StepsSection />
         <ReportExample />
-        <PriceSection />
         <ValuesSection />
+        <HomeAiSection />
+        <HomeMentorSection />
+        <HomeComparisonSection />
+        <HomePriceSection />
+        <HomeHistorySection />
+        <HomeTestimonialsSection />
+        <HomeTeamSection />
+        <HomeWerdenSection />
+        <HomeFaqSection />
         <CtaSection />
         <EcosystemSection />
       </main>

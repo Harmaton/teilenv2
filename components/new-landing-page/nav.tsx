@@ -17,6 +17,7 @@ const moreLinks = [
   ["El Valor Humano", "Newsletter y artículos", "/el-valor-humano"],
   ["Nuestra visión", "Hacia dónde vamos", "/vision"],
   ["Precio", "Qué incluye el informe y cuánto cuesta", "/precio"],
+  ["Participación de menores", "Autorización familiar y proceso para adolescentes", "/menores"],
   ["Términos del servicio", "Reglas de uso y condiciones de compra", "/terminos"],
   ["Política de privacidad", "Cómo tratamos tus datos", "/privacidad"],
   ["Política de reembolso", "Cómo solicitar un reembolso", "/reembolsos"],
@@ -27,6 +28,7 @@ const primaryLinks = [
   ["Cómo funciona", "#pasos"],
   ["Para familias", "/familias"],
   ["Para colegios", "/colegios"],
+  ["Precio", "/precio"],
   ["Nosotros", "/nosotros"],
 ];
 
