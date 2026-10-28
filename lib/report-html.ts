@@ -8,9 +8,10 @@ export function extractIdentityReportPages(document: string): IdentityReportPage
   let match: RegExpExecArray | null;
 
   while ((match = pagePattern.exec(document)) && pages.length < 5) {
-    const title = match[1].match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1] ?? `PÁGINA ${pages.length}`;
-    const content = match[1].match(/<div class=["']page-content["'][^>]*>([\s\S]*?)<\/div>\s*<footer/i)?.[1] ?? match[1];
-    pages.push({ title: stripTags(title).trim(), html: cleanGeneratedHtml(content) });
+    const section = match[1];
+    const title = section.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1] ?? `PÁGINA ${pages.length}`;
+    const content = extractClassedElementContent(section, "div", "page-content");
+    pages.push({ title: stripTags(title).trim(), html: cleanGeneratedHtml(content ?? section) });
   }
   return pages;
 }
@@ -18,9 +19,6 @@ export function extractIdentityReportPages(document: string): IdentityReportPage
 export function renderIdentityReportHtml(pages: IdentityReportPage[], options: { avatarUrl?: string | null; studentName?: string | null; age?: number | null; birthYear?: number | null; schoolName?: string | null; relationship?: string | null; city?: string | null; country?: string | null; scores?: ReportScore[] } = {}) {
   const pageMarkup = pages.slice(0, 5).map((page, index) => {
     let html = cleanGeneratedHtml(page.html);
-
-    const { body: withoutClosing, closing } = extractClosing(html);
-    html = withoutClosing;
 
     let needsBar = "";
     if (index === 3) {
@@ -30,7 +28,7 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
     }
 
     return `
-    <section class="report-page report-page-${index}${index === 0 && options.scores?.length ? " report-has-scores" : ""}" aria-labelledby="report-page-title-${index}">
+    <section class="report-page report-page-${index}" aria-labelledby="report-page-title-${index}">
       <div class="page-kicker">TEILEN TEENS <span>${index === 0 ? "MAPA DE IDENTIDAD" : `PÁGINA ${index}`}</span></div>
       <header class="page-header">
         <div class="brand-mark"><span class="brand-spark">✦</span> TEILEN TEENS</div>
@@ -38,11 +36,10 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
         <div class="title-rule"><i></i></div>
       </header>
       ${buildStudentContext(options)}
-      ${index === 0 ? `${buildQuadrantScoreVisual(options.scores)}${buildIdentityFrameworkVisual()}` : ""}
+      ${index === 0 ? buildIdentityFrameworkVisual() : ""}
       <div class="page-content">${decorateGeneratedHtml(html, index)}</div>
       ${needsBar}
       ${index === 4 ? buildSalomonCallout() : ""}
-      <footer class="page-footer">${closing ? escapeHtml(closing) : "Cada página de este informe suma a tu mapa de identidad."}</footer>
     </section>
   `;
   }).join("");
@@ -60,8 +57,8 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: #fff; color: var(--ink); }
   body { font-family: Montserrat, "Avenir Next", Arial, sans-serif; }
-  .report-page { width: 210mm; height: 297mm; padding: 10mm 12mm 11mm; overflow: hidden; position: relative; page-break-after: always; background: #fff; display: flex; flex-direction: column; }
-  .report-page:last-child { page-break-after: auto; }
+  .report-page { width: 210mm; min-height: 297mm; height: auto; padding: 10mm 12mm 11mm; overflow: visible; position: relative; break-inside: auto; page-break-inside: auto; break-after: page; page-break-after: always; background: #fff; display: flex; flex-direction: column; }
+  .report-page:last-child { break-after: auto; page-break-after: auto; }
   .page-kicker { display: flex; justify-content: space-between; color: var(--muted); font-size: 8px; font-weight: 600; letter-spacing: .14em; }
   .page-kicker span { color: var(--orange); }
   .page-header { text-align: center; margin: 5mm 0 4mm; position: relative; }
@@ -101,20 +98,6 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
   .report-callout { position: relative; padding-left: 12mm; }
   .report-callout::before { content: "✦"; position: absolute; left: 3mm; top: 3mm; color: var(--orange); font-size: 14px; }
   .report-page-0 .page-content { font-size: 8.8pt; }
-  .quadrant-score-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2mm; width: 174mm; max-width: 100%; margin: 0 auto 3mm; flex-shrink: 0; }
-  .quadrant-score { display: grid; grid-template-columns: 8mm minmax(0, 1fr); align-items: center; gap: 1.5mm; border: .7pt solid var(--line); border-radius: 9px; padding: 2mm; background: var(--warm); }
-  .quadrant-score-ring { display: grid; place-items: center; width: 8mm; height: 8mm; border-radius: 50%; background: conic-gradient(var(--quadrant-color) calc(var(--score) * 1%), #eadfd4 0); }
-  .quadrant-score-ring::before { content: ""; width: 5.5mm; height: 5.5mm; border-radius: 50%; background: var(--warm); }
-  .quadrant-score-copy { min-width: 0; }
-  .quadrant-score-label { color: var(--muted); font-size: 7px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-  .quadrant-score-value { display: flex; align-items: baseline; justify-content: space-between; margin-top: 1mm; color: var(--ink); font-family: Georgia, serif; font-size: 15px; }
-  .quadrant-score-value small { color: var(--muted); font-family: Montserrat, Arial, sans-serif; font-size: 6.5px; }
-  .quadrant-score-track { height: 2mm; margin-top: 1.5mm; overflow: hidden; border-radius: 99px; background: #eadfd4; }
-  .quadrant-score-fill { height: 100%; border-radius: inherit; background: var(--orange); }
-  .report-has-scores .framework-visual { height: 30mm; margin-bottom: 2mm; }
-  .report-has-scores .framework-core { width: 25mm; height: 25mm; }
-  .report-has-scores .framework-node { width: 25mm; height: 9mm; padding: 1mm; font-size: 6px; }
-  .report-has-scores .framework-node strong { font-size: 6.5px; }
   .framework-visual { position: relative; width: 174mm; max-width: 100%; height: 57mm; margin: 0 auto 3mm; flex-shrink: 0; }
   .framework-visual svg { display: block; width: 100%; height: 100%; }
   .framework-core { position: absolute; left: 50%; top: 50%; width: 43mm; height: 43mm; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1.5px solid var(--orange); border-radius: 50%; background: #fff; text-align: center; }
@@ -149,17 +132,6 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
     font-family: Georgia, serif; font-weight: 700; font-size: 11px;
   }
 
-  /* closing tagline footer, matches PDF's dot-rule style */
-  .page-footer {
-    position: absolute; bottom: 7mm; left: 12mm; right: 12mm;
-    text-align: center; font-style: italic;
-    color: var(--muted); font-size: 8.5px; font-family: Georgia, serif;
-  }
-  .page-footer::before {
-    content: ""; display: block; margin: 0 auto 2mm; width: 6px; height: 6px;
-    border-radius: 50%; background: var(--orange);
-  }
-
   /* scenario needs bar, page 3 */
   .scenario-needs { margin-top: 3mm; border-top: .7pt solid var(--line); padding-top: 3mm; }
   .scenario-needs-title { text-align: center; color: var(--orange); font-size: 9px; letter-spacing: .1em; font-weight: 700; margin-bottom: 2.5mm; text-transform: uppercase; }
@@ -170,7 +142,7 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
   .scenario-need-text { font-size: 7.5px; color: var(--muted); }
 
   /* Salomón AI closer, two-column card */
-  .salomon-callout { display: grid; grid-template-columns: 10mm 1fr auto; align-items: center; gap: 3mm; padding: 3mm 3mm 3mm 3mm; margin-top: auto; }
+  .salomon-callout { display: grid; grid-template-columns: 10mm 1fr auto; align-items: center; gap: 3mm; padding: 3mm; margin-top: 3mm; }
   .salomon-callout::before { display: none; }
   .salomon-callout .box-icon { position: static; }
   .salomon-text strong { display: block; color: var(--orange); font-size: 10px; letter-spacing: .08em; margin-bottom: .8mm; }
@@ -189,7 +161,7 @@ export function renderIdentityReportHtml(pages: IdentityReportPage[], options: {
 }
 
 function cleanGeneratedHtml(html: string) {
-  return html
+  return removeGeneratedSalomonCallouts(html)
     .replace(/<span\b[^>]*class=["'][^"']*\bbox-icon\b[^"']*["'][^>]*>[\s\S]*?<\/span>/gi, "")
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "")
@@ -202,16 +174,50 @@ function cleanGeneratedHtml(html: string) {
     .replace(/\son[a-z]+\s*=\s*(["']).*?\1/gi, "");
 }
 
-/**
- * Pulls a trailing <p class="page-closing">...</p> out of a page's HTML
- * so it can be rendered in the footer instead of inline in the body.
- */
-function extractClosing(html: string): { body: string; closing: string | null } {
-  const match = html.match(/<p[^>]*class=["'][^"']*\bpage-closing\b[^"']*["'][^>]*>([\s\S]*?)<\/p>/i);
-  if (!match || match.index === undefined) return { body: html, closing: null };
-  const closing = stripTags(match[1]).trim();
-  const body = html.slice(0, match.index) + html.slice(match.index + match[0].length);
-  return { body, closing };
+function removeGeneratedSalomonCallouts(html: string) {
+  let cleaned = html;
+  const calloutPattern = /<div\b[^>]*class=["'][^"']*\b(?:salomon-callout|report-callout)\b[^"']*["'][^>]*>/gi;
+
+  while (/PROFUNDIZA TU PROCESO/i.test(cleaned)) {
+    const phraseIndex = cleaned.search(/PROFUNDIZA TU PROCESO/i);
+    const matches = [...cleaned.matchAll(calloutPattern)].filter((match) => match.index !== undefined && match.index < phraseIndex);
+    const callout = matches.at(-1);
+    if (!callout || callout.index === undefined) break;
+
+    const start = callout.index;
+    const end = findElementEnd(cleaned, "div", callout.index);
+    if (end === null) break;
+    cleaned = `${cleaned.slice(0, start)}${cleaned.slice(end)}`;
+  }
+
+  return cleaned;
+}
+
+function extractClassedElementContent(html: string, tagName: string, className: string) {
+  const openingTag = new RegExp(
+    `<${tagName}\\b(?=[^>]*\\bclass=["'][^"']*\\b${className}\\b[^"']*["'])[^>]*>`,
+    "i",
+  ).exec(html);
+  if (!openingTag || openingTag.index === undefined) return null;
+
+  const contentStart = openingTag.index + openingTag[0].length;
+  const elementEnd = findElementEnd(html, tagName, openingTag.index);
+  return elementEnd === null ? null : html.slice(contentStart, elementEnd - `</${tagName}>`.length);
+}
+
+function findElementEnd(html: string, tagName: string, openingIndex: number) {
+  const tags = new RegExp(`<\\/?${tagName}\\b[^>]*>`, "gi");
+  tags.lastIndex = openingIndex;
+  let depth = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = tags.exec(html))) {
+    if (new RegExp(`^</${tagName}\\b`, "i").test(match[0])) depth -= 1;
+    else if (!/\/>$/.test(match[0])) depth += 1;
+    if (depth === 0) return tags.lastIndex;
+  }
+
+  return null;
 }
 
 /**
@@ -401,8 +407,6 @@ export function buildReportHtml({
     year: "numeric",
   });
 
-  const chartHtml = scores && scores.length ? buildScoreChart(scores) : "";
-
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -486,7 +490,6 @@ export function buildReportHtml({
   </div>
   <div class="report-body">
     ${fragment}
-    ${chartHtml}
   </div>
   <div class="report-footer">
     ${testDescription ? escapeHtml(testDescription) : ""}
@@ -497,71 +500,10 @@ export function buildReportHtml({
 
 }
 
-function buildQuadrantScoreVisual(scores?: ReportScore[]) {
-  if (!scores?.length) return "";
-  const quadrants = [
-    { code: "RB", label: "Basal derecho", color: "#D97B1A" },
-    { code: "LB", label: "Basal izquierdo", color: "#527C8B" },
-    { code: "RF", label: "Frontal derecho", color: "#7B6A9D" },
-    { code: "LF", label: "Frontal izquierdo", color: "#68835D" },
-  ];
-  const scoreByCode = new Map(scores.map((score) => [score.label.slice(0, 2).toUpperCase(), score.value]));
-  if (quadrants.some(({ code }) => !scoreByCode.has(code))) return "";
-
-  return `<div class="quadrant-score-grid" aria-label="Puntuaciones de los cuatro cuadrantes">
-    ${quadrants.map(({ code, label, color }) => {
-      const value = Math.max(0, Math.min(100, Math.round(scoreByCode.get(code) ?? 0)));
-      return `<div class="quadrant-score">
-        <div class="quadrant-score-ring" style="--score:${value};--quadrant-color:${color}" role="img" aria-label="${value} por ciento"></div>
-        <div class="quadrant-score-copy">
-          <div class="quadrant-score-label">${code} · ${label}</div>
-          <div class="quadrant-score-value">${value}<small>/ 100</small></div>
-          <div class="quadrant-score-track" role="img" aria-label="${value} de 100"><div class="quadrant-score-fill" style="width:${value}%;background:${color}"></div></div>
-        </div>
-      </div>`;
-    }).join("")}
-  </div>`;
-}
-
 function escapeHtml(str: string) {
   return str
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-}
-
-
-
-function buildScoreChart(scores: { label: string; value: number }[]) {
-  if (!scores.length) return "";
-
-  const barHeight = 28;
-  const gap = 14;
-  const chartWidth = 480;
-  const labelWidth = 140;
-  const barMaxWidth = chartWidth - labelWidth - 50;
-  const height = scores.length * (barHeight + gap);
-  const ACCENT = "#FF5A1F";
-
-  const bars = scores
-    .map((s, i) => {
-      const y = i * (barHeight + gap);
-      const w = (s.value / 100) * barMaxWidth;
-      return `
-        <text x="0" y="${y + barHeight / 2 + 4}" font-size="12" fill="#333">${escapeHtml(s.label)}</text>
-        <rect x="${labelWidth}" y="${y}" width="${barMaxWidth}" height="${barHeight}" rx="6" fill="#f2f2f2" />
-        <rect x="${labelWidth}" y="${y}" width="${Math.max(w, 4)}" height="${barHeight}" rx="6" fill="${ACCENT}" />
-        <text x="${labelWidth + barMaxWidth + 8}" y="${y + barHeight / 2 + 4}" font-size="12" font-weight="600" fill="#111">${s.value}</text>
-      `;
-    })
-    .join("");
-
-  return `
-    <div style="margin: 24px 0;">
-      <svg viewBox="0 0 ${chartWidth} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg" font-family="inherit">
-        ${bars}
-      </svg>
-    </div>
-  `;
 }
